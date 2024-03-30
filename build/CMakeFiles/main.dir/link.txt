@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp.o CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp.o CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp.o -o main  /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a 

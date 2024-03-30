@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/build",
+  "command": "/usr/bin/g++  -I/media/jay/D25C27F95C27D74F/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp.o -c /media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp",
+  "file": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp",
+  "output": "CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp.o"
+},
+{
+  "directory": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/build",
+  "command": "/usr/bin/g++  -I/media/jay/D25C27F95C27D74F/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp.o -c /media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp",
+  "file": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp",
+  "output": "CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp.o"
+},
+{
+  "directory": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/build",
+  "command": "/usr/bin/g++  -I/media/jay/D25C27F95C27D74F/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp.o -c /media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp",
+  "file": "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp",
+  "output": "CMakeFiles/main.dir/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp.o"
+}
+]
