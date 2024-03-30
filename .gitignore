@@ -4,5 +4,9 @@
 /CMakeFiles
 /build/CMakeFiles
 /build/.cmake
+/build/*.cmake
+/build/compile_commands.json
+/build/CMakeCache.txt
+/build/main
 /.vscode
 /.cmake
