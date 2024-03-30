@@ -10,12 +10,7 @@ compile_commands.json
 build/CMakeCache.txt
 CMakeCache.txt
 build/cmake_install.cmake
-cmake_install.cmake
 build/main
 main
 .vscode
 .cmake
-
-build/cmake_install.cmake
-build/CMakeCache.txt
-build/main
