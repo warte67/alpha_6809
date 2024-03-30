@@ -1,3 +1,0 @@
-/media/jay/D25C27F95C27D74F/dev/alpha_6809/CMakeFiles/main.dir
-/media/jay/D25C27F95C27D74F/dev/alpha_6809/CMakeFiles/edit_cache.dir
-/media/jay/D25C27F95C27D74F/dev/alpha_6809/CMakeFiles/rebuild_cache.dir
