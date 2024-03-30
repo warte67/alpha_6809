@@ -1,5 +1,8 @@
 *.o
 *.o.d
 *.cmake
+/CMakeFiles
+/build/CMakeFiles
+/build/./cmake
 /.vscode
 /.cmake
