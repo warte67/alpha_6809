@@ -18,23 +18,8 @@
     
 int main(int argc, char *argv[])
 {
-    // bool b_SDL_wasinit = false;
-    // if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
-    //     std::cout << "SDL_Init() failed!\n";
-    // else
-    // {
-    //     std::cout << "SDL_Init() was successful!\n";
-    //     b_SDL_wasinit = true;
-    // }
-
     Bus& bus = Bus::Inst();
     bus.Run();
-
-    // if (b_SDL_wasinit)
-    // {
-    //     SDL_Quit();
-    // }
-
 
     #ifdef DEBUG
         std::cout << "DEBUG flag was set at compile time.\n";
