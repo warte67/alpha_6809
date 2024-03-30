@@ -73,43 +73,43 @@ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: CMakeFiles/main.dir/
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: /home/jay/dev/alpha_6809/src/main.cpp
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/jay/dev/alpha_6809/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -c /home/jay/dev/alpha_6809/src/main.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -c /home/jay/dev/alpha_6809/src/main.cpp
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/main.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/main.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.i
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/main.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/main.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.s
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o: /home/jay/dev/alpha_6809/src/IDevice.cpp
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/jay/dev/alpha_6809/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -c /home/jay/dev/alpha_6809/src/IDevice.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -c /home/jay/dev/alpha_6809/src/IDevice.cpp
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/IDevice.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/IDevice.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.i
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/IDevice.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/IDevice.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.s
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: /home/jay/dev/alpha_6809/src/Bus.cpp
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/jay/dev/alpha_6809/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -c /home/jay/dev/alpha_6809/src/Bus.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -MF CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o.d -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -c /home/jay/dev/alpha_6809/src/Bus.cpp
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/Bus.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jay/dev/alpha_6809/src/Bus.cpp > CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.i
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/Bus.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jay/dev/alpha_6809/src/Bus.cpp -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.s
 
 # Object files for target main
 main_OBJECTS = \
