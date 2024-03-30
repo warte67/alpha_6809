@@ -56,9 +56,6 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
-				},
-				{
 					"backtrace" : 3,
 					"fragment" : "-fexceptions"
 				},
@@ -71,7 +68,7 @@
 			[
 				{
 					"backtrace" : 4,
-					"path" : "/media/jay/D25C27F95C27D74F/dev/alpha_6809/build/../include"
+					"path" : "/home/jay/dev/alpha_6809/build/../include"
 				},
 				{
 					"backtrace" : 4,
@@ -93,10 +90,6 @@
 	{
 		"commandFragments" : 
 		[
-			{
-				"fragment" : "-g",
-				"role" : "flags"
-			},
 			{
 				"fragment" : "",
 				"role" : "flags"
@@ -138,19 +131,19 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/main.cpp",
+			"path" : "/home/jay/dev/alpha_6809/src/main.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/IDevice.cpp",
+			"path" : "/home/jay/dev/alpha_6809/src/IDevice.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "/media/jay/D25C27F95C27D74F/dev/alpha_6809/src/Bus.cpp",
+			"path" : "/home/jay/dev/alpha_6809/src/Bus.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
