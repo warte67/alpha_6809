@@ -1,1 +1,0 @@
-/usr/bin/g++ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -o main  /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a 
