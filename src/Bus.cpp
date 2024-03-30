@@ -37,10 +37,12 @@ Bus::Bus()
             printf("{\n");
             printf("    //  **********************************************\n");
             printf("    //  * Allocated 64k Memory Mapped System Symbols *\n");
-            printf("    //  **********************************************\n");
+            printf("    //  **********************************************\n");         
         }
 		else							// 6809 ASM version
 		{
+			printf("\n\n");
+			printf("// memory_map.asm\n");
             printf(";  **********************************************\n");
             printf(";  * Allocated 64k Memory Mapped System Symbols *\n");
             printf(";  **********************************************\n");
@@ -55,8 +57,8 @@ Bus::Bus()
 	IDevice* dev = nullptr;
 	dev = new RAM("SOFT_VECTORS");
 	int addr = Attach(dev, 16);
-    dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0,"Software Interrupt Vectors:");
+    dev->DisplayEnum("", 0, "");
+    dev->DisplayEnum("", 0,"Software Interrupt Vectors:");
     dev->DisplayEnum("SOFT_EXEC", 0x0000, "Exec Software Interrupt Vector");
     dev->DisplayEnum("SOFT_SWI3", 0x0002, "SWI3 Software Interrupt Vector");
     dev->DisplayEnum("SOFT_SWI2", 0x0004, "SWI2 Software Interrupt Vector");
@@ -65,9 +67,10 @@ Bus::Bus()
     dev->DisplayEnum("SOFT_SWI",  0x000A, "SWI / SYS Software Interrupt Vector");
     dev->DisplayEnum("SOFT_NMI",  0x000C, "NMI Software Interrupt Vector");
     dev->DisplayEnum("SOFT_RESET",0x000E, "RESET Software Interrupt Vector");	
-	dev->DisplayEnum("",0, "");
+	dev->DisplayEnum("", 0, "");
 
 	// zero page 256 bytes	
+    dev->DisplayEnum("", 0, "System Memory:");
     dev = new RAM("ZERO_PAGE");
     addr += Attach(dev, 256 - 16);	
 
@@ -81,22 +84,73 @@ Bus::Bus()
     addr += Attach(dev, 512);  
     dev->DisplayEnum("SSTACK_TOP",0x0400, "Top of the system stack space");  
 
+    // standard video buffer (11k)
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0x0400, "Video Buffer (11K)");
+    // dev = new RAM("VIDEO_RAM");     // TODO: change to GFX device
+    dev = new Gfx("VIDEO_RAM");     // TODO: change to GFX device
+    addr += Attach(dev, 11*1024);    
+    
+	// user RAM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0x3000, "User RAM (32K)");
+    dev = new RAM("USER_RAM");
+    addr += Attach(dev, 32*1024);    
 
+	// paged RAM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xB000, "Paged Memory Bank One (8K)");
+    dev = new RAM("PG_BANK_ONE");
+    addr += Attach(dev, 8*1024);   
 
+	// paged ROM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xD000, "Paged Memory Bank Two (8K)");
+    dev = new RAM("PG_BANK_TWO");
+    addr += Attach(dev, 8*1024);          
 
+	// KERNEL ROM
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xF000, "KERNEL ROM (3.5K)");
+    dev = new ROM("KERNEL_ROM");
+    addr += Attach(dev, 3.5*1024);   // hardware registers should be included here
 
     ////////////////////////////////////////////////////////////
     // TODO:  
-    //    Add more devices to the mix
+    //    Hardware Registers
     /////////
 
     // ...
+            dev->DisplayEnum("",0, "");
+            dev->DisplayEnum("",0xF000, "TODO: HARDWARE REGISTERS (0.5K)");
+            dev = new ROM("HDW_REGS");
+            addr += Attach(dev, 512-16);
+
+    int hdw_top = addr;
+    int hdw_size = 0;
+
+    printf("\t\t\t\t(Hardware Registers Top: $%04X)\n", hdw_top);
+    printf("\t\t\t\t(Hardware Registers Size: $%04X)\n", hdw_size);
 
 
 
 
 
 
+
+	// ROM VECTORS
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0,"Hardware Interrupt Vectors:");
+    dev = new ROM("ROM_VECTS");
+    addr += Attach(dev, 16);
+    dev->DisplayEnum("HARD_EXEC", 0xfff0, "EXEC Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI3", 0xfff2, "SWI3 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI2", 0xfff4, "SWI2 Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_FIRQ", 0xfff6, "FIRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_IRQ",  0xfff8, "IRQ Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_SWI",  0xfffA, "SWI / SYS Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_NMI",  0xfffC, "NMI Hardware Interrupt Vector");
+    dev->DisplayEnum("HARD_RESET",0xfffE, "RESET Hardware Interrupt Vector");
 
     // close the memory map definitions
     if (COMPILE_MEMORY_MAP)
@@ -104,13 +158,15 @@ Bus::Bus()
         if (MEMORY_MAP_OUTPUT_CPP)
 		{
             printf("};  // END: enum MEMMAP\n\n");
-
 			printf("\n");
 			printf("#endif // __MEMORY_MAP_H__\n");
 			printf("\n\n");
 		}
         else
+        {
             printf("; END of definitions\n\n");
+			printf("\n\n");
+        }
 
         printf("\n\nThe flag COMPILE_MEMORY_MAP is set as true, therefore this app\n");
         printf("cannot continue past this point. Set the definition of COMPILE_MEMORY_MAP\n");
@@ -467,4 +523,9 @@ void Bus::Write_Word(Word offset, Word data, bool debug)
     Byte lsb = data & 0xff;
     Bus::Write(offset, msb);
     Bus::Write(offset + 1, lsb);
+}
+
+
+void Bus::def_display()
+{
 }

@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
     ../src/main.cpp
     ../src/IDevice.cpp
     ../src/Bus.cpp
+    ../src/Gfx.cpp
 )
 
 # INCLUDE DIRECTORIES

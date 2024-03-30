@@ -30,7 +30,7 @@ class IDevice
         virtual void write_word(Word offset, Word data, bool debug = false);  
 
         // helpers
-        virtual void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
+        void DisplayEnum(std::string sToken, Word ofs, std::string sComment);
 
         // public accessors
         std::string name() { return _deviceName; }

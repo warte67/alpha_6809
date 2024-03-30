@@ -7,6 +7,7 @@
 #pragma once
 
 #include "IDevice.hpp"
+#include "Gfx.hpp"
 
 class Bus : public IDevice
 {
@@ -58,7 +59,7 @@ class Bus : public IDevice
 		static Byte Read(Word offset, bool debug = false);
 		static void Write(Word offset, Byte data, bool debug = false);
 		static Word Read_Word(Word offset, bool debug = false);
-		static void Write_Word(Word offset, Word data, bool debug = false);        
+		static void Write_Word(Word offset, Word data, bool debug = false);       
 
     private:
         int _lastAddress = 0;
@@ -68,5 +69,18 @@ class Bus : public IDevice
         Byte clock_div(Byte& cl_div, int bit);
         void clockDivider();
 
+        struct mem_def_node
+        {
+            std::string label;
+            int offset;
+            std::string comment;
+        };
+        inline static std::vector<mem_def_node> vec_mem_def;
+        inline static void def_push(std::string label, int offset, std::string comment) 
+        {    
+            // offset == -1 (none)            
+            vec_mem_def.push_back({label, offset, comment});
+        }	
+        static void def_display();		
 };
 

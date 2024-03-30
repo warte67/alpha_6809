@@ -46,29 +46,32 @@ void IDevice::DisplayEnum(std::string sToken, Word ofs, std::string sComment)
 		std::string sN = "$";
 		std::string sCTK = "  ; ";
 		std::string sCMA = "  ";
+		std::string sPAD = "";
 		if (MEMORY_MAP_OUTPUT_CPP)
 		{
 			sN = "0x";
 			sCTK = "// ";
 			sCMA = ", ";
+			sPAD = "    ";
 		}
 		if (sComment.empty())
 			sCTK = "";
 		// single line comment
 		if (sToken.empty())
+		{
 			printf("        %s%s\n", sCTK.c_str(), sComment.c_str());
+		}
 		// normal line
 		else
 		{
 			std::string sLabel = sToken;
 			while (sToken.size() < 16)
 				sToken += " ";
-			
 			if (MEMORY_MAP_OUTPUT_CPP)
 				sToken += " = ";
 			else
 				sToken += "    equ   ";
-			std::cout << sToken << sN << hex(ofs, 4) << sCMA << sCTK << sComment << std::endl;	
+			std::cout << sPAD << sToken << sN << hex(ofs, 4) << sCMA << sCTK << sComment << std::endl;	
 		}
 	}
 }
