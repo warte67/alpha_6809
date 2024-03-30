@@ -7,6 +7,7 @@
 /build/*.cmake
 /build/compile_commands.json
 /build/CMakeCache.txt
+/build/cmake_install.cmake
 /build/main
 /.vscode
 /.cmake
