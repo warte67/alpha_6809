@@ -17,7 +17,7 @@
 //    #include "memory_map.h"
     
 // Generate a memory map definition file?
-#define COMPILE_MEMORY_MAP      false
+#define COMPILE_MEMORY_MAP      true
 #define MEMORY_MAP_OUTPUT_CPP   true
 
 // simple 6809 types
@@ -31,16 +31,16 @@
         #define DWord Uint32
     #endif
 
+  
+// constants
+constexpr Word VID_BUFFER_SIZE = 11 * 1024;      // standard video buffer size
 
-//    
-//    
-//    // constants
+
 //    const bool ENABLE_MOUSE_CURSOR = true;      // mouse cursor shown by default
 //    const bool ENABLE_DEBUG = false;
 //    const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
 //    
 //    
-//    constexpr Word VID_BUFFER_SIZE = 8 * 1024;      // standard video buffer size
 //    constexpr Word EDIT_BUFFER_SIZE = 256;          // input/edit buffer size
 //    
 //    

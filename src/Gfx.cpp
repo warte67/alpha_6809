@@ -27,13 +27,18 @@ void Gfx::write(Word offset, Byte data, bool debug)
 
 Word Gfx::OnAttach(Word nextAddr)
 {
-    printf("Gfx::OnAttach()\n");
-    return 0;
+    // printf("%s::OnAttach()\n", Name().c_str());
+
+    Word old_addr = nextAddr;
+    DisplayEnum("VIDEO_START", nextAddr, "Start of Video Buffer Memory");
+    nextAddr += VID_BUFFER_SIZE;
+    DisplayEnum("VIDEO_END", nextAddr-1, "End of Video Buffer Memory");
+    return nextAddr - old_addr;
 }
 
 void Gfx::OnInit()
 {
-    printf("Gfx::OnInit()\n");
+    printf("%s::OnInit()\n", Name().c_str());
 
     // int d = 0;
     // for (int a=0; a<0x410; a++)
@@ -42,7 +47,7 @@ void Gfx::OnInit()
 
 void Gfx::OnQuit()
 {
-    printf("Gfx::OnQuit()\n");
+    printf("%s::OnQuit()\n", Name().c_str());
 }
 
 void Gfx::OnActivate()
@@ -53,7 +58,7 @@ void Gfx::OnActivate()
     {
         sdl_window = SDL_CreateWindow("alpha_6809",
                               SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED, 
-                              1024, 576,
+                              512, 288,
                               SDL_WINDOW_RESIZABLE);
         if (!sdl_window)
         {

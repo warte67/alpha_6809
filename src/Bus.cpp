@@ -5,6 +5,7 @@
 /////////////
 
 #include <chrono>
+#include <sstream>
 #include "Bus.hpp"
 
 Bus::Bus()
@@ -86,10 +87,11 @@ Bus::Bus()
 
     // standard video buffer (11k)
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0x0400, "Video Buffer (11K)");
-    // dev = new RAM("VIDEO_RAM");     // TODO: change to GFX device
-    dev = new Gfx("VIDEO_RAM");     // TODO: change to GFX device
-    addr += Attach(dev, 11*1024);    
+    std::stringstream ss;
+    ss << "Video Buffer (" << (VID_BUFFER_SIZE/1024) << "K)";
+    dev->DisplayEnum("",0x0400, ss.str());
+    dev = new Gfx();     // TODO: change to GFX device
+    addr += Attach(dev);    
     
 	// user RAM
     dev->DisplayEnum("",0, "");
@@ -292,12 +294,15 @@ void Bus::OnEvent(SDL_Event* null_event)
                 break;
             
             case SDL_KEYDOWN:
-                //if (evnt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                // [ALT-X]
                 if (evnt.key.keysym.sym == SDLK_x)
                 {
                     if (SDL_GetModState() & KMOD_ALT)
                         s_bIsRunning = false;
                 }
+                // [ESCAPE]
+                if (evnt.key.keysym.sym == SDLK_ESCAPE)
+                    s_bIsRunning = false;
                 break;
         }
     }        
@@ -427,6 +432,7 @@ void Bus::OnRender()
 
 Word Bus::Attach(IDevice* dev, Word size) 
 {    
+    // printf("Bus::Attach()\n");
     if (dev != nullptr)
     {
         if (size == 0)
