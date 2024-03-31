@@ -7,7 +7,9 @@
 #pragma once
 
 #include "IDevice.hpp"
-#include "Gfx.hpp"
+
+class GfxVRam;
+class Gfx;
 
 class Bus : public IDevice
 {
@@ -24,6 +26,9 @@ class Bus : public IDevice
 		inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
         inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
         float _avg_cpu_cycle_time = 0.0f;
+
+        inline static GfxVRam* s_gfx_vram = nullptr;
+        inline static Gfx* s_gfx = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -60,6 +65,9 @@ class Bus : public IDevice
 		static void Write(Word offset, Byte data, bool debug = false);
 		static Word Read_Word(Word offset, bool debug = false);
 		static void Write_Word(Word offset, Word data, bool debug = false);       
+
+        inline static GfxVRam* gfx_vram() { return s_gfx_vram; }    // to non-enforced singleton
+        inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
 
     private:
         int _lastAddress = 0;

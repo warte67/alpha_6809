@@ -1,18 +1,20 @@
 // *************************************************
 // *
-// * Gfx.hpp
+// * GfxVRam.hpp
+// *
+// *        Handles the standard video memory
 // *
 // ***********************************
 #pragma once
 
 #include "IDevice.hpp"
 
-class Gfx : public IDevice
+class GfxVRam : public IDevice
 {
     public:
-        Gfx() { _deviceName = "Gfx"; }
-        Gfx(std::string sName) : IDevice(sName) {}
-        ~Gfx() {};
+        GfxVRam() { _deviceName = "GfxVRam"; }
+        GfxVRam(std::string sName) : IDevice(sName) {}
+        ~GfxVRam() {};
 
         // pure virtuals
 		Word OnAttach(Word nextAddr) override;
@@ -29,4 +31,5 @@ class Gfx : public IDevice
         void write(Word offset, Byte data, bool debug = false) override;
 
     private:
+        SDL_Window* sdl_window = nullptr;
 };

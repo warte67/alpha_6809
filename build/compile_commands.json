@@ -19,6 +19,12 @@
 },
 {
   "directory": "/home/jay/dev/alpha_6809/build",
+  "command": "/usr/bin/g++  -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxVRam.cpp.o -c /home/jay/dev/alpha_6809/src/GfxVRam.cpp",
+  "file": "/home/jay/dev/alpha_6809/src/GfxVRam.cpp",
+  "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxVRam.cpp.o"
+},
+{
+  "directory": "/home/jay/dev/alpha_6809/build",
   "command": "/usr/bin/g++  -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o -c /home/jay/dev/alpha_6809/src/Gfx.cpp",
   "file": "/home/jay/dev/alpha_6809/src/Gfx.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o"

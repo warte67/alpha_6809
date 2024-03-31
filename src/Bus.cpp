@@ -7,23 +7,26 @@
 #include <chrono>
 #include <sstream>
 #include "Bus.hpp"
+#include "GfxVRam.hpp"
+#include "Gfx.hpp"
+
 
 Bus::Bus()
 {
-    std::cout << "Bus::Bus()\n";
+    // std::cout << Name() << "::Bus()\n";
+
+    _deviceName = "Bus";
 
     // initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
-        std::cout << "SDL_Init() failed!\n" << SDL_GetError() << std::endl;
+        std::stringstream ss;
+        ss << "SDL_Init() failed!\n" << SDL_GetError() << std::endl;
+        Bus::Error(ss.str());
         s_bIsRunning = false;
-    }
-    else
-    {
-        std::cout << "SDL_Init() was successful!\n";
-        s_b_SDL_WasInit = true;
-    }
-
+        return;     // no need to continue if SDL_Init fails
+    }    
+    s_b_SDL_WasInit = true;
 
     if (COMPILE_MEMORY_MAP)
     {
@@ -90,8 +93,8 @@ Bus::Bus()
     std::stringstream ss;
     ss << "Video Buffer (" << (VID_BUFFER_SIZE/1024) << "K)";
     dev->DisplayEnum("",0x0400, ss.str());
-    dev = new Gfx();     // TODO: change to GFX device
-    addr += Attach(dev);    
+    s_gfx_vram = new GfxVRam();
+    addr += Attach(s_gfx_vram);    
     
 	// user RAM
     dev->DisplayEnum("",0, "");
@@ -123,18 +126,20 @@ Bus::Bus()
     /////////
 
     // ...
-            dev->DisplayEnum("",0, "");
-            dev->DisplayEnum("",0xF000, "TODO: HARDWARE REGISTERS (0.5K)");
-            dev = new ROM("HDW_REGS");
-            addr += Attach(dev, 512-16);
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",0xF000, "HARDWARE REGISTERS (0.5K)");
+    s_gfx = new Gfx();  // non-enforced singleton
+    addr += Attach(s_gfx);
 
-    int hdw_top = addr;
-    int hdw_size = 0;
-
-    printf("\t\t\t\t(Hardware Registers Top: $%04X)\n", hdw_top);
-    printf("\t\t\t\t(Hardware Registers Size: $%04X)\n", hdw_size);
-
-
+    // RESERVED
+    int reserved = 0xfff0 - addr;
+    std::stringstream s;
+    s << reserved << " bytes in reserve";
+    dev->DisplayEnum("",0, "");
+    dev->DisplayEnum("",addr, s.str());
+    addr += reserved;
+    dev = new ROM("RESERVED");
+    addr += Attach(dev, reserved);
 
 
 
@@ -187,7 +192,7 @@ Bus::Bus()
 
 Bus::~Bus()
 {
-    std::cout << "~Bus::Bus()\n";
+    // std::cout << "~" << Name() << "::Bus()\n";
 
     // shutdown the CPU thread
     // ...
@@ -208,33 +213,36 @@ Bus::~Bus()
 
 
 void Bus::Run()
-{
-    std::cout << "Bus::Run()\n";
+{    
+    // std::cout << Name() << "::Run()\n";
 
     // Bus::Error("Does the error thing work?");
 
-    while (s_bIsRunning)
+    if (s_bIsRunning)
     {
-        if (s_bIsDirty)
+        while (s_bIsRunning)
         {
-            // shutdown the old environment
-            OnDeactivate();
-            // create a new environment
-            OnActivate();
-			// no longer dirty
-			s_bIsDirty = false;            
+            if (s_bIsDirty)
+            {
+                // shutdown the old environment
+                OnDeactivate();
+                // create a new environment
+                OnActivate();
+                // no longer dirty
+                s_bIsDirty = false;            
+            }
+            OnUpdate(0.0f);
+            OnEvent(nullptr);
+            OnRender();      
+            // only a present for Gfx
+            // m_gfx->OnPresent();  // special case for the GFX Device
         }
-        OnUpdate(0.0f);
-        OnEvent(nullptr);
-        OnRender();      
-		// only a present for Gfx
-	    // m_gfx->OnPresent();  // special case for the GFX Device
-    }
-    // shutdown the environment
-    OnDeactivate();    
+        // shutdown the environment
+        OnDeactivate();    
 
-    // close down all of the attached devices
-    OnQuit();   // One time destructor
+        // close down all of the attached devices
+        OnQuit();   // One time destructor
+    }
 }
 
 
@@ -245,40 +253,42 @@ Word Bus::OnAttach(Word nextAddr)
     // this should never actually be called from the Bus
     return 0;
 
-    std::cout << "Bus::OnAttach()\n";
+    // std::cout << Name() << "::OnAttach()\n";
+
     return 0;
 }
 
 void Bus::OnInit()
 {
-    std::cout << "Bus::OnInit()\n";
+    // std::cout << Name() << "::OnInit()\n";
 	for (auto &d : Bus::_memoryNodes)
 		d->OnInit();    
 }
 
 void Bus::OnQuit()
 {
-    std::cout << "Bus::OnQuit()\n";
+    // std::cout << Name() << "::OnQuit()\n";
 	for (auto &d : Bus::_memoryNodes)
 		d->OnQuit();    
 }
 
 void Bus::OnActivate()
 {
-    std::cout << "Bus::OnActivate()\n";
+    // std::cout << Name() << "::OnActivate()\n";
 	for (auto &d : Bus::_memoryNodes)
 		d->OnActivate();    
 }
 void Bus::OnDeactivate()
 {
-    std::cout << "Bus::OnDeactivate()\n";
+    // std::cout << Name() << "::OnDeactivate()\n";
     for (auto &d : Bus::_memoryNodes)
 		d->OnDeactivate();
 }
 
 void Bus::OnEvent(SDL_Event* null_event)
 { 
-    // std::cout << "Bus::OnEvent()\n";
+    // std::cout << Name() << "::OnEvent()\n";
+
     SDL_Event evnt;
     while (SDL_PollEvent(&evnt))
     {
@@ -375,7 +385,7 @@ void Bus::clockDivider()
 
 void Bus::OnUpdate(float fNullTime)
 {
-    // std::cout << "Bus::OnUpdate()\n";
+    // std::cout << Name() << "::OnUpdate()\n";
 
     // update the clock divider
     clockDivider();
@@ -425,14 +435,14 @@ void Bus::OnUpdate(float fNullTime)
 
 void Bus::OnRender()
 {
-    // std::cout << "Bus::OnRender()\n";
+    // std::cout << Name() << "::OnRender()\n";
 	for (auto &d : Bus::_memoryNodes)
 		d->OnRender();    
 }
 
 Word Bus::Attach(IDevice* dev, Word size) 
 {    
-    // printf("Bus::Attach()\n");
+    // std::cout << Name() << "::Attach()\n";
     if (dev != nullptr)
     {
         if (size == 0)
