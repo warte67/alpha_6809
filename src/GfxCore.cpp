@@ -392,11 +392,40 @@ void GfxCore::_init_gmodes()
     vec_timings.push_back( { 1024,  768 } );                //  2 = 1024 x 768
     vec_timings.push_back( {  640,  480 } );                //  3 =  640 x 480
 
-    // timing index = (vec_gmode index) % 32
+    // graphics modes (*text mode only)
+    vec_gmodes.push_back( { 0, 640, 400, 2, 2 } );         //   0*
+    vec_gmodes.push_back( { 0, 640, 200, 2, 4 } );         //   1*
+    vec_gmodes.push_back( { 0, 320, 400, 4, 2 } );         //   2*
+    vec_gmodes.push_back( { 0, 320, 200, 4, 4 } );         //   3
+    vec_gmodes.push_back( { 0, 320, 160, 4, 5 } );         //   4
+    vec_gmodes.push_back( { 0, 256, 200, 5, 4 } );         //   5
+    vec_gmodes.push_back( { 0, 256, 160, 5, 5 } );         //   6
+    vec_gmodes.push_back( { 0, 160, 100, 8, 8 } );         //   7
+    vec_gmodes.push_back( { 1, 640, 360, 2, 2 } );         //   8*
+    vec_gmodes.push_back( { 1, 640, 240, 2, 3 } );         //   9*
+    vec_gmodes.push_back( { 1, 320, 180, 4, 4 } );         //   10
+    vec_gmodes.push_back( { 1, 320, 144, 4, 5 } );         //   11
+    vec_gmodes.push_back( { 1, 256, 180, 5, 4 } );         //   12
+    vec_gmodes.push_back( { 1, 256, 144, 5, 5 } );         //   13
+    vec_gmodes.push_back( { 1, 256, 120, 5, 6 } );         //   14
+    vec_gmodes.push_back( { 1, 160,  90, 8, 8 } );         //   15
 
-    // 1600 x 900
-    vec_gmodes.push_back( { 0, 640, 400, 2, 2 } );         //   0
-
+    vec_gmodes.push_back( { 2, 512, 384, 2, 2 } );         //   16*
+    vec_gmodes.push_back( { 2, 341, 256, 3, 3 } );         //   17
+    vec_gmodes.push_back( { 2, 256, 256, 4, 3 } );         //   18
+    vec_gmodes.push_back( { 2, 256, 192, 4, 4 } );         //   19
+    vec_gmodes.push_back( { 2, 204, 153, 5, 5 } );         //   20
+    vec_gmodes.push_back( { 2, 170, 128, 6, 6 } );         //   21
+    vec_gmodes.push_back( { 2, 128, 128, 8, 6 } );         //   22
+    vec_gmodes.push_back( { 2, 128,  96, 8, 8 } );         //   23
+    vec_gmodes.push_back( { 3, 320, 240, 2, 2 } );         //   24
+    vec_gmodes.push_back( { 3, 320, 160, 2, 3 } );         //   25
+    vec_gmodes.push_back( { 3, 160, 160, 4, 3 } );         //   26
+    vec_gmodes.push_back( { 3, 160, 120, 4, 4 } );         //   27
+    vec_gmodes.push_back( { 3, 160,  96, 4, 5 } );         //   28
+    vec_gmodes.push_back( { 3, 128, 120, 5, 4 } );         //   29
+    vec_gmodes.push_back( { 3, 128,  96, 5, 5 } );         //   30
+    vec_gmodes.push_back( { 3, 128,  80, 5, 6 } );         //   31
 
 
     // verify gmodes
