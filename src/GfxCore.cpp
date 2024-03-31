@@ -99,6 +99,7 @@ void GfxCore::OnRender()
 
 void GfxCore::_init_gmodes()
 {
+    /******
     // Timings
     vec_timings.push_back( { 1600,  900 } );             //  0 = 1600 x  900
     vec_timings.push_back( { 1440,  900 } );             //  1 = 1440 x  900
@@ -382,6 +383,21 @@ void GfxCore::_init_gmodes()
     vec_gmodes.push_back( { 7, 128,  80, 5, 6 } );         // 253
     vec_gmodes.push_back( { 7, 128,  68, 5, 7 } );         // 254
     vec_gmodes.push_back( { 7, 128,  60, 5, 8 } );         // 255
+
+    *****/
+
+    // Timings
+    vec_timings.push_back( { 1280,  800 } );                //  0 = 1280 x 800
+    vec_timings.push_back( { 1280,  720 } );                //  1 = 1280 x 720
+    vec_timings.push_back( { 1024,  768 } );                //  2 = 1024 x 768
+    vec_timings.push_back( {  640,  480 } );                //  3 =  640 x 480
+
+    // timing index = (vec_gmode index) % 32
+
+    // 1600 x 900
+    vec_gmodes.push_back( { 0, 640, 400, 2, 2 } );         //   0
+
+
 
     // verify gmodes
     int i=0;
