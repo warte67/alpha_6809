@@ -1,20 +1,22 @@
 // *************************************************
 // *
-// * GfxVRam.hpp
+// * GfxCore.hpp
 // *
-// *        Handles the standard video memory
+// *    1) Handles the standard video memory.
+// *    2) Maintains the SDL window, renderer, and main display buffer texture
+// *    3) Contains the potential display mode scan timing data
 // *
 // ***********************************
 #pragma once
 
 #include "IDevice.hpp"
 
-class GfxVRam : public IDevice
+class GfxCore : public IDevice
 {
     public:
-        GfxVRam() { _deviceName = "GfxVRam"; }
-        GfxVRam(std::string sName) : IDevice(sName) {}
-        ~GfxVRam() {};
+        GfxCore() { _deviceName = "GfxCore"; }
+        GfxCore(std::string sName) : IDevice(sName) {}
+        ~GfxCore() {};
 
         // pure virtuals
 		Word OnAttach(Word nextAddr) override;

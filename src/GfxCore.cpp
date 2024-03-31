@@ -1,15 +1,15 @@
 // *************************************************
 // *
-// * GfxVRam.cpp
+// * GfxCore.cpp
 // *
 // ***********************************
 
 #include <sstream>
-#include "GfxVRam.hpp"
+#include "GfxCore.hpp"
 #include "Bus.hpp"
 
 
-Byte GfxVRam::read(Word offset, bool debug)
+Byte GfxCore::read(Word offset, bool debug)
 {
     Byte data = IDevice::read(offset);
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
@@ -17,7 +17,7 @@ Byte GfxVRam::read(Word offset, bool debug)
     return data;
 }
 
-void GfxVRam::write(Word offset, Byte data, bool debug)
+void GfxCore::write(Word offset, Byte data, bool debug)
 {
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
 
@@ -25,7 +25,7 @@ void GfxVRam::write(Word offset, Byte data, bool debug)
     // printf("Gfx::read($%04X) = $%02X\n", offset,  IDevice::read(offset));
 }
 
-Word GfxVRam::OnAttach(Word nextAddr)
+Word GfxCore::OnAttach(Word nextAddr)
 {
     // printf("%s::OnAttach()\n", Name().c_str());
 
@@ -36,17 +36,17 @@ Word GfxVRam::OnAttach(Word nextAddr)
     return nextAddr - old_addr;
 }
 
-void GfxVRam::OnInit()
+void GfxCore::OnInit()
 {
     // printf("%s::OnInit()\n", Name().c_str());
 }
 
-void GfxVRam::OnQuit()
+void GfxCore::OnQuit()
 {
     // printf("%s::OnQuit()\n", Name().c_str());
 }
 
-void GfxVRam::OnActivate()
+void GfxCore::OnActivate()
 {
     // printf("%s::OnActivate()\n", Name().c_str());
 
@@ -65,7 +65,7 @@ void GfxVRam::OnActivate()
     }
 }
 
-void GfxVRam::OnDeactivate()
+void GfxCore::OnDeactivate()
 {
     // printf("%s::OnDeactivate()\n", Name().c_str());
 
@@ -77,17 +77,17 @@ void GfxVRam::OnDeactivate()
     }
 }
 
-void GfxVRam::OnEvent(SDL_Event* evnt)
+void GfxCore::OnEvent(SDL_Event* evnt)
 {
     // printf("%sw::OnEvent()\n", Name().c_str());
 }
 
-void GfxVRam::OnUpdate(float fElapsedTime)
+void GfxCore::OnUpdate(float fElapsedTime)
 {
     // printf("%s::OnUpdate()\n", Name().c_str());
 }
 
-void GfxVRam::OnRender()
+void GfxCore::OnRender()
 {
     // printf("%s::OnRender()\n", Name().c_str());
 }

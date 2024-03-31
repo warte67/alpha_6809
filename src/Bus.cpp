@@ -7,7 +7,7 @@
 #include <chrono>
 #include <sstream>
 #include "Bus.hpp"
-#include "GfxVRam.hpp"
+#include "GfxCore.hpp"
 #include "Gfx.hpp"
 
 
@@ -93,8 +93,8 @@ Bus::Bus()
     std::stringstream ss;
     ss << "Video Buffer (" << (VID_BUFFER_SIZE/1024) << "K)";
     dev->DisplayEnum("",0x0400, ss.str());
-    s_gfx_vram = new GfxVRam();
-    addr += Attach(s_gfx_vram);    
+    s_gfx_core = new GfxCore();
+    addr += Attach(s_gfx_core);    
     
 	// user RAM
     dev->DisplayEnum("",0, "");
@@ -125,11 +125,16 @@ Bus::Bus()
     //    Hardware Registers
     /////////
 
-    // ...
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0xF000, "HARDWARE REGISTERS (0.5K)");
+    dev->DisplayEnum("",0, "HARDWARE REGISTERS (0.5K)");
+
+    // base graphics device
     s_gfx = new Gfx();  // non-enforced singleton
     addr += Attach(s_gfx);
+
+
+
+
 
     // RESERVED
     int reserved = 0xfff0 - addr;
@@ -140,10 +145,6 @@ Bus::Bus()
     addr += reserved;
     dev = new ROM("RESERVED");
     addr += Attach(dev, reserved);
-
-
-
-
 
 	// ROM VECTORS
     dev->DisplayEnum("",0, "");

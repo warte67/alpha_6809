@@ -177,29 +177,29 @@ home/jay/dev/alpha_6809/src/Gfx.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.s
 .PHONY : home/jay/dev/alpha_6809/src/Gfx.cpp.s
 
-home/jay/dev/alpha_6809/src/GfxVRam.o: home/jay/dev/alpha_6809/src/GfxVRam.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.o
+home/jay/dev/alpha_6809/src/GfxCore.o: home/jay/dev/alpha_6809/src/GfxCore.cpp.o
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.o
 
 # target to build an object file
-home/jay/dev/alpha_6809/src/GfxVRam.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxVRam.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.cpp.o
+home/jay/dev/alpha_6809/src/GfxCore.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.cpp.o
 
-home/jay/dev/alpha_6809/src/GfxVRam.i: home/jay/dev/alpha_6809/src/GfxVRam.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.i
+home/jay/dev/alpha_6809/src/GfxCore.i: home/jay/dev/alpha_6809/src/GfxCore.cpp.i
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.i
 
 # target to preprocess a source file
-home/jay/dev/alpha_6809/src/GfxVRam.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxVRam.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.cpp.i
+home/jay/dev/alpha_6809/src/GfxCore.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.i
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.cpp.i
 
-home/jay/dev/alpha_6809/src/GfxVRam.s: home/jay/dev/alpha_6809/src/GfxVRam.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.s
+home/jay/dev/alpha_6809/src/GfxCore.s: home/jay/dev/alpha_6809/src/GfxCore.cpp.s
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.s
 
 # target to generate assembly for a file
-home/jay/dev/alpha_6809/src/GfxVRam.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxVRam.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/GfxVRam.cpp.s
+home/jay/dev/alpha_6809/src/GfxCore.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.s
+.PHONY : home/jay/dev/alpha_6809/src/GfxCore.cpp.s
 
 home/jay/dev/alpha_6809/src/IDevice.o: home/jay/dev/alpha_6809/src/IDevice.cpp.o
 .PHONY : home/jay/dev/alpha_6809/src/IDevice.o
@@ -264,9 +264,9 @@ help:
 	@echo "... home/jay/dev/alpha_6809/src/Gfx.o"
 	@echo "... home/jay/dev/alpha_6809/src/Gfx.i"
 	@echo "... home/jay/dev/alpha_6809/src/Gfx.s"
-	@echo "... home/jay/dev/alpha_6809/src/GfxVRam.o"
-	@echo "... home/jay/dev/alpha_6809/src/GfxVRam.i"
-	@echo "... home/jay/dev/alpha_6809/src/GfxVRam.s"
+	@echo "... home/jay/dev/alpha_6809/src/GfxCore.o"
+	@echo "... home/jay/dev/alpha_6809/src/GfxCore.i"
+	@echo "... home/jay/dev/alpha_6809/src/GfxCore.s"
 	@echo "... home/jay/dev/alpha_6809/src/IDevice.o"
 	@echo "... home/jay/dev/alpha_6809/src/IDevice.i"
 	@echo "... home/jay/dev/alpha_6809/src/IDevice.s"

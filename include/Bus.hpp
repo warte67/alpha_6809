@@ -8,7 +8,7 @@
 
 #include "IDevice.hpp"
 
-class GfxVRam;
+class GfxCore;
 class Gfx;
 
 class Bus : public IDevice
@@ -27,7 +27,7 @@ class Bus : public IDevice
         inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
         float _avg_cpu_cycle_time = 0.0f;
 
-        inline static GfxVRam* s_gfx_vram = nullptr;
+        inline static GfxCore* s_gfx_core = nullptr;
         inline static Gfx* s_gfx = nullptr;
 
     public:
@@ -66,7 +66,7 @@ class Bus : public IDevice
 		static Word Read_Word(Word offset, bool debug = false);
 		static void Write_Word(Word offset, Word data, bool debug = false);       
 
-        inline static GfxVRam* gfx_vram() { return s_gfx_vram; }    // to non-enforced singleton
+        inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
         inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
 
     private:
