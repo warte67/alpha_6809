@@ -14,10 +14,10 @@
 #include <vector>
 #include <iostream>
 
-//    #include "memory_map.h"
+#include "memory_map.hpp"
     
 // Generate a memory map definition file?
-#define COMPILE_MEMORY_MAP      true
+#define COMPILE_MEMORY_MAP      false
 #define MEMORY_MAP_OUTPUT_CPP   true
 
 // simple 6809 types

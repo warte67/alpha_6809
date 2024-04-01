@@ -29,4 +29,19 @@ class Gfx : public IDevice
         void write(Word offset, Byte data, bool debug = false) override;
 
     private:
+
+        // internal registers
+        inline static Byte s_gfx_mode = 03;    // default: 3= 320x200 text 
+
 };
+
+
+/******
+
+   GFX_MODE     (Byte) Graphics Mode
+                - bit 0-4   = Resolution Modes 0-31
+                - bit 5     = 0:windowed, 1:fullscreen (emulation only)
+                - bit 6     = 0:vsync off, 1:vsync on
+                - bit 7     = 0:text,  1:bitmap
+
+ ******/

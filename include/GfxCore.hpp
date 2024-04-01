@@ -32,9 +32,8 @@ class GfxCore : public IDevice
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
 
-    private:
-        SDL_Window* sdl_window = nullptr;
-
+        // public accessors
+        inline static void Present() { SDL_RenderPresent(sdl_renderer); }
 
     public:
         struct GTIMING
@@ -53,23 +52,23 @@ class GfxCore : public IDevice
         };
 
     private:
+        inline static SDL_Window* sdl_window = nullptr;
+        inline static SDL_Renderer* sdl_renderer = nullptr;
+        inline static SDL_Texture* sdl_target_texture = nullptr;
+        Uint32 sdl_renderer_flags = 0;
+        int window_width = 0;
+        int window_height = 0;
+        Uint32 window_flags = 0;
+        bool bIsFullscreen = false;
+        Word res_width = 0;
+        Word res_height = 0;
+
+
+
         std::vector<GTIMING> vec_timings;
-        std::vector<GMODE> vec_gmodes;
+        std::vector<GMODE> vec_gmodes;   
+        // helpers     
         void _init_gmodes();
+        void _decode_gmode();
 };
 
-/******
-
-    Needed to track all of the graphics modes:
-
-        Res_Width       // number of pixels per column
-        Res_Height      // number of pixels per row
-        Pixel_Width     // horizontal scan multiplier
-        Pixel_Height    // vertical scan multiplier
-
-        // calculated at run time?
-        Timing_Width    // Res_Width * Pixel_Width
-        Timing_Height   // Res_Height * Pixel_Height
-
-
- ******/

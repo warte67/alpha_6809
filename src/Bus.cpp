@@ -235,8 +235,8 @@ void Bus::Run()
             OnUpdate(0.0f);
             OnEvent(nullptr);
             OnRender();      
-            // only a present for Gfx
-            // m_gfx->OnPresent();  // special case for the GFX Device
+            // only a present for Gfx            
+            GfxCore::Present();
         }
         // shutdown the environment
         OnDeactivate();    
@@ -311,10 +311,24 @@ void Bus::OnEvent(SDL_Event* null_event)
                     if (SDL_GetModState() & KMOD_ALT)
                         s_bIsRunning = false;
                 }
+                // Testing [SPACE]
+                if (evnt.key.keysym.sym == SDLK_SPACE)
+                {
+                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
+                    s_bIsDirty = true;
+                }
+                // Testing [ENTER]
+                if (evnt.key.keysym.sym == SDLK_RETURN)
+                {
+                    Byte data = Bus::Read(GFX_MODE);
+                    (data & 0x80) ? data &= 0x7f : data |= 0x80;
+                    Bus::Write(GFX_MODE, data);
+                    s_bIsDirty = true;
+                }
                 // [ESCAPE]
                 if (evnt.key.keysym.sym == SDLK_ESCAPE)
                     s_bIsRunning = false;
-                break;
+                break;                
         }
     }        
 }
