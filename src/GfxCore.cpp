@@ -52,6 +52,7 @@ void GfxCore::OnQuit()
 void GfxCore::_decode_gmode()
 {
     Byte gmode = Bus::Read(GFX_MODE);
+    Byte gemu = Bus::Read(GFX_EMU);
 
     // fetch the desktop size
     SDL_DisplayMode DM;
@@ -70,7 +71,7 @@ void GfxCore::_decode_gmode()
     window_flags = SDL_WINDOW_RESIZABLE;
     window_width = desktop_width * 0.65f;
     window_height = (int)(float)window_width / aspect;
-    if (gmode & 0x80)
+    if (gemu & 0x80)
     {   // FULLSCREEN
         bIsFullscreen = true;
         window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -83,10 +84,47 @@ void GfxCore::_decode_gmode()
 	if (gmode & 0x40)
 		sdl_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
 
+    // Verify Graphics Mode
+    int bp_size = (res_width * res_height) / 8;
+    bits_per_pixel = 1<<((gmode & 0x60)>>5);
+    bIsBitmapMode = false;
+    if (gmode & 0x80)
+    {
+        bIsBitmapMode = true;
+        // single bit plane size is too big to fit in video memory
+        if (bp_size > VID_BUFFER_SIZE)
+        {
+            gmode &= 0x7f;  // clear the graphics mode bit
+            bIsBitmapMode = false;
+        }
+        else
+        {
+            // correct bits_per_pixel
+            if (bits_per_pixel > 1)
+            {
+                while (bp_size * bits_per_pixel > VID_BUFFER_SIZE)
+                {
+                    gmode -= 0x20;
+                    bits_per_pixel = 1<<((gmode & 0x60)>>5);
+                }
+            }
+        }
+        Bus::Write(GFX_MODE, gmode);
+    }
+    if (!(gmode & 0x80))
+        bits_per_pixel = 0; // text only
+
     // Testing: report results
     if (true)
     {
+        printf("-=<###################################################>=-\n");
+        printf("MODE: $%02X\n", gmode);
         (bIsFullscreen) ? printf("Full Screen\n") : printf("Windowed\n");
+        (bIsBitmapMode) ? printf("Bitmap Mode ") : printf("Text Mode ");
+        if (bIsBitmapMode)
+            printf("    %3d x%3d\n", res_width, res_height);
+        else
+            printf("    %3d x%3d\n", res_width/8, res_height/8);
         printf("Display Width:  %4d\n", desktop_width);
         printf("Display Height: %4d\n", desktop_height);
         printf("Window Width:  %4d\n", window_width);
@@ -94,6 +132,7 @@ void GfxCore::_decode_gmode()
         printf("Res Width:  %4d\n", res_width);
         printf("Res Height: %4d\n", res_height);
         printf("aspect: %f\n", aspect);
+        printf("Bits Per Pixel: %d\n", bits_per_pixel);
     }
 }
 
@@ -214,7 +253,6 @@ void GfxCore::OnRender()
     SDL_SetRenderTarget(sdl_renderer, NULL);
     // SDL_RenderCopy(sdl_renderer, sdl_target_texture, NULL, NULL);
 
-
     // render aspect
     Byte mode = Bus::Read(GFX_MODE) & 0x1f;
     Byte tindex = vec_gmodes[mode].Timing_index;   
@@ -288,7 +326,7 @@ void GfxCore::_init_gmodes()
     vec_gmodes.push_back( { 3, 128,  96, 5, 5 } );         //   30
     vec_gmodes.push_back( { 3, 128,  80, 5, 6 } );         //   31
 
-    if (true)
+    if (false)
     {
         // verify gmodes
         int i=0;

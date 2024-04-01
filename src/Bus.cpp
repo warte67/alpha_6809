@@ -315,15 +315,15 @@ void Bus::OnEvent(SDL_Event* null_event)
                 if (evnt.key.keysym.sym == SDLK_SPACE)
                 {
                     Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
-                    s_bIsDirty = true;
+                    // s_bIsDirty = true;
                 }
                 // Testing [ENTER]
                 if (evnt.key.keysym.sym == SDLK_RETURN)
                 {
-                    Byte data = Bus::Read(GFX_MODE);
+                    Byte data = Bus::Read(GFX_EMU);
                     (data & 0x80) ? data &= 0x7f : data |= 0x80;
-                    Bus::Write(GFX_MODE, data);
-                    s_bIsDirty = true;
+                    Bus::Write(GFX_EMU, data);
+                    // s_bIsDirty = true;
                 }
                 // [ESCAPE]
                 if (evnt.key.keysym.sym == SDLK_ESCAPE)

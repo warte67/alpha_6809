@@ -68,6 +68,7 @@ class Bus : public IDevice
 
         inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
         inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
+        inline static void IsDirty(bool dirty) { s_bIsDirty = dirty; }
 
     private:
         int _lastAddress = 0;

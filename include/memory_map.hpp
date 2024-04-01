@@ -1,3 +1,4 @@
+
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -45,12 +46,17 @@ enum MEMMAP
         // HARDWARE REGISTERS (0.5K)
     GFX_MODE         = 0xFE00, // (Byte) Graphics Mode
         //           - bit 0-4   = Resolution Modes 0-31
-        //           - bit 5     = 0:windowed, 1:fullscreen (emulation only)
-        //           - bit 6     = 0:vsync off, 1:vsync on
         //           - bit 7     = 0:text,  1:bitmap
         
-        // 495 bytes in reserve
-    RESERVED         = 0xFE01, 
+    GFX_EMU          = 0xFE01, // (Byte) Emulation Flags
+        //           - bits 0-2  = Active Monitor 0-7
+        //           - bits 3-5  = reserved
+        //           - bit  6    = 0:vsync off, 1:vsync on
+        //           - bit  7    = 0:windowed, 1:fullscreen
+        
+        
+        // 494 bytes in reserve
+    RESERVED         = 0xFE02, 
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -66,4 +72,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+
 

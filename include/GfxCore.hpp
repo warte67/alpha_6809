@@ -60,8 +60,10 @@ class GfxCore : public IDevice
         int window_height = 0;
         Uint32 window_flags = 0;
         bool bIsFullscreen = false;
+        bool bIsBitmapMode = false;
         Word res_width = 0;
         Word res_height = 0;
+        Byte bits_per_pixel = 1;
 
 
 

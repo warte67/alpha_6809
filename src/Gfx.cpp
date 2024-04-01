@@ -14,8 +14,8 @@ Byte Gfx::read(Word offset, bool debug)
     Byte data = IDevice::read(offset);
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
 
-    if (offset == GFX_MODE)
-        return s_gfx_mode;
+    if (offset == GFX_MODE)     return s_gfx_mode;
+    if (offset == GFX_EMU)      return s_gfx_emu;
 
     return data;
 }
@@ -24,9 +24,22 @@ void Gfx::write(Word offset, Byte data, bool debug)
 {
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
 
-    if (offset == GFX_MODE)
+    switch (offset)
     {
-        s_gfx_mode = data;
+        case GFX_MODE:
+            if (data != s_gfx_mode)
+            {
+                s_gfx_mode = data;
+                Bus::IsDirty(true);
+            }
+            break;
+        case GFX_EMU:
+            if (data != s_gfx_emu)
+            {
+                s_gfx_emu = data;
+                Bus::IsDirty(true);
+            }
+            break;
     }
 
     IDevice::write(offset,data);
@@ -40,11 +53,18 @@ Word Gfx::OnAttach(Word nextAddr)
     Word old_addr = nextAddr;
     DisplayEnum("GFX_MODE", nextAddr, "(Byte) Graphics Mode");
 	DisplayEnum("", 0, "\t     - bit 0-4   = Resolution Modes 0-31");
-	DisplayEnum("", 0, "\t     - bit 5     = 0:windowed, 1:fullscreen (emulation only)");
-	DisplayEnum("", 0, "\t     - bit 6     = 0:vsync off, 1:vsync on");
 	DisplayEnum("", 0, "\t     - bit 7     = 0:text,  1:bitmap");
+    DisplayEnum("", 0, "");
+    nextAddr++;
 
-    nextAddr += 1;
+    DisplayEnum("GFX_EMU", nextAddr, "(Byte) Emulation Flags");
+	DisplayEnum("", 0, "\t     - bits 0-2  = Active Monitor 0-7");
+	DisplayEnum("", 0, "\t     - bits 3-5  = reserved");
+	DisplayEnum("", 0, "\t     - bit  6    = 0:vsync off, 1:vsync on");
+	DisplayEnum("", 0, "\t     - bit  7    = 0:windowed, 1:fullscreen");
+    DisplayEnum("", 0, "");
+    nextAddr++;
+
     return nextAddr - old_addr;
 }
 
