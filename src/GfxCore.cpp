@@ -117,8 +117,8 @@ void GfxCore::_decode_gmode()
     // Testing: report results
     if (true)
     {
-        printf("-=<###################################################>=-\n");
-        printf("MODE: $%02X\n", gmode);
+        printf("\x1b[31m-=<###################################################>=-\n");
+        printf("\x1b[37mMODE: $%02X\n", gmode);
         (bIsFullscreen) ? printf("Full Screen\n") : printf("Windowed\n");
         (bIsBitmapMode) ? printf("Bitmap Mode ") : printf("Text Mode ");
         if (bIsBitmapMode)
