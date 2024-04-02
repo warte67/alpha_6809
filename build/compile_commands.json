@@ -1,31 +1,31 @@
 [
 {
   "directory": "/home/jay/dev/alpha_6809/build",
-  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -c /home/jay/dev/alpha_6809/src/main.cpp",
+  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -O3 -DNDEBUG -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o -c /home/jay/dev/alpha_6809/src/main.cpp",
   "file": "/home/jay/dev/alpha_6809/src/main.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o"
 },
 {
   "directory": "/home/jay/dev/alpha_6809/build",
-  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -c /home/jay/dev/alpha_6809/src/IDevice.cpp",
+  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -O3 -DNDEBUG -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o -c /home/jay/dev/alpha_6809/src/IDevice.cpp",
   "file": "/home/jay/dev/alpha_6809/src/IDevice.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o"
 },
 {
   "directory": "/home/jay/dev/alpha_6809/build",
-  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -c /home/jay/dev/alpha_6809/src/Bus.cpp",
+  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -O3 -DNDEBUG -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o -c /home/jay/dev/alpha_6809/src/Bus.cpp",
   "file": "/home/jay/dev/alpha_6809/src/Bus.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o"
 },
 {
   "directory": "/home/jay/dev/alpha_6809/build",
-  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o -c /home/jay/dev/alpha_6809/src/GfxCore.cpp",
+  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -O3 -DNDEBUG -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o -c /home/jay/dev/alpha_6809/src/GfxCore.cpp",
   "file": "/home/jay/dev/alpha_6809/src/GfxCore.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o"
 },
 {
   "directory": "/home/jay/dev/alpha_6809/build",
-  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -g -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o -c /home/jay/dev/alpha_6809/src/Gfx.cpp",
+  "command": "/usr/bin/g++ -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2 -O3 -DNDEBUG -fexceptions -Wall -o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o -c /home/jay/dev/alpha_6809/src/Gfx.cpp",
   "file": "/home/jay/dev/alpha_6809/src/Gfx.cpp",
   "output": "CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o"
 }
