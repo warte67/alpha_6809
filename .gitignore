@@ -1,8 +1,6 @@
 *.o
 *.o.d
 *.cmake
-CMakeFiles
-build/CMakeFiles
 build/.cmake
 build/*.cmake
 build/compile_commands.json
