@@ -390,6 +390,7 @@ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: /home/jay/dev/alpha_6
   /home/jay/dev/alpha_6809/include/Bus.hpp \
   /home/jay/dev/alpha_6809/include/Gfx.hpp \
   /home/jay/dev/alpha_6809/include/IDevice.hpp \
+  /home/jay/dev/alpha_6809/include/font8x8_system.hpp \
   /home/jay/dev/alpha_6809/include/memory_map.hpp \
   /home/jay/dev/alpha_6809/include/types.hpp \
   /usr/include/SDL2/SDL.h \
@@ -766,6 +767,7 @@ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: /home/jay/dev/alpha_6
 
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o: /home/jay/dev/alpha_6809/src/GfxCore.cpp \
   /home/jay/dev/alpha_6809/include/Bus.hpp \
+  /home/jay/dev/alpha_6809/include/Gfx.hpp \
   /home/jay/dev/alpha_6809/include/GfxCore.hpp \
   /home/jay/dev/alpha_6809/include/IDevice.hpp \
   /home/jay/dev/alpha_6809/include/memory_map.hpp \
@@ -1893,6 +1895,8 @@ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: /home/jay/dev/alpha_
 
 
 /home/jay/dev/alpha_6809/src/IDevice.cpp:
+
+/home/jay/dev/alpha_6809/include/font8x8_system.hpp:
 
 /home/jay/dev/alpha_6809/src/Gfx.cpp:
 

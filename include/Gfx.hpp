@@ -44,6 +44,10 @@ class Gfx : public IDevice
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }  
 
+        inline static Byte GetGlyphData(Byte index, Byte row)
+        { return _gfx_glyph_data[index][row]; }
+
+
     private:
 
         // internal registers (do these really need to be statics?)

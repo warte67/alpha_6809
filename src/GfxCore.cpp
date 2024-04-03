@@ -235,6 +235,10 @@ void GfxCore::OnUpdate(float fElapsedTime)
 	// SDL_SetRenderDrawColor(sdl_renderer, 8,32,4,255);    //rgba
     // SDL_RenderClear(sdl_renderer);    
 
+
+    _updateTextScreen();
+    return;
+
     void *pixels;
     int pitch;
 
@@ -377,43 +381,55 @@ void GfxCore::_init_gmodes()
 
 
 
-// void GfxCore::_updateTextScreen() 
-// {
-//     void *pixels;
-//     int pitch;
+void GfxCore::_updateTextScreen() 
+{
+    if (true)
+    {
+        for (Word t=VIDEO_START; t<=VIDEO_END; t++)
+            Bus::Write(t, rand()%256);
+    }
 
-//     if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {
-//         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
-//         Bus::Error("");
-//     }
-//     else
-//     {
-// 		Word end = Bus::Read_Word(STD_VID_MAX);
-// 		Word addr = STD_VID_MIN;
-// 		for (; addr <= end; addr += 2)
-// 		{
-// 			Byte ch = Bus::Read(addr, true);
-// 			Byte at = Bus::Read(addr + 1, true);
-// 			Byte fg = at >> 4;
-// 			Byte bg = at & 0x0f;
-// 			Word index = addr - STD_VID_MIN;
-// 			Byte width = _texture_width / 8;
-// 			int x = ((index / 2) % width) * 8;
-// 			int y = ((index / 2) / width) * 8;
-// 			for (int v = 0; v < 8; v++)
-// 			{
-// 				for (int h = 0; h < 8; h++)
-// 				{
-// 					int color = bg;
-// 					if (_dsp_glyph_data[ch][v] & (1 << 7 - h))
-// 						color = fg;
-// 					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
-// 				}
-// 			}
-// 		}
-//         SDL_UnlockTexture(_std_texture); 
-//     }
-// } 
+
+    void *pixels;
+    int pitch;
+
+    if (SDL_LockTexture(sdl_target_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        Byte col = res_height / 8;
+        Byte row = res_width / 8;
+        Word end = ((col*row)*2) + VIDEO_START;
+        // Word end  = VIDEO_START+128;
+		Word addr = VIDEO_START;
+		for (; addr < end; addr += 2)
+		{
+			Byte ch = Bus::Read(addr, true);
+			Byte at = Bus::Read(addr + 1, true);
+			Byte fg = at >> 4;
+			Byte bg = at & 0x0f;
+			Word index = addr - VIDEO_START;
+			Byte width = res_width / 8;
+			int x = ((index / 2) % width) * 8;
+			int y = ((index / 2) / width) * 8;
+			for (int v = 0; v < 8; v++)
+			{
+				for (int h = 0; h < 8; h++)
+				{
+					int color = bg;
+					// if (_gfx_glyph_data[ch][v] & (1 << 7 - h))
+					if (Gfx::GetGlyphData(ch, v) & (1 << (7 - h)))
+						color = fg;
+					// _setPixel_unlocked(pixels, pitch, x + h, y + v, 15);
+					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
+				}
+			}
+		}
+        SDL_UnlockTexture(sdl_target_texture); 
+    }
+} 
 
 void GfxCore::_setPixel(int x, int y, Byte color_index, 
 						SDL_Texture* _texture, bool bIgnoreAlpha)
