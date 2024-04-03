@@ -42,6 +42,20 @@ void GfxCore::OnInit()
     // printf("%s::OnInit()\n", Name().c_str());
 
     _init_gmodes();
+
+    // randomize the video ram contents
+    if (true)
+    {   
+        Byte c=0, a=0;
+        for (Word t=VIDEO_START; t<=VIDEO_END; t+=2)
+        {
+            Bus::Write(t, c++);
+            Bus::Write(t+1, a);
+            if (c==0)   a++;
+        }
+    }
+
+
 }
 
 void GfxCore::OnQuit()
@@ -49,6 +63,41 @@ void GfxCore::OnQuit()
     // printf("%s::OnQuit()\n", Name().c_str());
 }
 
+bool GfxCore::VerifyGmode(Byte gmode)
+{
+    // Verify Graphics Mode
+    int bp_size = (res_width * res_height) / 8;
+    bits_per_pixel = 1<<((gmode & 0x60)>>5);
+    bIsBitmapMode = false;
+    if (gmode & 0x80)
+    {
+        bIsBitmapMode = true;
+        // single bit plane size is too big to fit in video memory
+        if (bp_size > VID_BUFFER_SIZE)
+        {
+            gmode &= 0x7f;  // clear the graphics mode bit
+            bIsBitmapMode = false;
+        }
+        else
+        {
+            // correct bits_per_pixel
+            if (bits_per_pixel > 1)
+            {
+                while (bp_size * bits_per_pixel > VID_BUFFER_SIZE)
+                {
+                    gmode -= 0x20;
+                    bits_per_pixel = 1<<((gmode & 0x60)>>5);
+                }
+            }
+        }
+        IDevice::write(GFX_MODE, gmode);
+    }
+    if (!(gmode & 0x80))
+        bits_per_pixel = 0; // text only   
+    if (gmode == Bus::Read(GFX_MODE))    
+        return false;
+    return true;
+}
 
 void GfxCore::_decode_gmode()
 {
@@ -86,34 +135,7 @@ void GfxCore::_decode_gmode()
 		sdl_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC;
 
     // Verify Graphics Mode
-    int bp_size = (res_width * res_height) / 8;
-    bits_per_pixel = 1<<((gmode & 0x60)>>5);
-    bIsBitmapMode = false;
-    if (gmode & 0x80)
-    {
-        bIsBitmapMode = true;
-        // single bit plane size is too big to fit in video memory
-        if (bp_size > VID_BUFFER_SIZE)
-        {
-            gmode &= 0x7f;  // clear the graphics mode bit
-            bIsBitmapMode = false;
-        }
-        else
-        {
-            // correct bits_per_pixel
-            if (bits_per_pixel > 1)
-            {
-                while (bp_size * bits_per_pixel > VID_BUFFER_SIZE)
-                {
-                    gmode -= 0x20;
-                    bits_per_pixel = 1<<((gmode & 0x60)>>5);
-                }
-            }
-        }
-        Bus::Write(GFX_MODE, gmode);
-    }
-    if (!(gmode & 0x80))
-        bits_per_pixel = 0; // text only
+    VerifyGmode(gmode);
 
     // Testing: report results
     if (true)
@@ -236,40 +258,17 @@ void GfxCore::OnUpdate(float fElapsedTime)
     // SDL_RenderClear(sdl_renderer);    
 
 
-    _updateTextScreen();
-    return;
-
-    void *pixels;
-    int pitch;
-
-    if (SDL_LockTexture(sdl_target_texture, NULL, &pixels, &pitch) < 0) {
-        std::stringstream ss;
-        ss << "Couldn't lock texture: " << SDL_GetError();
-        Bus::Error(ss.str());
+    if (true)
+    {   // increment the video ram contents
+        for (Word t=VIDEO_START; t<=VIDEO_END; t++)
+            Bus::Write(t, Bus::Read(t)+1);
     }
+
+    if (bIsBitmapMode)
+        _updateBitmapScreen();
     else
-    {
-        static Byte color = 0;
-        for (int y=0; y<res_height;y++)
-        {
-            for (int x=0; x<res_width; x++)
-            {
-                _setPixel_unlocked(pixels, pitch, x, y, color++);
-            }
-        }
-        // color++;
-
-        // for (int t=0; t< 10000; t++)
-        // {
-        //     int x = rand() % res_width;
-        //     int y = rand() % res_height;
-        //     Byte color = rand() % 256;
-        //     _setPixel_unlocked(pixels, pitch, x, y, color);
-        // }
-        SDL_UnlockTexture(sdl_target_texture); 
-    }
-
-
+        _updateTextScreen();
+    return;
 }
 
 void GfxCore::OnRender()
@@ -319,38 +318,38 @@ void GfxCore::_init_gmodes()
     vec_timings.push_back( {  640,  480 } );                //  3 =  640 x 480
 
     // graphics modes (*text mode only)
-    vec_gmodes.push_back( { 0, 640, 400, 2, 2 } );         //   0*
-    vec_gmodes.push_back( { 0, 640, 200, 2, 4 } );         //   1*
-    vec_gmodes.push_back( { 0, 320, 400, 4, 2 } );         //   2*
-    vec_gmodes.push_back( { 0, 320, 200, 4, 4 } );         //   3
-    vec_gmodes.push_back( { 0, 320, 160, 4, 5 } );         //   4
-    vec_gmodes.push_back( { 0, 256, 200, 5, 4 } );         //   5
-    vec_gmodes.push_back( { 0, 256, 160, 5, 5 } );         //   6
-    vec_gmodes.push_back( { 0, 160, 100, 8, 8 } );         //   7
-    vec_gmodes.push_back( { 1, 640, 360, 2, 2 } );         //   8*
-    vec_gmodes.push_back( { 1, 640, 240, 2, 3 } );         //   9*
-    vec_gmodes.push_back( { 1, 320, 180, 4, 4 } );         //   10
-    vec_gmodes.push_back( { 1, 320, 144, 4, 5 } );         //   11
-    vec_gmodes.push_back( { 1, 256, 180, 5, 4 } );         //   12
-    vec_gmodes.push_back( { 1, 256, 144, 5, 5 } );         //   13
-    vec_gmodes.push_back( { 1, 256, 120, 5, 6 } );         //   14
-    vec_gmodes.push_back( { 1, 160,  90, 8, 8 } );         //   15
-    vec_gmodes.push_back( { 2, 512, 384, 2, 2 } );         //   16*
-    vec_gmodes.push_back( { 2, 340, 256, 3, 3 } );         //   17
-    vec_gmodes.push_back( { 2, 256, 256, 4, 3 } );         //   18
-    vec_gmodes.push_back( { 2, 256, 192, 4, 4 } );         //   19
-    vec_gmodes.push_back( { 2, 204, 152, 5, 5 } );         //   20
-    vec_gmodes.push_back( { 2, 170, 128, 6, 6 } );         //   21
-    vec_gmodes.push_back( { 2, 128, 128, 8, 6 } );         //   22
-    vec_gmodes.push_back( { 2, 128,  96, 8, 8 } );         //   23
-    vec_gmodes.push_back( { 3, 320, 240, 2, 2 } );         //   24
-    vec_gmodes.push_back( { 3, 320, 160, 2, 3 } );         //   25
-    vec_gmodes.push_back( { 3, 160, 160, 4, 3 } );         //   26
-    vec_gmodes.push_back( { 3, 160, 120, 4, 4 } );         //   27
-    vec_gmodes.push_back( { 3, 160,  96, 4, 5 } );         //   28
-    vec_gmodes.push_back( { 3, 128, 120, 5, 4 } );         //   29
-    vec_gmodes.push_back( { 3, 128,  96, 5, 5 } );         //   30
-    vec_gmodes.push_back( { 3, 128,  80, 5, 6 } );         //   31
+    vec_gmodes.push_back( { 0, 640, 400, 2, 2 } );         //   0x00    0*
+    vec_gmodes.push_back( { 0, 640, 200, 2, 4 } );         //   0x01    1*
+    vec_gmodes.push_back( { 0, 320, 400, 4, 2 } );         //   0x02    2*
+    vec_gmodes.push_back( { 0, 320, 200, 4, 4 } );         //   0x03    3
+    vec_gmodes.push_back( { 0, 320, 160, 4, 5 } );         //   0x04    4
+    vec_gmodes.push_back( { 0, 256, 200, 5, 4 } );         //   0x05    5
+    vec_gmodes.push_back( { 0, 256, 160, 5, 5 } );         //   0x06    6
+    vec_gmodes.push_back( { 0, 160, 100, 8, 8 } );         //   0x07    7
+    vec_gmodes.push_back( { 1, 640, 360, 2, 2 } );         //   0x08    8*
+    vec_gmodes.push_back( { 1, 640, 240, 2, 3 } );         //   0x09    9*
+    vec_gmodes.push_back( { 1, 320, 180, 4, 4 } );         //   0x0A    10
+    vec_gmodes.push_back( { 1, 320, 144, 4, 5 } );         //   0x0B    11
+    vec_gmodes.push_back( { 1, 256, 180, 5, 4 } );         //   0x0C    12
+    vec_gmodes.push_back( { 1, 256, 144, 5, 5 } );         //   0x0D    13
+    vec_gmodes.push_back( { 1, 256, 120, 5, 6 } );         //   0x0E    14
+    vec_gmodes.push_back( { 1, 160,  90, 8, 8 } );         //   0x0F    15
+    vec_gmodes.push_back( { 2, 512, 384, 2, 2 } );         //   0x10    16*
+    vec_gmodes.push_back( { 2, 340, 256, 3, 3 } );         //   0x11    17
+    vec_gmodes.push_back( { 2, 256, 256, 4, 3 } );         //   0x12    18
+    vec_gmodes.push_back( { 2, 256, 192, 4, 4 } );         //   0x13    19
+    vec_gmodes.push_back( { 2, 204, 152, 5, 5 } );         //   0x14    20
+    vec_gmodes.push_back( { 2, 171, 128, 6, 6 } );         //   0x15    21
+    vec_gmodes.push_back( { 2, 128, 128, 8, 6 } );         //   0x16    22
+    vec_gmodes.push_back( { 2, 128,  96, 8, 8 } );         //   0x17    23
+    vec_gmodes.push_back( { 3, 320, 240, 2, 2 } );         //   0x18    24
+    vec_gmodes.push_back( { 3, 320, 160, 2, 3 } );         //   0x19    25
+    vec_gmodes.push_back( { 3, 160, 160, 4, 3 } );         //   0x1A    26
+    vec_gmodes.push_back( { 3, 160, 120, 4, 4 } );         //   0x1B    27
+    vec_gmodes.push_back( { 3, 160,  96, 4, 5 } );         //   0x1C    28
+    vec_gmodes.push_back( { 3, 128, 120, 5, 4 } );         //   0x1D    29
+    vec_gmodes.push_back( { 3, 128,  96, 5, 5 } );         //   0x1E    30
+    vec_gmodes.push_back( { 3, 128,  80, 5, 6 } );         //   0x1F    31
 
     if (false)
     {
@@ -376,20 +375,81 @@ void GfxCore::_init_gmodes()
 }
 
 
+void GfxCore::_updateBitmapScreen()
+{
+    Word pixel_index = VIDEO_START;
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(sdl_target_texture, NULL, &pixels, &pitch) < 0)
+        Bus::Error("Failed to lock texture: ");	
+    else
+    {
+        for (int y = 0; y < res_height; y++)
+        {
+            for (int x = 0; x < res_width; )
+            {
+                // 256 color mode
+                if (bits_per_pixel == 8)
+                {
+                    Byte index = Bus::Read(pixel_index++);
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 16 color mode
+                else if (bits_per_pixel == 4)
+                {
+                    Byte data = Bus::Read(pixel_index++);
+                    Byte index = (data >> 4);
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data & 0x0f);
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 4 color mode
+                else if (bits_per_pixel == 2)
+                {
+                    Byte data = Bus::Read(pixel_index++);
+                    Byte index = (data >> 6) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 4) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 2) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 0) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 2 color mode
+                else if (bits_per_pixel == 1)
+                {
+                    Byte data = Bus::Read(pixel_index++);
+                    Byte index = (data >> 7) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+                    index = (data >> 6) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 5) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 4) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 3) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 2) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 1) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 0) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+            }
+        }
+        SDL_UnlockTexture(sdl_target_texture); 
+    }
 
-
+    // SDL_SetRenderTarget(_renderer, _render_target);
+    SDL_RenderCopy(sdl_renderer, sdl_target_texture, NULL, NULL);		
+}
 
 
 
 void GfxCore::_updateTextScreen() 
 {
-    if (true)
-    {
-        for (Word t=VIDEO_START; t<=VIDEO_END; t++)
-            Bus::Write(t, rand()%256);
-    }
-
-
     void *pixels;
     int pitch;
 
@@ -420,7 +480,8 @@ void GfxCore::_updateTextScreen()
 				{
 					int color = bg;
 					// if (_gfx_glyph_data[ch][v] & (1 << 7 - h))
-					if (Gfx::GetGlyphData(ch, v) & (1 << (7 - h)))
+                    Byte gd = Gfx::GetGlyphData(ch, v);
+					if (gd & (1 << (7 - h)))
 						color = fg;
 					// _setPixel_unlocked(pixels, pitch, x + h, y + v, 15);
 					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);

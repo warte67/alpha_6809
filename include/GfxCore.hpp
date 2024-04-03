@@ -35,6 +35,9 @@ class GfxCore : public IDevice
         // public accessors
         inline static void Present() { SDL_RenderPresent(sdl_renderer); }
 
+        // public members
+        bool VerifyGmode(Byte gmode);
+
     public:
         struct GTIMING
         {
@@ -76,6 +79,7 @@ class GfxCore : public IDevice
 						SDL_Texture* _texture, bool bIgnoreAlpha = false);
         void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
 								Byte color_index, bool bIgnoreAlpha = false);        
-        void _updateTextScreen();                               
+        void _updateTextScreen();        
+        void _updateBitmapScreen();                       
 };
 

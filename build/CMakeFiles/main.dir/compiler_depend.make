@@ -389,6 +389,7 @@ CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: /home/jay/dev/alpha_6
 CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: /home/jay/dev/alpha_6809/src/Gfx.cpp \
   /home/jay/dev/alpha_6809/include/Bus.hpp \
   /home/jay/dev/alpha_6809/include/Gfx.hpp \
+  /home/jay/dev/alpha_6809/include/GfxCore.hpp \
   /home/jay/dev/alpha_6809/include/IDevice.hpp \
   /home/jay/dev/alpha_6809/include/font8x8_system.hpp \
   /home/jay/dev/alpha_6809/include/memory_map.hpp \

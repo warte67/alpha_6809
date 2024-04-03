@@ -234,7 +234,7 @@ void Bus::Run()
             OnUpdate(0.0f);
             OnEvent(nullptr);
             OnRender();      
-            // only a present for Gfx            
+            // only a present for GfxCore            
             GfxCore::Present();
         }
         // shutdown the environment
@@ -323,6 +323,26 @@ void Bus::OnEvent(SDL_Event* null_event)
                     (data & 0x80) ? data &= 0x7f : data |= 0x80;
                     Bus::Write(GFX_EMU, data);
                     // s_bIsDirty = true;
+                }
+                // Testing [TAB]
+                if (evnt.key.keysym.sym == SDLK_TAB)
+                {
+                    Byte data = Bus::Read(GFX_MODE);
+                    if (!(data & 0x80))
+                    {
+                        data &= 0x1F;
+                        data |= 0x80;
+                    }
+                    else
+                    {
+                        data += 0x20;
+                    }
+                    Bus::Write(GFX_MODE, data);
+                    if (Bus::Read(GFX_MODE)!=data)
+                    {
+                        data &= 0x1f;
+                        Bus::Write(GFX_MODE, data);
+                    }
                 }
                 // [ESCAPE]
                 if (evnt.key.keysym.sym == SDLK_ESCAPE)

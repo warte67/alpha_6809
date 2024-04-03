@@ -12,7 +12,7 @@
 
 # =============================================================================
 # Project: main
-# Configurations: Release
+# Configurations: Debug
 # =============================================================================
 
 #############################################
@@ -24,7 +24,7 @@ ninja_required_version = 1.5
 #############################################
 # Set configuration variable for custom commands.
 
-CONFIGURATION = Release
+CONFIGURATION = Debug
 # =============================================================================
 # Include auxiliary files.
 
@@ -49,37 +49,37 @@ cmake_ninja_workdir = /home/jay/dev/alpha_6809/build/
 
 build cmake_object_order_depends_target_main: phony || CMakeFiles/main.dir
 
-build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: CXX_COMPILER__main_unscanned_Release /home/jay/dev/alpha_6809/src/main.cpp || cmake_object_order_depends_target_main
+build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/main.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -fexceptions -Wall
+  FLAGS = -g -fexceptions -Wall
   INCLUDES = -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src
 
-build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o: CXX_COMPILER__main_unscanned_Release /home/jay/dev/alpha_6809/src/IDevice.cpp || cmake_object_order_depends_target_main
+build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/IDevice.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -fexceptions -Wall
+  FLAGS = -g -fexceptions -Wall
   INCLUDES = -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src
 
-build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: CXX_COMPILER__main_unscanned_Release /home/jay/dev/alpha_6809/src/Bus.cpp || cmake_object_order_depends_target_main
+build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/Bus.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -fexceptions -Wall
+  FLAGS = -g -fexceptions -Wall
   INCLUDES = -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src
 
-build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o: CXX_COMPILER__main_unscanned_Release /home/jay/dev/alpha_6809/src/GfxCore.cpp || cmake_object_order_depends_target_main
+build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/GfxCore.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -fexceptions -Wall
+  FLAGS = -g -fexceptions -Wall
   INCLUDES = -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src
 
-build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: CXX_COMPILER__main_unscanned_Release /home/jay/dev/alpha_6809/src/Gfx.cpp || cmake_object_order_depends_target_main
+build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/Gfx.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o.d
-  FLAGS = -O3 -DNDEBUG -fexceptions -Wall
+  FLAGS = -g -fexceptions -Wall
   INCLUDES = -I/home/jay/dev/alpha_6809/build/../include -isystem /usr/include/SDL2
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/home/jay/dev/alpha_6809/src
@@ -92,8 +92,8 @@ build CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o: CXX_COMPILER__m
 #############################################
 # Link the executable main
 
-build main: CXX_EXECUTABLE_LINKER__main_Release CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o | /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a
-  FLAGS = -O3 -DNDEBUG
+build main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/GfxCore.cpp.o CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o | /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a
+  FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libSDL2.so  /usr/lib/x86_64-linux-gnu/libSDL2main.a
   OBJECT_DIR = CMakeFiles/main.dir
   POST_BUILD = :

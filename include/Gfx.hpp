@@ -51,7 +51,7 @@ class Gfx : public IDevice
     private:
 
         // internal registers (do these really need to be statics?)
-        inline static Byte s_gfx_mode   = 0x03;     // default: 3 = 320x200 text 
+        inline static Byte s_gfx_mode   = 0x00;     // default: 3 = 320x200 text 
         inline static Byte s_gfx_emu    = 0x00;     // default: 0 = windowed... primary monitor
         inline static Byte _gfx_pal_idx = 0x00;     // GFX_PAL_IDX
 

@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include "Gfx.hpp"
+#include "GfxCore.hpp"
 #include "Bus.hpp"
 #include "font8x8_system.hpp"
 
@@ -13,14 +14,13 @@ Byte Gfx::read(Word offset, bool debug)
 {
     Byte data = IDevice::read(offset);
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
-
-    if (offset == GFX_MODE)     return s_gfx_mode;
-    if (offset == GFX_EMU)      return s_gfx_emu;
-
-
     switch (offset)
     {
-        case GFX_MODE:          data = s_gfx_mode; break;
+        case GFX_MODE:         
+        {   
+            data = s_gfx_mode; 
+            break;
+        }
         case GFX_EMU:           data = s_gfx_emu; break;
    		case GFX_PAL_IDX:   	data = _gfx_pal_idx; break;
 		case GFX_PAL_CLR + 0: 	data = (_palette[_gfx_pal_idx].color >> 8) & 0xFF; break;
@@ -48,13 +48,17 @@ Byte Gfx::read(Word offset, bool debug)
 void Gfx::write(Word offset, Byte data, bool debug)
 {
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
+    
+    GfxCore* gfx_core = Bus::GetGfxCore();
 
     switch (offset)
     {
         case GFX_MODE:
             if (data != s_gfx_mode)
             {
-                s_gfx_mode = data;
+                // ToDo: Only change data if valid GMODE
+                if (gfx_core->VerifyGmode(data))
+                    s_gfx_mode = data;
                 Bus::IsDirty(true);
             }
             break;
@@ -160,24 +164,45 @@ void Gfx::OnInit()
     // INITIALIZE PALETTE DATA
     if (_palette.size() == 0)
     {
-        // BASIC COLORS (0-15)
+        // BASIC COLORS (0-15) STANDARD CGA COLORS
         std::vector<PALETTE> ref = {    
-			{ 0x0000 },	// 0: DK_BLACK
-			{ 0xF005 },	// 1: DK_BLUE
-			{ 0xF050 },	// 2: DK_GREEN
-			{ 0xF055 },	// 3: DK_CYAN
-			{ 0xF500 },	// 4: DK_RED
-			{ 0xF505 },	// 5: DK_MAGENTA
-			{ 0xF631 },	// 6: BROWN
-			{ 0xFAAA },	// 7: GRAY
-			{ 0xF555 },	// 8: DK_GRAY
-			{ 0xF00F },	// 9: BLUE
-			{ 0xF0F0 },	// a: GREEN
-			{ 0xF0FF },	// b: CYAN
-			{ 0xFF00 },	// c: RED
-			{ 0xFF0F },	// d: MAGENTA
-			{ 0xFFF0 },	// e: YELLOW
-			{ 0xFFFF },	// f: WHITE
+			{ 0xF000 },		// 0: black
+			{ 0xF555 },		// 1: dk gray
+			{ 0xF007 },		// 2: dk blue
+			{ 0xF600 },		// 3: dk red
+			{ 0xF140 },		// 4: dk green
+			{ 0xF840 },		// 5: brown
+			{ 0xF406 },		// 6: purple          
+			{ 0xF046 },		// 7: deep sea           	
+			{ 0xF888 },		// 8: lt gray
+			{ 0xF22F },		// 9: blue
+			{ 0xFd00 },		// A: red
+			{ 0xF4F6 },		// B: lt green
+			{ 0xFED0 },		// C: yellow
+			{ 0xF85b },		// D: Lt Purple
+			{ 0xF59f },		// E: lt sky
+			{ 0xFFFF },		// F: white
+
+
+
+        // // BASIC COLORS (0-15) STANDARD CGA COLORS
+        // std::vector<PALETTE> ref = {    
+		// 	{ 0x0000 },	// 0: DK_BLACK
+		// 	{ 0xF005 },	// 1: DK_BLUE
+		// 	{ 0xF050 },	// 2: DK_GREEN
+		// 	{ 0xF055 },	// 3: DK_CYAN
+		// 	{ 0xF500 },	// 4: DK_RED
+		// 	{ 0xF505 },	// 5: DK_MAGENTA
+		// 	{ 0xF631 },	// 6: BROWN
+		// 	{ 0xFAAA },	// 7: GRAY
+		// 	{ 0xF555 },	// 8: DK_GRAY
+		// 	{ 0xF00F },	// 9: BLUE
+		// 	{ 0xF0F0 },	// a: GREEN
+		// 	{ 0xF0FF },	// b: CYAN
+		// 	{ 0xFF00 },	// c: RED
+		// 	{ 0xFA0A },	// d: MAGENTA
+		// 	{ 0xFFF0 },	// e: YELLOW
+		// 	{ 0xFFFF },	// f: WHITE
         };
         for (auto &p : ref)
         {
@@ -226,12 +251,16 @@ void Gfx::OnInit()
         }
     }
 
+    // initialize the font glyph buffer
+    for (int i=0; i<256; i++)
+        for (int r=0; r<8; r++)
+            _gfx_glyph_data[i][r] = font8x8_system[i][r];
 }
 
 void Gfx::_init_tests()
 {
-    Bus::Write(GFX_PAL_IDX, 0x12);
-    printf("GFX_PAL_IDX: $%02X\n", _gfx_pal_idx);
+    // Bus::Write(GFX_PAL_IDX, 0x12);
+    // printf("GFX_PAL_IDX: $%02X\n", _gfx_pal_idx);
 }
 
 void Gfx::OnQuit()
