@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include "GfxCore.hpp"
+#include "Gfx.hpp"
 #include "Bus.hpp"
 
 
@@ -175,7 +176,7 @@ void GfxCore::OnActivate()
     if (!sdl_target_texture)
     {
         sdl_target_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ARGB4444,
-                SDL_TEXTUREACCESS_TARGET, res_width, res_height);
+                SDL_TEXTUREACCESS_STREAMING, res_width, res_height);
         if (!sdl_target_texture)
             Bus::Error("Error Creating _render_target");    
     }
@@ -234,16 +235,37 @@ void GfxCore::OnUpdate(float fElapsedTime)
 	// SDL_SetRenderDrawColor(sdl_renderer, 8,32,4,255);    //rgba
     // SDL_RenderClear(sdl_renderer);    
 
-    for (int t=0; t< 10000; t++)
-    {
-        int x = rand() % res_width;
-        int y = rand() % res_height;
-        Uint8 r = rand() % 256;       
-        Uint8 g = rand() % 256;       
-        Uint8 b = rand() % 256;       
-        SDL_SetRenderDrawColor(sdl_renderer, r, g, b, 255);
-        SDL_RenderDrawPoint(sdl_renderer, x, y);
+    void *pixels;
+    int pitch;
+
+    if (SDL_LockTexture(sdl_target_texture, NULL, &pixels, &pitch) < 0) {
+        std::stringstream ss;
+        ss << "Couldn't lock texture: " << SDL_GetError();
+        Bus::Error(ss.str());
     }
+    else
+    {
+        static Byte color = 0;
+        for (int y=0; y<res_height;y++)
+        {
+            for (int x=0; x<res_width; x++)
+            {
+                _setPixel_unlocked(pixels, pitch, x, y, color++);
+            }
+        }
+        // color++;
+
+        // for (int t=0; t< 10000; t++)
+        // {
+        //     int x = rand() % res_width;
+        //     int y = rand() % res_height;
+        //     Byte color = rand() % 256;
+        //     _setPixel_unlocked(pixels, pitch, x, y, color);
+        // }
+        SDL_UnlockTexture(sdl_target_texture); 
+    }
+
+
 }
 
 void GfxCore::OnRender()
@@ -349,3 +371,112 @@ void GfxCore::_init_gmodes()
     }
 }
 
+
+
+
+
+
+
+// void GfxCore::_updateTextScreen() 
+// {
+//     void *pixels;
+//     int pitch;
+
+//     if (SDL_LockTexture(_std_texture, NULL, &pixels, &pitch) < 0) {
+//         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+//         Bus::Error("");
+//     }
+//     else
+//     {
+// 		Word end = Bus::Read_Word(STD_VID_MAX);
+// 		Word addr = STD_VID_MIN;
+// 		for (; addr <= end; addr += 2)
+// 		{
+// 			Byte ch = Bus::Read(addr, true);
+// 			Byte at = Bus::Read(addr + 1, true);
+// 			Byte fg = at >> 4;
+// 			Byte bg = at & 0x0f;
+// 			Word index = addr - STD_VID_MIN;
+// 			Byte width = _texture_width / 8;
+// 			int x = ((index / 2) % width) * 8;
+// 			int y = ((index / 2) / width) * 8;
+// 			for (int v = 0; v < 8; v++)
+// 			{
+// 				for (int h = 0; h < 8; h++)
+// 				{
+// 					int color = bg;
+// 					if (_dsp_glyph_data[ch][v] & (1 << 7 - h))
+// 						color = fg;
+// 					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
+// 				}
+// 			}
+// 		}
+//         SDL_UnlockTexture(_std_texture); 
+//     }
+// } 
+
+void GfxCore::_setPixel(int x, int y, Byte color_index, 
+						SDL_Texture* _texture, bool bIgnoreAlpha)
+{
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(_texture, NULL, &pixels, &pitch) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock texture: %s\n", SDL_GetError());
+        Bus::Error("");
+    }
+    else
+    {
+        _setPixel_unlocked(pixels, pitch, x, y, color_index, bIgnoreAlpha);
+        SDL_UnlockTexture(_texture);
+    }    
+}
+
+void GfxCore::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
+{
+    Gfx* gfx = Bus::GetGfx();
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
+    bool ALPHA_BLEND = true;
+    if (ALPHA_BLEND)
+    {       
+        // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
+        Uint16 pixel = *dst;	// 0xARGB
+		Byte r1 = (pixel & 0x0f00) >> 8;
+		Byte g1 = (pixel & 0x00f0) >> 4;
+		Byte b1 = (pixel & 0x000f) >> 0;
+		//
+        Byte a2 = gfx->alf(color_index);
+        Byte r2 = gfx->red(color_index);
+        Byte g2 = gfx->grn(color_index);
+        Byte b2 = gfx->blu(color_index);
+        if (bIgnoreAlpha)
+            a2 = 15;
+		//
+        Byte r = (((r1 * (16-a2))) + (r2 * (a2+1))) >> 4;
+        Byte g = (((g1 * (16-a2))) + (g2 * (a2+1))) >> 4;
+        Byte b = (((b1 * (16-a2))) + (b2 * (a2+1))) >> 4;
+
+        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = (
+                0xF000 | 
+                (r<<8) | 
+                (g<<4) | 
+                (b)
+            );          
+		}	
+    }
+    else
+    {        
+        // simple non-zero alpha channel
+        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        {
+            *dst = 
+            (
+                0xF000 |
+                (gfx->red(color_index)<<8) |
+                (gfx->grn(color_index)<<4) |
+                gfx->blu(color_index)
+            );    
+        }
+    }    
+}

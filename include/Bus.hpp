@@ -70,6 +70,9 @@ class Bus : public IDevice
         inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
         inline static void IsDirty(bool dirty) { s_bIsDirty = dirty; }
 
+        inline static GfxCore* GetGfxCore() { return s_gfx_core; }
+        inline static Gfx* GetGfx() { return s_gfx; }
+
     private:
         int _lastAddress = 0;
         inline static std::vector<IDevice*> _memoryNodes;		

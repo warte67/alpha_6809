@@ -28,11 +28,34 @@ class Gfx : public IDevice
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
 
+		// palette stuff
+        union PALETTE {
+            Word color;
+            struct {
+                Uint8 b : 4;
+                Uint8 g : 4;
+                Uint8 r : 4;
+                Uint8 a : 4;
+            };
+        };
+        std::vector<PALETTE> _palette;
+	    Uint8 red(Uint8 index) { Uint8 c = _palette[index].r;  return c; }
+        Uint8 grn(Uint8 index) { Uint8 c = _palette[index].g;  return c; }
+        Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
+        Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }  
+
     private:
 
-        // internal registers
-        inline static Byte s_gfx_mode   = 0x03;    // default: 3 = 320x200 text 
-        inline static Byte s_gfx_emu    = 0x00;    // default: 0 = windowed... primary monitor
+        // internal registers (do these really need to be statics?)
+        inline static Byte s_gfx_mode   = 0x03;     // default: 3 = 320x200 text 
+        inline static Byte s_gfx_emu    = 0x00;     // default: 0 = windowed... primary monitor
+        inline static Byte _gfx_pal_idx = 0x00;     // GFX_PAL_IDX
+
+        inline static Byte _gfx_glyph_idx = 0x00;         // GFX_GLYPH_IDX
+        inline static Byte _gfx_glyph_data[256][8]{0};    // GFX_GLYPH_DATA (Customizeable)
+
+        // helpers
+        void _init_tests();
 
 };
 

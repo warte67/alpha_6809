@@ -139,12 +139,11 @@ Bus::Bus()
     // RESERVED
     int reserved = 0xfff0 - addr;
     std::stringstream s;
-    s << reserved << " bytes in reserve";
-    dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",addr, s.str());
     addr += reserved;
     dev = new ROM("RESERVED");
     addr += Attach(dev, reserved);
+    s << reserved << " bytes in reserve";
+    dev->DisplayEnum("",addr, s.str());
 
 	// ROM VECTORS
     dev->DisplayEnum("",0, "");

@@ -65,12 +65,16 @@ class GfxCore : public IDevice
         Word res_height = 0;
         Byte bits_per_pixel = 1;
 
-
-
         std::vector<GTIMING> vec_timings;
         std::vector<GMODE> vec_gmodes;   
         // helpers     
         void _init_gmodes();
         void _decode_gmode();
+
+        // void _updateTextScreen();
+ 		void _setPixel(int x, int y, Byte color_index, 	
+						SDL_Texture* _texture, bool bIgnoreAlpha = false);
+        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
+								Byte color_index, bool bIgnoreAlpha = false);        
 };
 
