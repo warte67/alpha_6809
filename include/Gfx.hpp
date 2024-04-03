@@ -5,7 +5,7 @@
 // ***********************************
 #pragma once
 
-#include "IDevice.hpp"
+#include "IDevice.hpp" 
 
 class Gfx : public IDevice
 {
