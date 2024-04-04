@@ -1,5 +1,3 @@
-
-
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -28,12 +26,12 @@ enum MEMMAP
     SYSTEM_STACK     = 0x0200, 
     SSTACK_TOP       = 0x0400, // Top of the system stack space
         
-        // Video Buffer (11K)
+        // Video Buffer (15K)
     VIDEO_START      = 0x0400, 
-    VIDEO_END        = 0x2FFF, // End of Default Video Buffer Memory
+    VIDEO_END        = 0x3FFF, // End of Default Video Buffer Memory
         
-        // User RAM (32K)
-    USER_RAM         = 0x3000, 
+        // User Ram (28K)
+    USER_RAM         = 0x4000, 
         
         // Paged Memory Bank One (8K)
     PG_BANK_ONE      = 0xB000, 
@@ -94,6 +92,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
-
 
 

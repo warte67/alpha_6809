@@ -33,7 +33,7 @@
 
   
 // constants
-constexpr Word VID_BUFFER_SIZE = 11 * 1024;      // standard video buffer size
+constexpr Word VID_BUFFER_SIZE = 15 * 1024;      // standard video buffer size
 
 
 //    const bool ENABLE_MOUSE_CURSOR = true;      // mouse cursor shown by default

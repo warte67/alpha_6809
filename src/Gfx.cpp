@@ -6,7 +6,6 @@
 
 #include <sstream>
 #include "Gfx.hpp"
-// #include "GfxCore.hpp"
 #include "Bus.hpp"
 #include "font8x8_system.hpp"
 
@@ -16,11 +15,7 @@ Byte Gfx::read(Word offset, bool debug)
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
     switch (offset)
     {
-        case GFX_MODE:         
-        {   
-            data = s_gfx_mode; 
-            break;
-        }
+        case GFX_MODE:          data = s_gfx_mode; break;
         case GFX_EMU:           data = s_gfx_emu; break;
    		case GFX_PAL_IDX:   	data = _gfx_pal_idx; break;
 		case GFX_PAL_CLR + 0: 	data = (_palette[_gfx_pal_idx].color >> 8) & 0xFF; break;
@@ -48,8 +43,6 @@ Byte Gfx::read(Word offset, bool debug)
 void Gfx::write(Word offset, Byte data, bool debug)
 {
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
-    
-    // GfxCore* gfx_core = Bus::GetGfxCore();
 
     switch (offset)
     {

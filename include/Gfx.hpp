@@ -60,12 +60,8 @@ class Gfx : public IDevice
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }  
 
         // public accessors
-
-        inline static Byte GetGlyphData(Byte index, Byte row)
-        { return _gfx_glyph_data[index][row]; }
-
+        inline static Byte GetGlyphData(Byte index, Byte row) { return _gfx_glyph_data[index][row]; }
         inline static void Present() { SDL_RenderPresent(sdl_renderer); }
-        
         bool VerifyGmode(Byte gmode);
 
 
@@ -76,20 +72,12 @@ class Gfx : public IDevice
         inline static Byte s_gfx_mode   = 0x03;     // default: 3 = 320x200 text 
         inline static Byte s_gfx_emu    = 0x00;     // default: 0 = windowed... primary monitor
         inline static Byte _gfx_pal_idx = 0x00;     // GFX_PAL_IDX
-
         inline static Byte _gfx_glyph_idx = 0x00;         // GFX_GLYPH_IDX
         inline static Byte _gfx_glyph_data[256][8]{0};    // GFX_GLYPH_DATA (Customizeable)
-
-        // helpers
-        void _init_tests();
-
-
-
-
-        // from GfxCore (sort later)
         inline static SDL_Window* sdl_window = nullptr;
         inline static SDL_Renderer* sdl_renderer = nullptr;
         inline static SDL_Texture* sdl_target_texture = nullptr;
+
         Uint32 sdl_renderer_flags = 0;
         int window_width = 0;
         int window_height = 0;
@@ -102,18 +90,17 @@ class Gfx : public IDevice
 
         std::vector<GTIMING> vec_timings;
         std::vector<GMODE> vec_gmodes;   
-        // helpers     
+
+        // helpers
+        void _init_tests();
         void _init_gmodes();
         void _decode_gmode();
-
-        // void _updateTextScreen();
  		void _setPixel(int x, int y, Byte color_index, 	
 						SDL_Texture* _texture, bool bIgnoreAlpha = false);
         void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
 								Byte color_index, bool bIgnoreAlpha = false);        
         void _updateTextScreen();        
-        void _updateBitmapScreen();                       
-
+        void _updateBitmapScreen();       
 
 
 };

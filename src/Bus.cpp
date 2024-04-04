@@ -7,7 +7,6 @@
 #include <chrono>
 #include <sstream>
 #include "Bus.hpp"
-//#include "GfxCore.hpp"
 #include "Gfx.hpp"
 
 
@@ -88,38 +87,40 @@ Bus::Bus()
     addr += Attach(dev, 512);  
     dev->DisplayEnum("SSTACK_TOP",0x0400, "Top of the system stack space");  
 
-    // standard video buffer (11k)
+    // standard video buffer
     dev->DisplayEnum("",0, "");
     std::stringstream ss;
     ss << "Video Buffer (" << (VID_BUFFER_SIZE/1024) << "K)";
     dev->DisplayEnum("",0x0400, ss.str());
-    // s_gfx_core = new GfxCore();
-    // addr += Attach(s_gfx_core);    
     dev = new RAM("VIDEO_START");
     addr += Attach(dev, VID_BUFFER_SIZE);  
     dev->DisplayEnum("VIDEO_END",0x0400 + VID_BUFFER_SIZE - 1, "End of Default Video Buffer Memory");  
 
 	// user RAM
+    Word uram_size = 0xB000 - addr;
+    std::stringstream ss2;
+    ss2 << "User Ram (" << uram_size/1024 << "K)";
+    // printf("URAM: $%04x\n", uram_size);
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0x3000, "User RAM (32K)");
+    dev->DisplayEnum("",addr, ss2.str());
     dev = new RAM("USER_RAM");
-    addr += Attach(dev, 32*1024);    
+    addr += Attach(dev, uram_size);    
 
 	// paged RAM
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0xB000, "Paged Memory Bank One (8K)");
+    dev->DisplayEnum("",addr, "Paged Memory Bank One (8K)");
     dev = new RAM("PG_BANK_ONE");
     addr += Attach(dev, 8*1024);   
 
 	// paged ROM
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0xD000, "Paged Memory Bank Two (8K)");
+    dev->DisplayEnum("",addr, "Paged Memory Bank Two (8K)");
     dev = new RAM("PG_BANK_TWO");
     addr += Attach(dev, 8*1024);          
 
 	// KERNEL ROM
     dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",0xF000, "KERNEL ROM (3.5K)");
+    dev->DisplayEnum("",addr, "KERNEL ROM (3.5K)");
     dev = new ROM("KERNEL_ROM");
     addr += Attach(dev, 3.5*1024);   // hardware registers should be included here
 
