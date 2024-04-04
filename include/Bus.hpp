@@ -87,6 +87,8 @@ class Bus : public IDevice
         inline static Debug* GetDebug() { return s_debug; }
         inline static C6809* GetC6809() { return s_c6809; }
 
+        void load_hex(const char* filename);
+
     private:
         int _lastAddress = 0;
         inline static std::vector<IDevice*> _memoryNodes;		
@@ -107,7 +109,9 @@ class Bus : public IDevice
             // offset == -1 (none)            
             vec_mem_def.push_back({label, offset, comment});
         }	
-        static void def_display();		       
+
+        Byte _fread_hex_byte(std::ifstream& ifs);
+        Word _fread_hex_word(std::ifstream& ifs);
 
 };
 

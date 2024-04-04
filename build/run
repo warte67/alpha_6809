@@ -10,11 +10,10 @@ else
     cmake ..
 fi
 
-# re-build the kernel
-cd ../src
-asm6809 -H -9 "kernel_f000.asm" -o "../build/kernel_f000.hex" -l "../build/kernel_f000.lst" -s "../build/kernel_f000.sym"    
+# attempt to build the kernel rom
+./asm kernel_f000
+
 if [ $? -eq 0 ]; then
-    cd ../build
     make
     if [ $? -eq 0 ]; then
         ./main

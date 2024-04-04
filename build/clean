@@ -32,6 +32,9 @@ if test -e "$FILE"; then
     rm -rf "$FILE"
 fi
 
+# attempt to build the kernel rom
+./asm kernel_f000
+
 # Attempt to build, run if successful
 if [ "$1" = "build" -o "$1" = "make" -o "$1" = "run" ]; then
     cmake ..

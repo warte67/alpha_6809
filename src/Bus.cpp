@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <sstream>
+#include <fstream>
 #include "Bus.hpp"
 #include "Gfx.hpp"
 #include "Debug.hpp"
@@ -47,7 +48,7 @@ Bus::Bus()
 		else							// 6809 ASM version
 		{
 			printf("\n\n");
-			printf("// memory_map.asm\n");
+			printf(";  memory_map.asm\n\n");
             printf(";  **********************************************\n");
             printf(";  * Allocated 64k Memory Mapped System Symbols *\n");
             printf(";  **********************************************\n");
@@ -194,6 +195,8 @@ Bus::Bus()
         //exit(0);
     }
 
+    // Load the Kernal ROM
+    load_hex("kernel_f000.hex");
 
     // Call OnInit() before attaching the CPU Device
     OnInit();   // One time initialization
@@ -252,7 +255,7 @@ void Bus::Run()
                 // **************************************************
                 // * FOR NOW WE JUST LEAVE THE CPU SITTING IDLE!!!! *
                 // **************************************************
-                // C6809::IsCpuEnabled(true);
+                C6809::IsCpuEnabled(true);
 
 
 
@@ -568,6 +571,82 @@ void Bus::Write_Word(Word offset, Word data, bool debug)
 }
 
 
-void Bus::def_display()
+
+
+// load_hex helpers
+Byte Bus::_fread_hex_byte(std::ifstream& ifs)
 {
+	char str[3];
+	long l;
+	ifs.get(str[0]);
+	ifs.get(str[1]);
+	str[2] = '\0';	
+	l = strtol(str, NULL, 16);
+	return (Byte)(l & 0xff);	
 }
+Word Bus::_fread_hex_word(std::ifstream& ifs)
+{
+	Word ret;
+	ret = _fread_hex_byte(ifs);
+	ret <<= 8;
+	ret |= _fread_hex_byte(ifs);
+	return ret;				
+}
+void Bus::load_hex(const char* filename)
+{
+	// // lambda to convert integer to hex string
+	// auto hex = [](uint32_t n, uint8_t digits)
+	// {
+	// 	std::string s(digits, '0');
+	// 	for (int i = digits - 1; i >= 0; i--, n >>= 4)
+	// 		s[i] = "0123456789ABCDEF"[n & 0xF];
+	// 	return s;
+	// };
+
+	std::ifstream ifs(filename);
+	if (!ifs.is_open())
+	{
+		//printf("UNABLE TO OPEN FILE '%s'\n", filename);	
+
+        std::stringstream ss;
+        ss << "Unable to open file: " << filename;
+        Bus::Error(ss.str());        	
+
+		return;
+	}
+	bool done = false;
+	char c;	
+	while (!done)
+	{
+		Byte n, t;
+		Word addr;	
+		Byte b;
+		ifs.get(c);	// skip the leading ":"
+		n = _fread_hex_byte(ifs);		// byte count for this line
+		addr = _fread_hex_word(ifs);	// fetch the begin address		
+		t = _fread_hex_byte(ifs);		// record type
+		if (t == 0x00) 
+		{
+			while (n--) 
+			{
+				b = _fread_hex_byte(ifs);
+				// std::cout << "0x" << hex(addr,4) << ":";
+				// std::cout << "0x" << hex(b, 2) << std::endl;
+				Bus::Write(addr, b, true);
+				++addr;
+			}
+			// Read and discard checksum byte
+			(void)_fread_hex_byte(ifs);	
+			// skip the junk at the end of the line	
+			if (ifs.peek() == '\r')	ifs.get(c);
+			if (ifs.peek() == '\n')	ifs.get(c);
+		}
+		else if (t == 0x01) 
+			done = true;
+	}
+	// close and return
+	ifs.close();
+	
+	return;
+}
+

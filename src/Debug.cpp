@@ -16,7 +16,15 @@ Byte Debug::read(Word offset, bool debug)
     Byte data = IDevice::read(offset);
     printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
 
-    // ...
+    switch (offset)
+    {
+		case SYS_STATE: {
+			Byte err = C6809::s_sys_state & 0xF0;
+			C6809::s_sys_state &= 0x0F;
+			data = C6809::s_sys_state | err; 
+			break;
+		}        
+    }
 
     IDevice::write(offset,data);   // update any internal changes too
     return data;
@@ -25,7 +33,13 @@ void Debug::write(Word offset, Byte data, bool debug)
 {
     printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
 
-    // ...
+    switch (offset)
+    {
+		case SYS_STATE: { 
+			C6809::s_sys_state = data;
+			break;
+		}        
+    }
 
     IDevice::write(offset,data);   // update any internal changes too
 }
@@ -34,6 +48,58 @@ Word Debug::OnAttach(Word nextAddr)
 {
     // printf("%s::OnAttach()\n", Name().c_str());    
     Word old_addr = nextAddr;
+
+    DisplayEnum("", 0, "System Hardware Registers:");
+
+    DisplayEnum("", 0, "");
+    DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
+	DisplayEnum("", 0, "SYS_STATE: ABCD.SSSS");
+	DisplayEnum("", 0, "     A:0   = Error: Standard Buffer Overflow ");
+	DisplayEnum("", 0, "     B:0   = Error: Extended Buffer Overflow ");
+	DisplayEnum("", 0, "     C:0   = Error: Reserved ");
+	DisplayEnum("", 0, "     D:0   = Error: Reserved ");
+	DisplayEnum("", 0, "     S:$0  = CPU Clock  25 khz.");
+	DisplayEnum("", 0, "     S:$1  = CPU Clock  50 khz.");
+	DisplayEnum("", 0, "     S:$2  = CPU Clock 100 khz.");
+	DisplayEnum("", 0, "     S:$3  = CPU Clock 200 khz.");
+	DisplayEnum("", 0, "     S:$4  = CPU Clock 333 khz.");
+	DisplayEnum("", 0, "     S:$5  = CPU Clock 416 khz.");
+	DisplayEnum("", 0, "     S:$6  = CPU Clock 500 khz.");
+	DisplayEnum("", 0, "     S:$7  = CPU Clock 625 khz.");
+	DisplayEnum("", 0, "     S:$8  = CPU Clock 769 khz.");
+	DisplayEnum("", 0, "     S:$9  = CPU Clock 833 khz.");
+	DisplayEnum("", 0, "     S:$A  = CPU Clock 1.0 mhz.");
+	DisplayEnum("", 0, "     S:$B  = CPU Clock 1.4 mhz.");
+	DisplayEnum("", 0, "     S:$C  = CPU Clock 2.0 mhz.");
+	DisplayEnum("", 0, "     S:$D  = CPU Clock 3.3 mhz.");
+	DisplayEnum("", 0, "     S:$E  = CPU Clock 5.0 mhz.");
+	DisplayEnum("", 0, "     S:$F  = CPU Clock ~10.0 mhz. (unmetered)");
+	nextAddr++;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_SPEED", nextAddr, " (Word) Approx. Average CPU Clock Speed");
+	nextAddr+=2;
+
+	// DisplayEnum("", 0, "");
+	DisplayEnum("SYS_CLOCK_DIV", nextAddr, " (Byte) 60 hz Clock Divider Register (Read Only) ");
+	DisplayEnum("", 0, "SYS_CLOCK_DIV:");
+	DisplayEnum("", 0, "     bit 7: 0.46875 hz");
+	DisplayEnum("", 0, "     bit 6: 0.9375 hz");
+	DisplayEnum("", 0, "     bit 5: 1.875 hz");
+	DisplayEnum("", 0, "     bit 4: 3.75 hz");
+	DisplayEnum("", 0, "     bit 3: 7.5 hz");
+	DisplayEnum("", 0, "     bit 2: 15.0 hz");
+	DisplayEnum("", 0, "     bit 1: 30.0 hz");
+	DisplayEnum("", 0, "     bit 0: 60.0 hz");
+	nextAddr++;
+
+	DisplayEnum("", 0, "");
+	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
+	nextAddr += 2;
+
+
+
+    
     DisplayEnum("", 0, "Debug Hardware Registers:");
     DisplayEnum("DBG_BEGIN",    nextAddr, "Start of Debug Hardware Registers");
     DisplayEnum("DBG_BRK_ADDR", nextAddr, "   (Word) Address of current breakpoint");
@@ -58,7 +124,7 @@ void Debug::OnInit()
 {
     // printf("%s::OnInit()\n", Name().c_str());    
 
-    constexpr int DMONITOR = 3;
+    constexpr int DMONITOR = 2;
 
     s_bIsDebugActive = true;
 

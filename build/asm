@@ -2,12 +2,12 @@
 
 # build asm files
 cd ../src
+echo 'asm6809 -H -9 "$1.asm" -o "../build/$1.hex" -l "../build/$1.lst" -s "../build/$1.sym" '
 asm6809 -H -9 "$1.asm" -o "../build/$1.hex" -l "../build/$1.lst" -s "../build/$1.sym"    
 if [ $? -eq 0 ]; then
-    echo "successfully built $1"
+    echo "\e[93msuccessfully built $1.hex\e[0m"
 else
     echo "\e[31masm6809 FAILED!\e[0m"
 fi
-
 cd ../build
 

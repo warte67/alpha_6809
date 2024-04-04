@@ -69,6 +69,32 @@ kernel_start
 		stu	VECT_EXEC
 		ldu	#SSTACK_TOP
 
+	; increase the cpu clock rate to unmetered for now
+		lda	#$0F
+		sta	SYS_STATE
+
+
+	; testing: ... fill the screen buffer
+		ldd	#$000f
+		ldx	#VIDEO_START
+lp0		std	,x++
+		inca
+		incb
+		cmpx	#VIDEO_END
+		blt	lp0
+
+	; testing: ... increment the screen buffer
+lp1		
+		ldx	#VIDEO_START
+lp2		inc	,x+
+		cmpx	GFX_VID_END
+		bls	lp2
+		bra	lp1
+
+
+
+inf_loop	bra 	inf_loop
+
 
 
 

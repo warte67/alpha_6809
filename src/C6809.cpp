@@ -93,7 +93,7 @@ void C6809::ThreadProc()
 
 void C6809::clock_input()
 {
-	printf("C6809::clock_input() -- PC:$%04X\n", PC);
+	// printf("C6809::clock_input() -- PC:$%04X\n", PC);
 	// Bus& bus = Bus::Inst();
 	// Gfx* gfx = bus.m_gfx;
 	// GfxDebug* debug = gfx->m_debug;

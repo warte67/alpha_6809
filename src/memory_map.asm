@@ -1,5 +1,5 @@
+;  memory_map.asm
 
-; memory_map.asm
 ;  **********************************************
 ;  * Allocated 64k Memory Mapped System Symbols *
 ;  **********************************************
@@ -83,10 +83,48 @@ GFX_GLYPH_DATA      equ   $FE0C    ;  (8-Bytes) Text Glyph Pixel Data Array
           ;     array represents the top line of 8 pixels. Each array entry represents
           ;     a row of 8 pixels. 
         
+          ; System Hardware Registers:
+        
+SYS_STATE           equ   $FE14    ;  (Byte) System State Register
+          ; SYS_STATE: ABCD.SSSS
+          ;      A:0   = Error: Standard Buffer Overflow 
+          ;      B:0   = Error: Extended Buffer Overflow 
+          ;      C:0   = Error: Reserved 
+          ;      D:0   = Error: Reserved 
+          ;      S:$0  = CPU Clock  25 khz.
+          ;      S:$1  = CPU Clock  50 khz.
+          ;      S:$2  = CPU Clock 100 khz.
+          ;      S:$3  = CPU Clock 200 khz.
+          ;      S:$4  = CPU Clock 333 khz.
+          ;      S:$5  = CPU Clock 416 khz.
+          ;      S:$6  = CPU Clock 500 khz.
+          ;      S:$7  = CPU Clock 625 khz.
+          ;      S:$8  = CPU Clock 769 khz.
+          ;      S:$9  = CPU Clock 833 khz.
+          ;      S:$A  = CPU Clock 1.0 mhz.
+          ;      S:$B  = CPU Clock 1.4 mhz.
+          ;      S:$C  = CPU Clock 2.0 mhz.
+          ;      S:$D  = CPU Clock 3.3 mhz.
+          ;      S:$E  = CPU Clock 5.0 mhz.
+          ;      S:$F  = CPU Clock ~10.0 mhz. (unmetered)
+        
+SYS_SPEED           equ   $FE15    ;  (Word) Approx. Average CPU Clock Speed
+SYS_CLOCK_DIV       equ   $FE17    ;  (Byte) 60 hz Clock Divider Register (Read Only) 
+          ; SYS_CLOCK_DIV:
+          ;      bit 7: 0.46875 hz
+          ;      bit 6: 0.9375 hz
+          ;      bit 5: 1.875 hz
+          ;      bit 4: 3.75 hz
+          ;      bit 3: 7.5 hz
+          ;      bit 2: 15.0 hz
+          ;      bit 1: 30.0 hz
+          ;      bit 0: 60.0 hz
+        
+SYS_TIMER           equ   $FE18    ;  (Word) Increments at 0.46875 hz
           ; Debug Hardware Registers:
-DBG_BEGIN           equ   $FE14    ; Start of Debug Hardware Registers
-DBG_BRK_ADDR        equ   $FE14    ;    (Word) Address of current breakpoint
-DBG_FLAGS           equ   $FE16    ;    (Byte) Debug Specific Hardware Flags:
+DBG_BEGIN           equ   $FE1A    ; Start of Debug Hardware Registers
+DBG_BRK_ADDR        equ   $FE1A    ;    (Word) Address of current breakpoint
+DBG_FLAGS           equ   $FE1C    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 7: Debug Enable
           ;     bit 6: Single Step Enable
           ;     bit 5: Clear All Breakpoints
@@ -95,10 +133,10 @@ DBG_FLAGS           equ   $FE16    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 2: IRQ   (on low to high edge)
           ;     bit 1: NMI   (on low to high edge)
           ;     bit 0: RESET (on low to high edge)
-DBG_END             equ   $FE17    ; End Debug Registers
+DBG_END             equ   $FE1D    ; End Debug Registers
         
-RESERVED            equ   $FE17  
-          ; 473 bytes in reserve
+RESERVED            equ   $FE1D  
+          ; 467 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  

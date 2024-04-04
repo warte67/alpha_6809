@@ -219,19 +219,6 @@ void Gfx::OnInit()
 
     _init_gmodes();
 
-    // randomize the video ram contents
-    if (true)
-    {   
-        Byte c=0, a=0;
-        for (Word t=VIDEO_START; t<=VIDEO_END; t+=2)
-        {
-            Bus::Write(t, c++);
-            Bus::Write(t+1, a);
-            if (c==0)   a++;
-        }
-    }
-
-
     // INITIALIZE PALETTE DATA
     if (_palette.size() == 0)
     {
@@ -484,11 +471,6 @@ void Gfx::OnUpdate(float fElapsedTime)
 	// SDL_SetRenderDrawColor(sdl_renderer, 8,32,4,255);    //rgba
     // SDL_RenderClear(sdl_renderer);    
 
-    if (true)
-    {   // increment the video ram contents
-        for (Word t=VIDEO_START; t<=VIDEO_END; t++)
-            Bus::Write(t, Bus::Read(t)+1);
-    }
     if (bIsBitmapMode)
         _updateBitmapScreen();
     else
