@@ -249,7 +249,9 @@ void Bus::Run()
                 OnActivate();
 
 
-
+                // **************************************************
+                // * FOR NOW WE JUST LEAVE THE CPU SITTING IDLE!!!! *
+                // **************************************************
                 // C6809::IsCpuEnabled(true);
 
 

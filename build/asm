@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# build asm files
+cd ../src
+asm6809 -H -9 "$1.asm" -o "../build/$1.hex" -l "../build/$1.lst" -s "../build/$1.sym"    
+if [ $? -eq 0 ]; then
+    echo "successfully built $1"
+else
+    echo "\e[31masm6809 FAILED!\e[0m"
+fi
+
+cd ../build
+

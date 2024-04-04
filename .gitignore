@@ -4,7 +4,8 @@
 build/CMakeFiles/
 build/cmake_install.cmake
 build/Makefile
-build/SDL2.dll
+build/*.lst
+build/*.sym
 compile_commands.json
 CMakeCache.txt
 main
