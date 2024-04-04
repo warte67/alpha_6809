@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# ./run                 runs 'make', then if successful build runs program 'main'
+
+# if Makefile is not present, run CMAKE
+FILE=Makefile
+if test -e "$FILE"; then
+    echo 'Found Makefile!  Building...'
+else
+    cmake ..
+fi
+
+make
+if [ $? -eq 0 ]; then
+    ./main
+else
+    echo "\e[31mmake FAILED to build!\e[0m"
+fi
+

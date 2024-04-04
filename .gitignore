@@ -1,7 +1,10 @@
 *.o
 *.o.d
 *.cmake
-build/
+build/CMakeFiles/
+build/cmake_install.cmake
+build/Makefile
+build/SDL2.dll
 compile_commands.json
 CMakeCache.txt
 main
