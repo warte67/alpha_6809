@@ -1,3 +1,0 @@
-/home/jay/dev/alpha_6809/build/CMakeFiles/main.dir
-/home/jay/dev/alpha_6809/build/CMakeFiles/edit_cache.dir
-/home/jay/dev/alpha_6809/build/CMakeFiles/rebuild_cache.dir

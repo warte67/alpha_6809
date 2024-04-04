@@ -1,14 +1,9 @@
 *.o
 *.o.d
 *.cmake
-build/.cmake
-build/*.cmake
-build/compile_commands.json
+build/
 compile_commands.json
-build/CMakeCache.txt
 CMakeCache.txt
-build/cmake_install.cmake
-build/main
 main
 .vscode
 .cmake
