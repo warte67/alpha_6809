@@ -57,7 +57,7 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jay/dev/alpha_6809/build
+CMAKE_SOURCE_DIR = /home/jay/dev/alpha_6809
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/jay/dev/alpha_6809/build
@@ -129,101 +129,101 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
-home/jay/dev/alpha_6809/src/Bus.o: home/jay/dev/alpha_6809/src/Bus.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/Bus.o
+src/Bus.o: src/Bus.cpp.o
+.PHONY : src/Bus.o
 
 # target to build an object file
-home/jay/dev/alpha_6809/src/Bus.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/Bus.cpp.o
+src/Bus.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Bus.cpp.o
+.PHONY : src/Bus.cpp.o
 
-home/jay/dev/alpha_6809/src/Bus.i: home/jay/dev/alpha_6809/src/Bus.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/Bus.i
+src/Bus.i: src/Bus.cpp.i
+.PHONY : src/Bus.i
 
 # target to preprocess a source file
-home/jay/dev/alpha_6809/src/Bus.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/Bus.cpp.i
+src/Bus.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Bus.cpp.i
+.PHONY : src/Bus.cpp.i
 
-home/jay/dev/alpha_6809/src/Bus.s: home/jay/dev/alpha_6809/src/Bus.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/Bus.s
+src/Bus.s: src/Bus.cpp.s
+.PHONY : src/Bus.s
 
 # target to generate assembly for a file
-home/jay/dev/alpha_6809/src/Bus.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/Bus.cpp.s
+src/Bus.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Bus.cpp.s
+.PHONY : src/Bus.cpp.s
 
-home/jay/dev/alpha_6809/src/Gfx.o: home/jay/dev/alpha_6809/src/Gfx.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.o
+src/Gfx.o: src/Gfx.cpp.o
+.PHONY : src/Gfx.o
 
 # target to build an object file
-home/jay/dev/alpha_6809/src/Gfx.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.cpp.o
+src/Gfx.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Gfx.cpp.o
+.PHONY : src/Gfx.cpp.o
 
-home/jay/dev/alpha_6809/src/Gfx.i: home/jay/dev/alpha_6809/src/Gfx.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.i
+src/Gfx.i: src/Gfx.cpp.i
+.PHONY : src/Gfx.i
 
 # target to preprocess a source file
-home/jay/dev/alpha_6809/src/Gfx.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.cpp.i
+src/Gfx.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Gfx.cpp.i
+.PHONY : src/Gfx.cpp.i
 
-home/jay/dev/alpha_6809/src/Gfx.s: home/jay/dev/alpha_6809/src/Gfx.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.s
+src/Gfx.s: src/Gfx.cpp.s
+.PHONY : src/Gfx.s
 
 # target to generate assembly for a file
-home/jay/dev/alpha_6809/src/Gfx.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/Gfx.cpp.s
+src/Gfx.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/Gfx.cpp.s
+.PHONY : src/Gfx.cpp.s
 
-home/jay/dev/alpha_6809/src/IDevice.o: home/jay/dev/alpha_6809/src/IDevice.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.o
+src/IDevice.o: src/IDevice.cpp.o
+.PHONY : src/IDevice.o
 
 # target to build an object file
-home/jay/dev/alpha_6809/src/IDevice.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.cpp.o
+src/IDevice.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/IDevice.cpp.o
+.PHONY : src/IDevice.cpp.o
 
-home/jay/dev/alpha_6809/src/IDevice.i: home/jay/dev/alpha_6809/src/IDevice.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.i
+src/IDevice.i: src/IDevice.cpp.i
+.PHONY : src/IDevice.i
 
 # target to preprocess a source file
-home/jay/dev/alpha_6809/src/IDevice.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.cpp.i
+src/IDevice.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/IDevice.cpp.i
+.PHONY : src/IDevice.cpp.i
 
-home/jay/dev/alpha_6809/src/IDevice.s: home/jay/dev/alpha_6809/src/IDevice.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.s
+src/IDevice.s: src/IDevice.cpp.s
+.PHONY : src/IDevice.s
 
 # target to generate assembly for a file
-home/jay/dev/alpha_6809/src/IDevice.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/IDevice.cpp.s
+src/IDevice.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/IDevice.cpp.s
+.PHONY : src/IDevice.cpp.s
 
-home/jay/dev/alpha_6809/src/main.o: home/jay/dev/alpha_6809/src/main.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/main.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-home/jay/dev/alpha_6809/src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o
-.PHONY : home/jay/dev/alpha_6809/src/main.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-home/jay/dev/alpha_6809/src/main.i: home/jay/dev/alpha_6809/src/main.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/main.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-home/jay/dev/alpha_6809/src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.i
-.PHONY : home/jay/dev/alpha_6809/src/main.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-home/jay/dev/alpha_6809/src/main.s: home/jay/dev/alpha_6809/src/main.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/main.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-home/jay/dev/alpha_6809/src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.s
-.PHONY : home/jay/dev/alpha_6809/src/main.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -234,18 +234,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
-	@echo "... home/jay/dev/alpha_6809/src/Bus.o"
-	@echo "... home/jay/dev/alpha_6809/src/Bus.i"
-	@echo "... home/jay/dev/alpha_6809/src/Bus.s"
-	@echo "... home/jay/dev/alpha_6809/src/Gfx.o"
-	@echo "... home/jay/dev/alpha_6809/src/Gfx.i"
-	@echo "... home/jay/dev/alpha_6809/src/Gfx.s"
-	@echo "... home/jay/dev/alpha_6809/src/IDevice.o"
-	@echo "... home/jay/dev/alpha_6809/src/IDevice.i"
-	@echo "... home/jay/dev/alpha_6809/src/IDevice.s"
-	@echo "... home/jay/dev/alpha_6809/src/main.o"
-	@echo "... home/jay/dev/alpha_6809/src/main.i"
-	@echo "... home/jay/dev/alpha_6809/src/main.s"
+	@echo "... src/Bus.o"
+	@echo "... src/Bus.i"
+	@echo "... src/Bus.s"
+	@echo "... src/Gfx.o"
+	@echo "... src/Gfx.i"
+	@echo "... src/Gfx.s"
+	@echo "... src/IDevice.o"
+	@echo "... src/IDevice.i"
+	@echo "... src/IDevice.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

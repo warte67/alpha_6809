@@ -69,7 +69,7 @@ class Gfx : public IDevice
     private:
 
         // internal registers (do these really need to be statics?)
-        inline static Byte s_gfx_mode   = 0x0E;     // defaults: 0x03 = 40x25 text   0x0E = 32x15 text
+        inline static Byte s_gfx_mode   = 0x0E;     // defaults: 0x03 = 40x25 text   0x0E = 32x15 text (16:9)
         inline static Byte s_gfx_emu    = 0x00;     // default: 0 = windowed... primary monitor
         inline static Byte _gfx_pal_idx = 0x00;     // GFX_PAL_IDX
         inline static Byte _gfx_glyph_idx = 0x00;         // GFX_GLYPH_IDX
@@ -101,9 +101,7 @@ class Gfx : public IDevice
         void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
 								Byte color_index, bool bIgnoreAlpha = false);        
         void _updateTextScreen();        
-        void _updateBitmapScreen();       
-
-
+        void _updateBitmapScreen();    
 };
 
 
