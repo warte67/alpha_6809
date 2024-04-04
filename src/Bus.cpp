@@ -94,7 +94,7 @@ Bus::Bus()
     dev->DisplayEnum("",0x0400, ss.str());
     dev = new RAM("VIDEO_START");
     addr += Attach(dev, VID_BUFFER_SIZE);  
-    dev->DisplayEnum("VIDEO_END",0x0400 + VID_BUFFER_SIZE - 1, "End of Default Video Buffer Memory");  
+    dev->DisplayEnum("VIDEO_END",0x0400 + VID_BUFFER_SIZE - 1, "End of Default Video Space");  
 
 	// user RAM
     Word uram_size = 0xB000 - addr;

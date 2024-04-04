@@ -1,7 +1,7 @@
 # ninja log v5
-1	689	1712238938214270020	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o	36ec225edf921413
-1	683	1712238938206269773	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o	f95beb47218e21a0
+0	712	1712241829717139383	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/main.cpp.o	36ec225edf921413
+1	691	1712241829697139682	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/IDevice.cpp.o	f95beb47218e21a0
 0	2	0	clean	a31eedcededa8236
-1	883	1712238938406275947	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o	fb734c30ff178256
-1	894	1712238938418276318	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o	b20de8b86b59b435
-894	964	1712238938486278418	main	ddad55ed1db58b6
+1	890	1712241829893136749	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Gfx.cpp.o	fb734c30ff178256
+1	901	1712241829905136570	CMakeFiles/main.dir/home/jay/dev/alpha_6809/src/Bus.cpp.o	b20de8b86b59b435
+901	972	1712241829977135492	main	ddad55ed1db58b6

@@ -69,7 +69,7 @@ class Gfx : public IDevice
     private:
 
         // internal registers (do these really need to be statics?)
-        inline static Byte s_gfx_mode   = 0x03;     // default: 3 = 320x200 text 
+        inline static Byte s_gfx_mode   = 0x0E;     // defaults: 0x03 = 40x25 text   0x0E = 32x15 text
         inline static Byte s_gfx_emu    = 0x00;     // default: 0 = windowed... primary monitor
         inline static Byte _gfx_pal_idx = 0x00;     // GFX_PAL_IDX
         inline static Byte _gfx_glyph_idx = 0x00;         // GFX_GLYPH_IDX
@@ -77,6 +77,7 @@ class Gfx : public IDevice
         inline static SDL_Window* sdl_window = nullptr;
         inline static SDL_Renderer* sdl_renderer = nullptr;
         inline static SDL_Texture* sdl_target_texture = nullptr;
+        Word gfx_vid_end = VIDEO_END;
 
         Uint32 sdl_renderer_flags = 0;
         int window_width = 0;
@@ -117,6 +118,18 @@ class Gfx : public IDevice
         //           - bits 3-5  = reserved
         //           - bit  6    = 0:vsync off, 1:vsync on
         //           - bit  7    = 0:windowed, 1:fullscreen
+        
+    GFX_VID_END      = 0xFE02, //  (Word Read Only) Top of Display Buffer
+        // Note: This will change to reflect the highest address of 
+        //     the currently running video display mode.
+        
+    GFX_HRES         = 0xFE04, //  (Word Read Only) Horizontal Display Resolution
+        // Note: This will reflect the number of character columns for the 
+        //     text modes, but will reflect pixel columns for bitmap modes. 
+        
+    GFX_VRES         = 0xFE06, //  (Word Read Only) Vertical Display Resolution
+        // Note: This will reflect the number of character rows for the 
+        //     text modes, but will reflect pixel rows for bitmap modes. 
         
     GFX_PAL_IDX      = 0xFE02, //  (Byte) Color Palette Index
         // GFX_PAL_IDX: 0-255

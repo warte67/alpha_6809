@@ -17,6 +17,43 @@ Byte Gfx::read(Word offset, bool debug)
     {
         case GFX_MODE:          data = s_gfx_mode; break;
         case GFX_EMU:           data = s_gfx_emu; break;
+
+		case GFX_VID_END + 0: 	data = (gfx_vid_end >> 8) & 0xFF; break;
+		case GFX_VID_END + 1: 	data = gfx_vid_end & 0xFF; break;
+
+		case GFX_HRES + 0: 	
+        {
+            Word width = res_width;
+            if (!(s_gfx_mode & 0x80)) // text mode
+                width /= 8;
+            data = (width >> 8) & 0xFF; 
+            break;
+        }
+		case GFX_HRES + 1: 	
+        {
+            Word width = res_width;
+            if (!(s_gfx_mode & 0x80)) // text mode
+                width /= 8;
+            data = width & 0xFF; 
+            break;
+        }
+		case GFX_VRES + 0: 	
+        {
+            Word height = res_height;
+            if (!(s_gfx_mode & 0x80)) // text mode
+                height /= 8;
+            data = (height >> 8) & 0xFF; 
+            break;
+        }
+		case GFX_VRES + 1: 	
+        {
+            Word height = res_height;
+            if (!(s_gfx_mode & 0x80)) // text mode
+                height /= 8;
+            data = height & 0xFF; 
+            break;
+        }
+
    		case GFX_PAL_IDX:   	data = _gfx_pal_idx; break;
 		case GFX_PAL_CLR + 0: 	data = (_palette[_gfx_pal_idx].color >> 8) & 0xFF; break;
 		case GFX_PAL_CLR + 1: 	data = _palette[_gfx_pal_idx].color & 0xFF; break;
@@ -114,10 +151,28 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "");
     nextAddr++;
 
+    DisplayEnum("GFX_VID_END", nextAddr, " (Word Read Only) Top of Display Buffer");
+    DisplayEnum("", 0, "Note: This will change to reflect the highest address of ");
+    DisplayEnum("", 0, "    the currently running video display mode.");
+    DisplayEnum("", 0, "");
+    nextAddr += 2;
+
+    DisplayEnum("GFX_HRES", nextAddr, " (Word Read Only) Horizontal Display Resolution");
+    DisplayEnum("", 0, "Note: This will reflect the number of character columns for the ");
+    DisplayEnum("", 0, "    text modes, but will reflect pixel columns for bitmap modes. ");
+    DisplayEnum("", 0, "");
+    nextAddr += 2;
+
+    DisplayEnum("GFX_VRES", nextAddr, " (Word Read Only) Vertical Display Resolution");
+    DisplayEnum("", 0, "Note: This will reflect the number of character rows for the ");
+    DisplayEnum("", 0, "    text modes, but will reflect pixel rows for bitmap modes. ");
+    DisplayEnum("", 0, "");
+    nextAddr += 2;
+
     DisplayEnum("GFX_PAL_IDX", nextAddr, " (Byte) Color Palette Index");
     DisplayEnum("", 0, "GFX_PAL_IDX: 0-255");
     DisplayEnum("", 0, "Note: Use this register to set the index into theColor Palette. ");
-    DisplayEnum("", 0, "  Set this value prior referencing color data (GFX_PAL_CLR).");
+    DisplayEnum("", 0, "      Set this value prior referencing color data (GFX_PAL_CLR).");
     DisplayEnum("", 0, "");
     nextAddr += 1;
 
@@ -491,6 +546,12 @@ void Gfx::_decode_gmode()
     // Verify Graphics Mode
     VerifyGmode(gmode);
 
+    // Video Buffer Size
+    gfx_vid_end = VIDEO_START + ((res_width * res_height)/8)*bits_per_pixel;
+    if (gfx_vid_end == VIDEO_START) // is a text mode
+        gfx_vid_end = VIDEO_START + ((res_width/8)*(res_height/8))*2;
+    gfx_vid_end--;  // prevent off by one errors        
+
     // Testing: report results
     if (true)
     {
@@ -510,6 +571,8 @@ void Gfx::_decode_gmode()
         printf("Res Height: %4d\n", res_height);
         printf("aspect: %f\n", aspect);
         printf("Bits Per Pixel: %d\n", bits_per_pixel);
+        printf("GFX_VID_END: $%04X\n", gfx_vid_end);
+        printf("HRES: %d    VRES: %d\n", Bus::Read_Word(GFX_HRES), Bus::Read_Word(GFX_VRES));        
     }
 }
 
