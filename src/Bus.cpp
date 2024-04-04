@@ -7,7 +7,7 @@
 #include <chrono>
 #include <sstream>
 #include "Bus.hpp"
-#include "GfxCore.hpp"
+//#include "GfxCore.hpp"
 #include "Gfx.hpp"
 
 
@@ -93,9 +93,12 @@ Bus::Bus()
     std::stringstream ss;
     ss << "Video Buffer (" << (VID_BUFFER_SIZE/1024) << "K)";
     dev->DisplayEnum("",0x0400, ss.str());
-    s_gfx_core = new GfxCore();
-    addr += Attach(s_gfx_core);    
-    
+    // s_gfx_core = new GfxCore();
+    // addr += Attach(s_gfx_core);    
+    dev = new RAM("VIDEO_START");
+    addr += Attach(dev, VID_BUFFER_SIZE);  
+    dev->DisplayEnum("VIDEO_END",0x0400 + VID_BUFFER_SIZE - 1, "End of Default Video Buffer Memory");  
+
 	// user RAM
     dev->DisplayEnum("",0, "");
     dev->DisplayEnum("",0x3000, "User RAM (32K)");
@@ -235,7 +238,7 @@ void Bus::Run()
             OnEvent(nullptr);
             OnRender();      
             // only a present for GfxCore            
-            GfxCore::Present();
+            Gfx::Present();
         }
         // shutdown the environment
         OnDeactivate();    

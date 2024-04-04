@@ -28,6 +28,21 @@ class Gfx : public IDevice
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
 
+        struct GTIMING
+        {
+            Word Width;         // display width
+            Word Height;        // display height
+        };
+        struct GMODE 
+        {            
+            Byte Timing_index;  // 
+            Word Res_Width;     // number of pixels per column
+            Word Res_Height;    // number of pixels per row
+            Byte Pixel_Width;   // horizontal scan multiplier
+            Byte Pixel_Height;  // vertical scan multiplier           
+            // ... one byte wasted 
+        };
+
 		// palette stuff
         union PALETTE {
             Word color;
@@ -44,8 +59,15 @@ class Gfx : public IDevice
         Uint8 blu(Uint8 index) { Uint8 c = _palette[index].b;  return c; }
         Uint8 alf(Uint8 index) { Uint8 c = _palette[index].a;  return c; }  
 
+        // public accessors
+
         inline static Byte GetGlyphData(Byte index, Byte row)
         { return _gfx_glyph_data[index][row]; }
+
+        inline static void Present() { SDL_RenderPresent(sdl_renderer); }
+        
+        bool VerifyGmode(Byte gmode);
+
 
 
     private:
@@ -60,6 +82,39 @@ class Gfx : public IDevice
 
         // helpers
         void _init_tests();
+
+
+
+
+        // from GfxCore (sort later)
+        inline static SDL_Window* sdl_window = nullptr;
+        inline static SDL_Renderer* sdl_renderer = nullptr;
+        inline static SDL_Texture* sdl_target_texture = nullptr;
+        Uint32 sdl_renderer_flags = 0;
+        int window_width = 0;
+        int window_height = 0;
+        Uint32 window_flags = 0;
+        bool bIsFullscreen = false;
+        bool bIsBitmapMode = false;
+        Word res_width = 0;
+        Word res_height = 0;
+        Byte bits_per_pixel = 1;
+
+        std::vector<GTIMING> vec_timings;
+        std::vector<GMODE> vec_gmodes;   
+        // helpers     
+        void _init_gmodes();
+        void _decode_gmode();
+
+        // void _updateTextScreen();
+ 		void _setPixel(int x, int y, Byte color_index, 	
+						SDL_Texture* _texture, bool bIgnoreAlpha = false);
+        void _setPixel_unlocked(void* pixels, int pitch, int x, int y, 
+								Byte color_index, bool bIgnoreAlpha = false);        
+        void _updateTextScreen();        
+        void _updateBitmapScreen();                       
+
+
 
 };
 

@@ -1,4 +1,5 @@
 
+
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -28,8 +29,8 @@ enum MEMMAP
     SSTACK_TOP       = 0x0400, // Top of the system stack space
         
         // Video Buffer (11K)
-    VIDEO_START      = 0x0400, // Start of Video Buffer Memory
-    VIDEO_END        = 0x2FFF, // End of Video Buffer Memory
+    VIDEO_START      = 0x0400, 
+    VIDEO_END        = 0x2FFF, // End of Default Video Buffer Memory
         
         // User RAM (32K)
     USER_RAM         = 0x3000, 

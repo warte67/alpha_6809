@@ -66,8 +66,8 @@ class Bus : public IDevice
 		static Word Read_Word(Word offset, bool debug = false);
 		static void Write_Word(Word offset, Word data, bool debug = false);       
 
-        inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
-        inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
+        // inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
+        // inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
         inline static void IsDirty(bool dirty) { s_bIsDirty = dirty; }
 
         inline static GfxCore* GetGfxCore() { return s_gfx_core; }
@@ -94,5 +94,6 @@ class Bus : public IDevice
             vec_mem_def.push_back({label, offset, comment});
         }	
         static void def_display();		
+
 };
 
