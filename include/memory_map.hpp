@@ -1,4 +1,5 @@
 
+
 // memory_map.h
 #ifndef __MEMORY_MAP_H__
 #define __MEMORY_MAP_H__
@@ -88,8 +89,22 @@ enum MEMMAP
         //     array represents the top line of 8 pixels. Each array entry represents
         //     a row of 8 pixels. 
         
-    RESERVED         = 0xFE14, 
-        // 476 bytes in reserve
+        // Debug Hardware Registers:
+    DBG_BEGIN        = 0xFE14, // Start of Debug Hardware Registers
+    DBG_BRK_ADDR     = 0xFE14, //    (Word) Address of current breakpoint
+    DBG_FLAGS        = 0xFE16, //    (Byte) Debug Specific Hardware Flags:
+        //     bit 7: Debug Enable
+        //     bit 6: Single Step Enable
+        //     bit 5: Clear All Breakpoints
+        //     bit 4: Update Breakpoint at DEBUG_BRK_ADDR
+        //     bit 3: FIRQ  (on low to high edge)
+        //     bit 2: IRQ   (on low to high edge)
+        //     bit 1: NMI   (on low to high edge)
+        //     bit 0: RESET (on low to high edge)
+    DBG_END          = 0xFE17, // End Debug Registers
+        
+    RESERVED         = 0xFE17, 
+        // 473 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -105,6 +120,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
-
 
 

@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
     ./src/Bus.cpp
     ./src/Gfx.cpp
     ./src/Debug.cpp
+    ./src/C6809.cpp
 )
 
 # INCLUDE DIRECTORIES

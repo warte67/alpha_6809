@@ -6,13 +6,18 @@
 
 #pragma once
 
+#include <thread>
 #include "IDevice.hpp"
 
 class GfxCore;
 class Gfx;
+class Debug;
+class C6809;
 
 class Bus : public IDevice
 {
+    friend class C6809;     // This is cheating? Maybe not, but it does make me feel a bit dirty.
+
     private:
         Bus();
 
@@ -22,13 +27,18 @@ class Bus : public IDevice
         inline static bool s_b_SDL_WasInit = false;
 
         inline static int _fps = 0;
+
+		inline static float s_avg_cpu_cycle_time = 0;
 		inline static Byte _clock_div = 0;				// SYS_CLOCK_DIV (Byte) 60 hz Clock Divider  (Read Only) 
 		inline static Word _clock_timer = 0;			// SYS_TIMER	(R/W Word) increments at 0.46875 hz
-        inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
-        float _avg_cpu_cycle_time = 0.0f;
+		inline static Word _sys_cpu_speed = 0;			// SYS_SPEED	(Read Byte) register
+
+        inline static std::thread s_cpuThread;
 
         inline static GfxCore* s_gfx_core = nullptr;
         inline static Gfx* s_gfx = nullptr;
+        inline static Debug* s_debug = nullptr;
+        inline static C6809* s_c6809 = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -68,10 +78,14 @@ class Bus : public IDevice
 
         // inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
         // inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
+        inline static bool IsDirty() { return s_bIsDirty; }
         inline static void IsDirty(bool dirty) { s_bIsDirty = dirty; }
+        inline static bool IsRunning() { return s_bIsRunning; }
+        inline static void IsRunning(bool _r) { s_bIsRunning = _r; }
 
-        inline static GfxCore* GetGfxCore() { return s_gfx_core; }
         inline static Gfx* GetGfx() { return s_gfx; }
+        inline static Debug* GetDebug() { return s_debug; }
+        inline static C6809* GetC6809() { return s_c6809; }
 
     private:
         int _lastAddress = 0;
@@ -93,7 +107,7 @@ class Bus : public IDevice
             // offset == -1 (none)            
             vec_mem_def.push_back({label, offset, comment});
         }	
-        static void def_display();		
+        static void def_display();		       
 
 };
 

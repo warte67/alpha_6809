@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include "Gfx.hpp"
+#include "Debug.hpp"
 #include "Bus.hpp"
 #include "font8x8_system.hpp"
 
@@ -402,19 +403,77 @@ void Gfx::OnDeactivate()
 
 void Gfx::OnEvent(SDL_Event* evnt)
 {
+    if (evnt->window.windowID != GetWindowID())
+        return;
+
     // printf("%sw::OnEvent()\n", Name().c_str());
-    switch(evnt->type)
-    {
-        case SDL_WINDOWEVENT:  
+    {        
+        switch(evnt->type)
         {
-            if (evnt->window.event == SDL_WINDOWEVENT_RESIZED)
+            case SDL_WINDOWEVENT:  
             {
-                window_width = evnt->window.data1;
-                window_height = evnt->window.data2;
-				// m_debug->_onWindowResize();
+                if (evnt->window.windowID == GetWindowID())     // redundant
+                {
+                    if (evnt->window.event == SDL_WINDOWEVENT_RESIZED)
+                    {
+                        window_width = evnt->window.data1;
+                        window_height = evnt->window.data2;
+                        // m_debug->_onWindowResize();
+                    }
+                    // main window is closed
+                    if (evnt->window.event == SDL_WINDOWEVENT_CLOSE)
+                    {
+                        Bus::IsRunning(false);
+                    }
+                }
+                break;
             }
-			break;
-		}
+            
+            case SDL_KEYDOWN:
+            {
+                // [ALT-X]
+                if (evnt->key.keysym.sym == SDLK_x)
+                {
+                    if (SDL_GetModState() & KMOD_ALT)
+                        Bus::IsRunning(false);
+                }
+                // Testing [SPACE]
+                if (evnt->key.keysym.sym == SDLK_SPACE)
+                {
+                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
+                    // s_bIsDirty = true;
+                }
+                // Testing [ENTER]
+                if (evnt->key.keysym.sym == SDLK_RETURN)
+                {
+                    Byte data = Bus::Read(GFX_EMU);
+                    (data & 0x80) ? data &= 0x7f : data |= 0x80;
+                    Bus::Write(GFX_EMU, data);
+                    // s_bIsDirty = true;
+                }
+                // Testing [TAB]
+                if (evnt->key.keysym.sym == SDLK_TAB)
+                {
+                    Byte data = Bus::Read(GFX_MODE);
+                    if (!(data & 0x80))
+                    {
+                        data &= 0x1F;
+                        data |= 0x80;
+                    }
+                    else
+                    {
+                        data += 0x20;
+                    }
+                    Bus::Write(GFX_MODE, data);
+                    if (Bus::Read(GFX_MODE)!=data)
+                    {
+                        data &= 0x1f;
+                        Bus::Write(GFX_MODE, data);
+                    }
+                }
+                break;      
+            }      
+        }
     }
 }
 

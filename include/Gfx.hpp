@@ -64,6 +64,7 @@ class Gfx : public IDevice
         inline static void Present() { SDL_RenderPresent(sdl_renderer); }
         bool VerifyGmode(Byte gmode);
 
+        inline static Uint32 GetWindowID() { return SDL_GetWindowID(sdl_window); }
 
 
     private:

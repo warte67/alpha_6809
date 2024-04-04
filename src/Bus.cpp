@@ -8,6 +8,8 @@
 #include <sstream>
 #include "Bus.hpp"
 #include "Gfx.hpp"
+#include "Debug.hpp"
+#include "C6809.hpp"
 
 
 Bus::Bus()
@@ -136,6 +138,12 @@ Bus::Bus()
     s_gfx = new Gfx();  // non-enforced singleton
     addr += Attach(s_gfx);
 
+    // attach the debug device
+    s_debug = new Debug();
+    addr += Attach(s_debug);
+
+
+
 
 
 
@@ -190,8 +198,10 @@ Bus::Bus()
     // Call OnInit() before attaching the CPU Device
     OnInit();   // One time initialization
 
-    // set up the CPU Device thread
-    // ...
+	// Install the CPU and start its thread
+	s_c6809 = new C6809(this);
+	s_cpuThread = std::thread(&C6809::ThreadProc);
+	C6809::IsCpuEnabled(true);       
 }
 
 Bus::~Bus()
@@ -199,10 +209,14 @@ Bus::~Bus()
     // std::cout << "~" << Name() << "::Bus()\n";
 
     // shutdown the CPU thread
-    // ...
+    s_cpuThread.join();
 
     // Remove the CPU device
-    // ...
+    if (s_c6809)
+	{
+		delete s_c6809;
+		s_c6809 = nullptr;
+	}
 
     // delete all of the attached devices
     for (auto& d : Bus::_memoryNodes)
@@ -228,10 +242,18 @@ void Bus::Run()
         {
             if (s_bIsDirty)
             {
+                C6809::IsCpuEnabled(false);
                 // shutdown the old environment
                 OnDeactivate();
                 // create a new environment
                 OnActivate();
+
+
+
+                // C6809::IsCpuEnabled(true);
+
+
+
                 // no longer dirty
                 s_bIsDirty = false;            
             }
@@ -296,63 +318,27 @@ void Bus::OnEvent(SDL_Event* null_event)
     SDL_Event evnt;
     while (SDL_PollEvent(&evnt))
     {
-        // OnEvent(evnt)
-		for (auto &d : Bus::_memoryNodes)
-			d->OnEvent(&evnt);		
-
         switch (evnt.type) {
             // handle default events SDL_QUIT and ALT-X quits
-            case SDL_QUIT:
-                // handling of close button
+
+            case SDL_QUIT:  
+                // handling of close button 
+                //          (this only works for single window applications. 
+                //          Use SDL_WINDOWEVENT_CLOSE instead.)
                 s_bIsRunning = false;
                 break;
-            
+
             case SDL_KEYDOWN:
-                // [ALT-X]
-                if (evnt.key.keysym.sym == SDLK_x)
-                {
-                    if (SDL_GetModState() & KMOD_ALT)
-                        s_bIsRunning = false;
-                }
-                // Testing [SPACE]
-                if (evnt.key.keysym.sym == SDLK_SPACE)
-                {
-                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
-                    // s_bIsDirty = true;
-                }
-                // Testing [ENTER]
-                if (evnt.key.keysym.sym == SDLK_RETURN)
-                {
-                    Byte data = Bus::Read(GFX_EMU);
-                    (data & 0x80) ? data &= 0x7f : data |= 0x80;
-                    Bus::Write(GFX_EMU, data);
-                    // s_bIsDirty = true;
-                }
-                // Testing [TAB]
-                if (evnt.key.keysym.sym == SDLK_TAB)
-                {
-                    Byte data = Bus::Read(GFX_MODE);
-                    if (!(data & 0x80))
-                    {
-                        data &= 0x1F;
-                        data |= 0x80;
-                    }
-                    else
-                    {
-                        data += 0x20;
-                    }
-                    Bus::Write(GFX_MODE, data);
-                    if (Bus::Read(GFX_MODE)!=data)
-                    {
-                        data &= 0x1f;
-                        Bus::Write(GFX_MODE, data);
-                    }
-                }
+            {
                 // [ESCAPE]
                 if (evnt.key.keysym.sym == SDLK_ESCAPE)
                     s_bIsRunning = false;
                 break;                
+            }
         }
+        // OnEvent(evnt)
+        for (auto &d : Bus::_memoryNodes)
+            d->OnEvent(&evnt);		
     }        
 }
 
@@ -458,7 +444,7 @@ void Bus::OnUpdate(float fNullTime)
 		sTitle += "  FPS: ";
 		sTitle += std::to_string(_fps);
 
-        _sys_cpu_speed = (int)(1.0f / (_avg_cpu_cycle_time / 1000000.0f));
+        _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
 
         sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
 		// if (m_gfx)
@@ -499,7 +485,7 @@ Word Bus::Attach(IDevice* dev, Word size)
 
 void Bus::Error(const std::string& sErr)
 {
-	std::cout << "\n    ERROR: " << sErr << SDL_GetError() << "\n\n";
+	std::cout << "\n    ERROR: " << sErr << " -- " << SDL_GetError() << "\n\n";
 
     // if SDL has been initialized, use a message box too
     if (s_b_SDL_WasInit)

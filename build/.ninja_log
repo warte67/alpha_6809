@@ -1,0 +1,8 @@
+# ninja log v5
+1	713	1712264833611484015	CMakeFiles/main.dir/src/IDevice.cpp.o	260323fee8729fdb
+0	757	1712264833655484446	CMakeFiles/main.dir/src/main.cpp.o	66eaf30585477c76
+1	1010	1712264833907486908	CMakeFiles/main.dir/src/Debug.cpp.o	ae1cc7463ec2fe0
+1	1049	1712264833947487298	CMakeFiles/main.dir/src/Gfx.cpp.o	700ac23bb0ed37c9
+1	1110	1712264834007487885	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
+1	1475	1712264834371491442	CMakeFiles/main.dir/src/C6809.cpp.o	5710ebea0c95313c
+1475	1567	1712264834463492340	main	8c20407ba029f1e8

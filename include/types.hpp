@@ -35,14 +35,15 @@
 // constants
 constexpr Word VID_BUFFER_SIZE = 15 * 1024;      // standard video buffer size
 
+constexpr Word DEBUG_WIDTH = 640;
+constexpr Word DEBUG_HEIGHT = 360;
+constexpr int DEBUG_BUFFER_WIDTH = DEBUG_WIDTH * 2;
+constexpr int DEBUG_BUFFER_HEIGHT = DEBUG_HEIGHT * 2;
+constexpr size_t DEBUG_BUFFER_SIZE = (DEBUG_WIDTH/8)*(DEBUG_HEIGHT/8);
 
-//    const bool ENABLE_MOUSE_CURSOR = true;      // mouse cursor shown by default
-//    const bool ENABLE_DEBUG = false;
-//    const bool DEBUG_SINGLE_STEP = ENABLE_DEBUG;	// false;
-//    
-//    
-//    constexpr Word EDIT_BUFFER_SIZE = 256;          // input/edit buffer size
-//    
-//    
-//    // debugging
-//    //const bool DEBUG_SCANTYPE_OLD = false;
+
+constexpr bool DEBUG_SINGLE_STEP = false;
+
+
+
+
