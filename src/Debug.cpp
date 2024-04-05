@@ -408,7 +408,8 @@ void Debug::OnUpdate(float fElapsedTime)
     if (Bus::GetC6809() == nullptr)     return;
     if (!IsActive())    return;
 
-    SDL_RaiseWindow(Debug::GetSDLWindow());
+    if (bIsCursorVisible)
+        SDL_RaiseWindow(Debug::GetSDLWindow());
 
     // frame rate limit the debug layer updates
     const float delay = 1.0f / 30.0f;
