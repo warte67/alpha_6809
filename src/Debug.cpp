@@ -302,8 +302,6 @@ void Debug::OnEvent(SDL_Event* evnt)
         }
     }
 
-
-
     // if not a debug event, just return now
     if (evnt->window.windowID != GetWindowID())
         return;
@@ -317,7 +315,7 @@ void Debug::OnEvent(SDL_Event* evnt)
             {
                 case SDL_WINDOWEVENT_CLOSE:
                 {
-                    printf("%s::OnEvent(): SDL_WINDOWEVENT_CLOSE\n", Name().c_str());
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_CLOSE\n", Name().c_str());
                     s_bIsDebugActive = false;
                     // SDL_HideWindow(sdl_debug_window);
                     SDL_MinimizeWindow(sdl_debug_window);   // just minimize instead of close
@@ -325,36 +323,37 @@ void Debug::OnEvent(SDL_Event* evnt)
                 }                
                 case SDL_WINDOWEVENT_MINIMIZED:
                 {
-                    printf("%s::OnEvent(): SDL_WINDOWEVENT_MINIMIZED\n", Name().c_str());
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_MINIMIZED\n", Name().c_str());
                     s_bIsDebugActive = false;
                     break;
                 }
                 case SDL_WINDOWEVENT_RESTORED:
                 {
-                    printf("%s::OnEvent(): SDL_WINDOWEVENT_RESTORED\n", Name().c_str());
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_RESTORED\n", Name().c_str());
                     s_bIsDebugActive = true;
                     break;
                 }
                 case SDL_WINDOWEVENT_ENTER:
                 {
-                    printf("%s::OnEvent(): SDL_WINDOWEVENT_ENTER\n", Name().c_str());
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_ENTER\n", Name().c_str());
                     bIsMouseOver = true;
                     break;
                 }
                 case SDL_WINDOWEVENT_LEAVE:
                 {
-                    printf("%s::OnEvent(): SDL_WINDOWEVENT_LEAVE\n", Name().c_str());
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_LEAVE\n", Name().c_str());
                     bIsMouseOver = false;
                     break;
                 }
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                {
+                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_FOCUS_LOST\n", Name().c_str());
+                    bIsCursorVisible = false;
+                    break;
+                }                
             }
             break;
         }
-        case SDL_QUIT:
-            // handling of close button
-            printf("DEBUG:  SDL_QUIT\n");
-            // s_bIsRunning = false;
-            break;
 
         case SDL_KEYDOWN: 
         {
