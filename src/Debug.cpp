@@ -170,14 +170,31 @@ void Debug::OnInit()
 {
     // printf("%s::OnInit()\n", Name().c_str());    
 
-    constexpr int DMONITOR = 2;
+    // start up conditions
+    reg_flags = 0;
+    s_bIsDebugActive = false;
+    s_bSingleStep = false;
+    debug_window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
+    if (DEBUG_STARTS_ACTIVE | DEBUG_SINGLE_STEP)    
+    { 
+        s_bIsDebugActive = true;  
+        reg_flags |= 0x80; 
+        debug_window_flags = SDL_WINDOW_RESIZABLE; 
+    }
+    if (DEBUG_SINGLE_STEP)      
+    { 
+        s_bSingleStep = true;     
+        reg_flags |= 0x40; 
+    }
 
-    s_bIsDebugActive = true;
+
+    // s_bIsDebugActive = true;
 
     sdl_debug_window = SDL_CreateWindow("alpha_6809 Debugger",
-                            SDL_WINDOWPOS_CENTERED_DISPLAY(DMONITOR),  SDL_WINDOWPOS_CENTERED_DISPLAY(DMONITOR), 
-                            DEBUG_BUFFER_WIDTH, DEBUG_BUFFER_HEIGHT,
-                            debug_window_flags);
+            SDL_WINDOWPOS_CENTERED_DISPLAY(DEBUG_MONITOR),  
+            SDL_WINDOWPOS_CENTERED_DISPLAY(DEBUG_MONITOR), 
+            DEBUG_BUFFER_WIDTH, DEBUG_BUFFER_HEIGHT,
+            debug_window_flags);
     if (!sdl_debug_window)
     {
         std::stringstream ss;
@@ -205,7 +222,6 @@ void Debug::OnInit()
     }     
 
     // create the character buffer
-    // _db_bfr.reserve(DEBUG_BUFFER_SIZE);
     for (unsigned int t=0; t<DEBUG_BUFFER_SIZE; t++)
     {
         D_GLYPH dg;
@@ -219,8 +235,16 @@ void Debug::OnInit()
         c.chr = ' ';
         c.attr = at;
     }    
-    //printf("_db_bfr.size(): %d\n", (int)_db_bfr.size());
+
+
 }
+
+void Debug::OnActivate()
+{
+    // start with debug window in focus
+    SDL_RaiseWindow(sdl_debug_window);
+}
+
 void Debug::OnQuit() 
 {
     // printf("%s::OnQuit()\n", Name().c_str());    

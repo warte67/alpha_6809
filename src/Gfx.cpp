@@ -333,9 +333,10 @@ void Gfx::OnActivate()
     else
     {
         sdl_window = SDL_CreateWindow("alpha_6809",
-                                SDL_WINDOWPOS_CENTERED,  SDL_WINDOWPOS_CENTERED, 
-                                window_width, window_height,
-                                window_flags);
+            SDL_WINDOWPOS_CENTERED_DISPLAY(MAIN_MONITOR),  
+            SDL_WINDOWPOS_CENTERED_DISPLAY(MAIN_MONITOR), 
+            window_width, window_height,
+            window_flags);
         if (!sdl_window)
         {
             std::stringstream ss;

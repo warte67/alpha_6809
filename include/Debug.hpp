@@ -21,7 +21,7 @@ class Debug : public IDevice
 		Word OnAttach(Word nextAddr) override;
 		void OnInit() override;
 		void OnQuit() override;
-		void OnActivate() override {}
+		void OnActivate() override;
 		void OnDeactivate() override {}
 		void OnEvent(SDL_Event* evnt) override;
 		void OnUpdate(float fElapsedTime) override;
@@ -45,13 +45,7 @@ class Debug : public IDevice
 
     private:
 
-        inline static SDL_Window* sdl_debug_window = nullptr;
-        inline static SDL_Renderer* sdl_debug_renderer = nullptr;
-        inline static SDL_Texture* sdl_debug_target_texture = nullptr;
 
-        inline static bool s_bIsDebugActive = false;
-        inline static bool s_bSingleStep = DEBUG_SINGLE_STEP;
-        inline static bool s_bIsStepPaused = true;
 
         // Word reg_brk_addr = 0x0000;	    // break point hardware register
         // Byte reg_flags = 0x00;			// debug flags hardware register
@@ -145,6 +139,13 @@ class Debug : public IDevice
         Word reg_brk_addr = 0x0000;	    // break point hardware register
         Byte reg_flags = 0x00;			// debug flags hardware register
 
+        inline static SDL_Window* sdl_debug_window = nullptr;
+        inline static SDL_Renderer* sdl_debug_renderer = nullptr;
+        inline static SDL_Texture* sdl_debug_target_texture = nullptr;
+
+        inline static bool s_bIsDebugActive = DEBUG_STARTS_ACTIVE;
+        inline static bool s_bSingleStep = DEBUG_SINGLE_STEP;
+        inline static bool s_bIsStepPaused = true;        
 
 
         Uint32 sdl_debug_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
