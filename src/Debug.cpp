@@ -187,13 +187,13 @@ void Debug::OnInit()
         reg_flags |= 0x40; 
     }
 
-
-    // s_bIsDebugActive = true;
+    // set the default monitor
+    Gfx::s_gfx_emu |= (DEBUG_MONITOR & 0x07)<<3;
 
     sdl_debug_window = SDL_CreateWindow("alpha_6809 Debugger",
             SDL_WINDOWPOS_CENTERED_DISPLAY(DEBUG_MONITOR),  
             SDL_WINDOWPOS_CENTERED_DISPLAY(DEBUG_MONITOR), 
-            DEBUG_BUFFER_WIDTH, DEBUG_BUFFER_HEIGHT,
+            DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT,
             debug_window_flags);
     if (!sdl_debug_window)
     {
@@ -222,6 +222,7 @@ void Debug::OnInit()
     }     
 
     // create the character buffer
+    _db_bfr.clear();
     for (unsigned int t=0; t<DEBUG_BUFFER_SIZE; t++)
     {
         D_GLYPH dg;
@@ -241,6 +242,27 @@ void Debug::OnInit()
 
 void Debug::OnActivate()
 {
+    // move (and resize) the window to the correct display monitor
+    static int s_monitor = (Gfx::s_gfx_emu & 0x38) >> 3;;
+    int DebugMonitor = (Gfx::s_gfx_emu & 0x38) >> 3;
+    if (s_monitor != DebugMonitor)
+    {
+        s_monitor = DebugMonitor;
+        int displays = SDL_GetNumVideoDisplays();
+        if( displays > 1 )
+        {
+            std::vector< SDL_Rect > displayBounds;
+            for( int i = 0; i < displays; i++ ) {
+                displayBounds.push_back( SDL_Rect() );
+                SDL_GetDisplayBounds( i, &displayBounds.back() );
+            }
+            int x = displayBounds[ DebugMonitor ].x + 100;
+            int y = displayBounds[ DebugMonitor ].y + 100;
+            SDL_SetWindowPosition(sdl_debug_window, x, y);
+            SDL_SetWindowSize(sdl_debug_window, DEBUG_WINDOW_WIDTH, DEBUG_WINDOW_HEIGHT);
+        }
+    }
+
     // start with debug window in focus
     SDL_RaiseWindow(sdl_debug_window);
 }

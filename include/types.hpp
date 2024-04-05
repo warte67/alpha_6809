@@ -39,8 +39,8 @@ constexpr int DEBUG_MONITOR = 0;
 
 constexpr Word DEBUG_WIDTH = 512;
 constexpr Word DEBUG_HEIGHT = 296;
-constexpr int DEBUG_BUFFER_WIDTH = DEBUG_WIDTH * 2;
-constexpr int DEBUG_BUFFER_HEIGHT = DEBUG_HEIGHT * 2;
+constexpr int DEBUG_WINDOW_WIDTH = DEBUG_WIDTH * 2;
+constexpr int DEBUG_WINDOW_HEIGHT = DEBUG_HEIGHT * 2;
 constexpr size_t DEBUG_BUFFER_SIZE = (DEBUG_WIDTH/8)*(DEBUG_HEIGHT/8);
 
 constexpr bool DEBUG_STARTS_ACTIVE = false;

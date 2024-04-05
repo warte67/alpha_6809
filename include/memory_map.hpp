@@ -50,7 +50,7 @@ enum MEMMAP
         
     GFX_EMU          = 0xFE01, // (Byte) Emulation Flags
         //           - bits 0-2  = Active Monitor 0-7
-        //           - bits 3-5  = reserved
+        //           - bits 3-5  = Debug Monitor 0-7
         //           - bit  6    = 0:vsync off, 1:vsync on
         //           - bit  7    = 0:windowed, 1:fullscreen
         

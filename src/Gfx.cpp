@@ -146,7 +146,7 @@ Word Gfx::OnAttach(Word nextAddr)
 
     DisplayEnum("GFX_EMU", nextAddr, "(Byte) Emulation Flags");
 	DisplayEnum("", 0, "\t     - bits 0-2  = Active Monitor 0-7");
-	DisplayEnum("", 0, "\t     - bits 3-5  = reserved");
+	DisplayEnum("", 0, "\t     - bits 3-5  = Debug Monitor 0-7");
 	DisplayEnum("", 0, "\t     - bit  6    = 0:vsync off, 1:vsync on");
 	DisplayEnum("", 0, "\t     - bit  7    = 0:windowed, 1:fullscreen");
     DisplayEnum("", 0, "");
@@ -313,6 +313,9 @@ void Gfx::OnInit()
     for (int i=0; i<256; i++)
         for (int r=0; r<8; r++)
             _gfx_glyph_data[i][r] = font8x8_system[i][r];
+
+    // set the default monitor
+    s_gfx_emu |= (MAIN_MONITOR & 0x07);
 }
 
 void Gfx::OnQuit()
@@ -325,25 +328,22 @@ void Gfx::OnActivate()
     // printf("%s::OnActivate()\n", Name().c_str());
     _decode_gmode();
 
-    // dont create a new window if one already exists
-    if (sdl_window)
+    // s_gfx_emu
+    int MainMonitor = s_gfx_emu & 0x07;
+    // printf("MainMonitor: %d\n", MainMonitor);
+
+    // create the main window
+    sdl_window = SDL_CreateWindow("alpha_6809",
+        SDL_WINDOWPOS_CENTERED_DISPLAY(MainMonitor),  
+        SDL_WINDOWPOS_CENTERED_DISPLAY(MainMonitor), 
+        window_width, window_height,
+        window_flags);
+    if (!sdl_window)
     {
-        SDL_SetWindowSize(sdl_window, window_width, window_height);
-    }
-    else
-    {
-        sdl_window = SDL_CreateWindow("alpha_6809",
-            SDL_WINDOWPOS_CENTERED_DISPLAY(MAIN_MONITOR),  
-            SDL_WINDOWPOS_CENTERED_DISPLAY(MAIN_MONITOR), 
-            window_width, window_height,
-            window_flags);
-        if (!sdl_window)
-        {
-            std::stringstream ss;
-            ss << "Unable to create the SDL window: " << SDL_GetError();
-            Bus::Error(ss.str());
-        }            
-    }
+        std::stringstream ss;
+        ss << "Unable to create the SDL window: " << SDL_GetError();
+        Bus::Error(ss.str());
+    }            
 	// create the renderer
     if (!sdl_renderer)
     {
@@ -599,6 +599,13 @@ void Gfx::_decode_gmode()
     if (gfx_vid_end == VIDEO_START) // is a text mode
         gfx_vid_end = VIDEO_START + ((res_width/8)*(res_height/8))*2;
     gfx_vid_end--;  // prevent off by one errors        
+
+    // VSYNC
+    SDL_RenderSetVSync(sdl_renderer, (gemu & 0x40));
+
+    // Main Monitor
+
+    // Debug Monitor
 
     // Testing: report results
     if (true)
