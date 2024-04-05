@@ -106,6 +106,7 @@ Word Debug::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "System Hardware Registers:");
 
     DisplayEnum("", 0, "");
+    DisplayEnum("SYS_BEGIN", nextAddr, " Start of System Hardware Registers");
     DisplayEnum("SYS_STATE", nextAddr, " (Byte) System State Register");
 	DisplayEnum("", 0, "SYS_STATE: ABCD.SSSS");
 	DisplayEnum("", 0, "     A:0   = Error: Standard Buffer Overflow ");
@@ -150,10 +151,11 @@ Word Debug::OnAttach(Word nextAddr)
 	DisplayEnum("", 0, "");
 	DisplayEnum("SYS_TIMER", nextAddr, " (Word) Increments at 0.46875 hz");
 	nextAddr += 2;
-    
-    DisplayEnum("", 0, "");
+    DisplayEnum("SYS_END", nextAddr, " End of System Hardware Registers");
+	DisplayEnum("", 0, "");
+
     DisplayEnum("", 0, "Debug Hardware Registers:");
-    DisplayEnum("DBG_BEGIN",    nextAddr, "Start of Debug Hardware Registers");
+    DisplayEnum("DBG_BEGIN", nextAddr, " start of debugger hardware registers");
     DisplayEnum("DBG_BRK_ADDR", nextAddr, "   (Word) Address of current breakpoint");
     nextAddr += 2;
     DisplayEnum("DBG_FLAGS",    nextAddr, "   (Byte) Debug Specific Hardware Flags:");

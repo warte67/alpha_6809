@@ -138,6 +138,7 @@ Word Gfx::OnAttach(Word nextAddr)
     // printf("%s::OnAttach()\n", Name().c_str());
 
     Word old_addr = nextAddr;
+    DisplayEnum("GFX_BEGIN", nextAddr, " Start of Graphics Hardware Registers");
     DisplayEnum("GFX_MODE", nextAddr, "(Byte) Graphics Mode");
 	DisplayEnum("", 0, "\t     - bit 0-4   = Resolution Modes 0-31");
 	DisplayEnum("", 0, "\t     - bit 7     = 0:text,  1:bitmap");
@@ -200,6 +201,8 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "");
     nextAddr += 8;
 
+    DisplayEnum("GFX_END", nextAddr, " End of Graphics Hardware Registers");
+    DisplayEnum("", 0, "");
 
     return nextAddr - old_addr;
 }
@@ -556,6 +559,12 @@ bool Gfx::VerifyGmode(Byte gmode)
     return true;
 }
 
+
+Word Gfx::GetTimingWidth()   
+{ return vec_timings[vec_gmodes[Bus::Read(GFX_MODE) & 0x1f].Timing_index].Width;  }
+Word Gfx::GetTimingHeight()  
+{ return vec_timings[vec_gmodes[Bus::Read(GFX_MODE) & 0x1f].Timing_index].Height; }
+
 void Gfx::_decode_gmode()
 {
     Byte gmode = Bus::Read(GFX_MODE);
@@ -833,8 +842,12 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
 {
     Gfx* gfx = Bus::GetGfx();
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
-    bool ALPHA_BLEND = true;
-    if (ALPHA_BLEND)
+
+    bool cls = false;
+    if (color_index ==0 && bIgnoreAlpha)
+        cls = true;
+
+    if (!bIgnoreAlpha)
     {       
         // int ret = ((p1 * (256-a))) + (p2 * (a+1)) >> 8;
         Uint16 pixel = *dst;	// 0xARGB
@@ -846,14 +859,14 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
         Byte r2 = gfx->red(color_index);
         Byte g2 = gfx->grn(color_index);
         Byte b2 = gfx->blu(color_index);
-        if (bIgnoreAlpha)
-            a2 = 15;
+        // if (bIgnoreAlpha)
+        //     a2 = 15;
 		//
         Byte r = (((r1 * (16-a2))) + (r2 * (a2+1))) >> 4;
         Byte g = (((g1 * (16-a2))) + (g2 * (a2+1))) >> 4;
         Byte b = (((b1 * (16-a2))) + (b2 * (a2+1))) >> 4;
 
-        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        if (gfx->alf(color_index) != 0) // || bIgnoreAlpha)
         {
             *dst = (
                 0xF000 | 
@@ -865,8 +878,11 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
     }
     else
     {        
-        // simple non-zero alpha channel
-        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        if (cls)
+        {
+            *dst = 0x0000;
+        }
+        else
         {
             *dst = 
             (
@@ -876,5 +892,5 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
                 gfx->blu(color_index)
             );    
         }
-    }    
+    }
 }

@@ -11,7 +11,8 @@ class Debug;
 
 class Gfx : public IDevice
 {
-    friend class Debug;
+    friend class Debug; 
+    friend class Mouse;
 
     public:
         Gfx() { _deviceName = "Gfx"; }
@@ -70,6 +71,9 @@ class Gfx : public IDevice
 
         inline static Uint32 GetWindowID() { return SDL_GetWindowID(sdl_window); }
         inline static SDL_Window* GetSDLWindow() { return sdl_window; }
+
+        Word GetTimingWidth();
+        Word GetTimingHeight();
 
 
     private:

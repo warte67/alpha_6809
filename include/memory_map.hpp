@@ -44,6 +44,7 @@ enum MEMMAP
     KERNEL_ROM       = 0xF000, 
         
         // HARDWARE REGISTERS (0.5K)
+    GFX_BEGIN        = 0xFE00, //  Start of Graphics Hardware Registers
     GFX_MODE         = 0xFE00, // (Byte) Graphics Mode
         //           - bit 0-4   = Resolution Modes 0-31
         //           - bit 7     = 0:text,  1:bitmap
@@ -88,8 +89,11 @@ enum MEMMAP
         //     array represents the top line of 8 pixels. Each array entry represents
         //     a row of 8 pixels. 
         
+    GFX_END          = 0xFE14, //  End of Graphics Hardware Registers
+        
         // System Hardware Registers:
         
+    SYS_BEGIN        = 0xFE14, //  Start of System Hardware Registers
     SYS_STATE        = 0xFE14, //  (Byte) System State Register
         // SYS_STATE: ABCD.SSSS
         //      A:0   = Error: Standard Buffer Overflow 
@@ -126,8 +130,10 @@ enum MEMMAP
         //      bit 0: 60.0 hz
         
     SYS_TIMER        = 0xFE18, //  (Word) Increments at 0.46875 hz
+    SYS_END          = 0xFE1A, //  End of System Hardware Registers
+        
         // Debug Hardware Registers:
-    DBG_BEGIN        = 0xFE1A, // Start of Debug Hardware Registers
+    DBG_BEGIN        = 0xFE1A, //  start of debugger hardware registers
     DBG_BRK_ADDR     = 0xFE1A, //    (Word) Address of current breakpoint
     DBG_FLAGS        = 0xFE1C, //    (Byte) Debug Specific Hardware Flags:
         //     bit 7: Debug Enable
@@ -140,8 +146,27 @@ enum MEMMAP
         //     bit 0: RESET (on low to high edge)
     DBG_END          = 0xFE1D, // End Debug Registers
         
-    RESERVED         = 0xFE1D, 
-        // 467 bytes in reserve
+        
+        // Mouse Cursor Hardware Registers:
+    CSR_BEGIN        = 0xFE1D, //  Start of Mouse Cursor Hardware Registers
+    CSR_XPOS         = 0xFE1D, //  (Word) horizontal mouse cursor coordinate
+    CSR_YPOS         = 0xFE1F, //  (Word) vertical mouse cursor coordinate
+    CSR_XOFS         = 0xFE21, //  (Byte) horizontal mouse cursor offset
+    CSR_YOFS         = 0xFE22, //  (Byte) vertical mouse cursor offset
+    CSR_SCROLL       = 0xFE23, //  (Signed) MouseWheel Scroll: -1, 0, 1
+    CSR_FLAGS        = 0xFE24, //  (Byte) mouse button flags:
+        //  CSR_FLAGS:
+        //       bits 0-4: button states
+        //       bits 5-6: number of clicks
+        //       bits 7:   cursor enable
+    CSR_BMP_INDX     = 0xFE25, //  (Byte) mouse cursor bitmap pixel offset
+    CSR_BMP_DATA     = 0xFE26, //  (Byte) mouse cursor bitmap pixel index color
+    CSR_PAL_INDX     = 0xFE28, //  (Byte) mouse cursor color palette index (0-15)
+    CSR_PAL_DATA     = 0xFE29, //  (Word) mouse cursor color palette data RGBA4444
+    CSR_END          = 0xFE2B, // End Mouse Registers
+        
+    RESERVED         = 0xFE2B, 
+        // 453 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 

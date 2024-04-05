@@ -11,7 +11,7 @@
 #include "Gfx.hpp"
 #include "Debug.hpp"
 #include "C6809.hpp"
-
+#include "Mouse.hpp"
 
 Bus::Bus()
 {
@@ -143,10 +143,15 @@ Bus::Bus()
     s_debug = new Debug();
     addr += Attach(s_debug);
 
+    // attach the mouse device
+    s_mouse = new Mouse();
+    addr += Attach(s_mouse);
 
 
 
 
+
+    
 
 
     // RESERVED

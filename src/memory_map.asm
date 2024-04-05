@@ -1,3 +1,4 @@
+
 ;  memory_map.asm
 
 ;  **********************************************
@@ -39,6 +40,7 @@ PG_BANK_TWO         equ   $D000
 KERNEL_ROM          equ   $F000  
         
           ; HARDWARE REGISTERS (0.5K)
+GFX_BEGIN           equ   $FE00    ;  Start of Graphics Hardware Registers
 GFX_MODE            equ   $FE00    ; (Byte) Graphics Mode
           ;          - bit 0-4   = Resolution Modes 0-31
           ;          - bit 7     = 0:text,  1:bitmap
@@ -83,8 +85,11 @@ GFX_GLYPH_DATA      equ   $FE0C    ;  (8-Bytes) Text Glyph Pixel Data Array
           ;     array represents the top line of 8 pixels. Each array entry represents
           ;     a row of 8 pixels. 
         
+GFX_END             equ   $FE14    ;  End of Graphics Hardware Registers
+        
           ; System Hardware Registers:
         
+SYS_BEGIN           equ   $FE14    ;  Start of System Hardware Registers
 SYS_STATE           equ   $FE14    ;  (Byte) System State Register
           ; SYS_STATE: ABCD.SSSS
           ;      A:0   = Error: Standard Buffer Overflow 
@@ -121,8 +126,10 @@ SYS_CLOCK_DIV       equ   $FE17    ;  (Byte) 60 hz Clock Divider Register (Read 
           ;      bit 0: 60.0 hz
         
 SYS_TIMER           equ   $FE18    ;  (Word) Increments at 0.46875 hz
+SYS_END             equ   $FE1A    ;  End of System Hardware Registers
+        
           ; Debug Hardware Registers:
-DBG_BEGIN           equ   $FE1A    ; Start of Debug Hardware Registers
+DBG_BEGIN           equ   $FE1A    ;  start of debugger hardware registers
 DBG_BRK_ADDR        equ   $FE1A    ;    (Word) Address of current breakpoint
 DBG_FLAGS           equ   $FE1C    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 7: Debug Enable
@@ -135,8 +142,27 @@ DBG_FLAGS           equ   $FE1C    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 0: RESET (on low to high edge)
 DBG_END             equ   $FE1D    ; End Debug Registers
         
-RESERVED            equ   $FE1D  
-          ; 467 bytes in reserve
+        
+          ; Mouse Cursor Hardware Registers:
+CSR_BEGIN           equ   $FE1D    ;  Start of Mouse Cursor Hardware Registers
+CSR_XPOS            equ   $FE1D    ;  (Word) horizontal mouse cursor coordinate
+CSR_YPOS            equ   $FE1F    ;  (Word) vertical mouse cursor coordinate
+CSR_XOFS            equ   $FE21    ;  (Byte) horizontal mouse cursor offset
+CSR_YOFS            equ   $FE22    ;  (Byte) vertical mouse cursor offset
+CSR_SCROLL          equ   $FE23    ;  (Signed) MouseWheel Scroll: -1, 0, 1
+CSR_FLAGS           equ   $FE24    ;  (Byte) mouse button flags:
+          ;  CSR_FLAGS:
+          ;       bits 0-4: button states
+          ;       bits 5-6: number of clicks
+          ;       bits 7:   cursor enable
+CSR_BMP_INDX        equ   $FE25    ;  (Byte) mouse cursor bitmap pixel offset
+CSR_BMP_DATA        equ   $FE26    ;  (Byte) mouse cursor bitmap pixel index color
+CSR_PAL_INDX        equ   $FE28    ;  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA        equ   $FE29    ;  (Word) mouse cursor color palette data RGBA4444
+CSR_END             equ   $FE2B    ; End Mouse Registers
+        
+RESERVED            equ   $FE2B  
+          ; 453 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -149,6 +175,5 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
 
 
