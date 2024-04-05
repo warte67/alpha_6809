@@ -225,7 +225,7 @@ void Gfx::OnInit()
     // INITIALIZE PALETTE DATA
     if (_palette.size() == 0)
     {
-        // BASIC COLORS (0-15) STANDARD CGA COLORS
+        // BASIC COLORS (0-15) CUSTOM DEFAULT COLORS
         std::vector<PALETTE> ref = {    
 			{ 0xF000 },		// 0: black
 			{ 0xF555 },		// 1: dk gray
@@ -243,8 +243,6 @@ void Gfx::OnInit()
 			{ 0xF85b },		// D: Lt Purple
 			{ 0xF59f },		// E: lt sky
 			{ 0xFFFF },		// F: white
-
-
 
         // // BASIC COLORS (0-15) STANDARD CGA COLORS
         // std::vector<PALETTE> ref = {    
@@ -296,7 +294,7 @@ void Gfx::OnInit()
             }
         }
 
-        // GRAYSCALE RAMP (233-255)
+        // GRAYSCALE RAMP (233-255) 
         for (float f=0.0f; f<=256.0f; f+=(256.0f / 24.0f))
         {
             if (f != 0.0f)
@@ -307,9 +305,13 @@ void Gfx::OnInit()
                 ent.g = (int)f>>4;
                 ent.r = (int)f>>4;
                 _palette.push_back(ent);
-                // printf("%3d:$%04X\n", (int)_palette.size(), ent.color);
             }
-        }
+        }  
+
+        // Add one 100% transparent black entry to the end              
+        _palette.push_back({0x0000});   // (255 = 100% transparent)
+
+        // printf("_palette.size(): %3d\n", (int)_palette.size());
     }
 
     // initialize the font glyph buffer
@@ -840,6 +842,17 @@ void Gfx::_setPixel(int x, int y, Byte color_index,
 
 void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
+    /*************************************************************
+     * NOTES:
+     * 
+     *  When transitioning to use an extended 64k external graphics 
+     *  buffer. This method should then include the alpha channel.
+     *  As of this point, the bIgnoreAlpha flag is not functional.
+     *  Use the Mouse::_setPixel_cursor() method as reference. That
+     *  Method does work as expected.
+     * 
+     *************************************************************/
+
     Gfx* gfx = Bus::GetGfx();
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
 
@@ -874,6 +887,12 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
                 (g<<4) | 
                 (b)
             );          
+            // *dst = (
+            //     (a2<<12) |       // utilize the alpha channel
+            //     (r<<8) | 
+            //     (g<<4) | 
+            //     (b)
+            // );          
 		}	
     }
     else

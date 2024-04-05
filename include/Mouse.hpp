@@ -28,15 +28,33 @@ class Mouse : public IDevice
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
 
-    private:
+        Uint8 red(Uint8 index) { Uint8 c = _csr_palette[index].r;  return c; }
+        Uint8 grn(Uint8 index) { Uint8 c = _csr_palette[index].g;  return c; }
+        Uint8 blu(Uint8 index) { Uint8 c = _csr_palette[index].b;  return c; }
+        Uint8 alf(Uint8 index) { Uint8 c = _csr_palette[index].a;  return c; }        
 
+    private:
+        // palette stuff
+        union PALETTE {
+            Word color;
+            struct {
+                Uint8 b : 4;		// blue
+                Uint8 g : 4;		// green
+                Uint8 r : 4;		// red
+                Uint8 a : 4;		// alpha
+            };
+        };
+        Byte m_palette_index = 0x00;   // DSP_PAL_IDX
+        std::vector<PALETTE> _csr_palette = {};
+
+        // starting cursor image
         std::vector<std::string> csr_buffer = 
         {
             "0000            ",
-            "08f0000         ",
-            "018fff00000     ",
-            " 018ffffff0     ",
-            " 0118fff000     ",
+            "08F0000         ",
+            "018FFF00000     ",
+            "0018FFFFFF0     ",
+            " 0118FFF000     ",
             " 01118000       ",
             " 001100         ",
             "  0110          ",
@@ -49,6 +67,9 @@ class Mouse : public IDevice
             "                ",
             "                "
         };
+        std::vector<Byte> csr_data;
+        void _render_csr_buffer();
+        void _setPixel_cursor(void* pixels, int pitch, int x, int y, Byte color_index);
 
         SDL_Texture* _cursor_texture = nullptr;
 

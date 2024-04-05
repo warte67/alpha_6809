@@ -157,12 +157,12 @@ CSR_FLAGS           equ   $FE24    ;  (Byte) mouse button flags:
           ;       bits 7:   cursor enable
 CSR_BMP_INDX        equ   $FE25    ;  (Byte) mouse cursor bitmap pixel offset
 CSR_BMP_DATA        equ   $FE26    ;  (Byte) mouse cursor bitmap pixel index color
-CSR_PAL_INDX        equ   $FE28    ;  (Byte) mouse cursor color palette index (0-15)
-CSR_PAL_DATA        equ   $FE29    ;  (Word) mouse cursor color palette data RGBA4444
-CSR_END             equ   $FE2B    ; End Mouse Registers
+CSR_PAL_INDX        equ   $FE27    ;  (Byte) mouse cursor color palette index (0-15)
+CSR_PAL_DATA        equ   $FE28    ;  (Word) mouse cursor color palette data RGBA4444
+CSR_END             equ   $FE2A    ; End Mouse Registers
         
-RESERVED            equ   $FE2B  
-          ; 453 bytes in reserve
+RESERVED            equ   $FE2A  
+          ; 454 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -175,5 +175,6 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
+
 
 

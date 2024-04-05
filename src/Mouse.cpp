@@ -24,10 +24,10 @@ Byte Mouse::read(Word offset, bool debug)
         case CSR_SCROLL:        { data = mouse_wheel; mouse_wheel = 0; break; }
         case CSR_FLAGS:			data = button_flags; break;
         case CSR_BMP_INDX:		data = bmp_offset; break;
-        case CSR_BMP_DATA:		data = cursor_buffer[bmp_offset / 16][bmp_offset % 16]; break;
-        // case CSR_PAL_INDX:		data = m_palette_index & 0x0f; break;
-        // case CSR_PAL_DATA + 0:  data = (_csr_palette[m_palette_index].color) >> 8; break;
-        // case CSR_PAL_DATA + 1:  data = (_csr_palette[m_palette_index].color) & 0xFF; break;
+        case CSR_BMP_DATA:		data = csr_data[bmp_offset]; break;
+        case CSR_PAL_INDX:		data = m_palette_index; break;
+        case CSR_PAL_DATA + 0:  data = (_csr_palette[m_palette_index].color) >> 8; break;
+        case CSR_PAL_DATA + 1:  data = (_csr_palette[m_palette_index].color) & 0xFF; break;
     }
     IDevice::write(offset,data);   // update any internal changes too
     return data;
@@ -52,20 +52,17 @@ void Mouse::write(Word offset, Byte data, bool debug)
             break;
         case CSR_BMP_INDX:	    bmp_offset = data;		break;
         case CSR_BMP_DATA:
-            cursor_buffer[bmp_offset / 16][bmp_offset % 16] = data;
-            _bCsrIsDirty = true;
+            csr_data[bmp_offset] = data;
             break;
-        // case CSR_PAL_INDX:	m_palette_index = data & 0x0f;	break;
-        // case CSR_PAL_DATA + 0:
-        //     _csr_palette[m_palette_index].color =
-        //         (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8);
-        //     _bCsrIsDirty = true;
-        //     break;
-        // case CSR_PAL_DATA + 1:
-        //     _csr_palette[m_palette_index].color =
-        //         (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0);
-        //     _bCsrIsDirty = true;
-        //     break;
+        case CSR_PAL_INDX:	m_palette_index = data;	break;
+        case CSR_PAL_DATA + 0:
+            _csr_palette[m_palette_index].color =
+                (_csr_palette[m_palette_index].color & 0x00FF) | (data << 8);
+            break;
+        case CSR_PAL_DATA + 1:
+            _csr_palette[m_palette_index].color =
+                (_csr_palette[m_palette_index].color & 0xFF00) | (data << 0);
+            break;
     }    
 
     IDevice::write(offset,data);   // update any internal changes too
@@ -102,7 +99,7 @@ Word Mouse::OnAttach(Word nextAddr)
     DisplayEnum("CSR_BMP_INDX", nextAddr, " (Byte) mouse cursor bitmap pixel offset");
     nextAddr += 1;
     DisplayEnum("CSR_BMP_DATA", nextAddr, " (Byte) mouse cursor bitmap pixel index color");
-    nextAddr += 2;
+    nextAddr += 1;
     DisplayEnum("CSR_PAL_INDX", nextAddr, " (Byte) mouse cursor color palette index (0-15)");
     nextAddr += 1;
     DisplayEnum("CSR_PAL_DATA", nextAddr, " (Word) mouse cursor color palette data RGBA4444");
@@ -130,6 +127,19 @@ void Mouse::OnInit()
     // printf("%s::OnInit()\n", Name().c_str());    
 
     _show_SDL_cursor(ENABLE_SDL_MOUSE_CURSOR);
+    _render_csr_buffer();
+    // copy the rest of the palette from Gfx into the local one
+    Gfx* gfx = Bus::GetGfx();
+    _csr_palette.clear();
+    for (int i=0;i<256;i++)
+    {
+        PALETTE clr = { 0x0000 };
+        clr.a = gfx->alf(i);
+        clr.r = gfx->red(i);
+        clr.g = gfx->grn(i);
+        clr.b = gfx->blu(i);
+        _csr_palette.push_back(clr);
+    }
 }
 void Mouse::OnQuit() 
 {
@@ -226,24 +236,13 @@ void Mouse::OnEvent(SDL_Event* evnt)
                 // update the registers
                 write_word(CSR_XPOS, mx);
                 write_word(CSR_YPOS, my);
-
-                //      if (_bCsrIsVisible)
-                //      {
-                //          if (mx >= m_gfx->_texture_width || my >= m_gfx->_texture_height || mx < 0 || my < 0)
-                //              SDL_ShowCursor(true);
-                //          else
-                //              SDL_ShowCursor(false);
-                //      }
             }
             break;
         } // END case SDL_MOUSEMOTION
         case SDL_MOUSEWHEEL:
         {
             if (evnt->window.windowID == Gfx::GetWindowID())
-            {
                 Bus::Write(CSR_SCROLL, evnt->wheel.y);
-                // printf("WHEEL: %d\n", Bus::Read(CSR_SCROLL));               
-            }
             break;
         } // END case SDL_MOUSEWHEEL       
 
@@ -325,38 +324,101 @@ void Mouse::_display_SDL_cursor()
             // start with a clear texture (pixel streaming version)
             for (int ty=0; ty<gfx->res_height; ty++)
                 for (int tx=0; tx<gfx->res_width; tx++)
-                    gfx->_setPixel_unlocked(pixels, pitch, tx, ty, 0, true);
+                    gfx->_setPixel_unlocked(pixels, pitch, tx, ty, 0, true);    
             b_wasCleared = true;
         }
         if (read(CSR_FLAGS) & 0x80)
         {
             b_wasCleared = false;
             // render the cursor
-            int x = (Sint16)Bus::Read_Word(CSR_XPOS);
-            int y = (Sint16)Bus::Read_Word(CSR_YPOS);    
-            int y_ofs = 0;
-            for (auto& li : csr_buffer)    
+            int x = (Sint16)Bus::Read_Word(CSR_XPOS) + (Sint8)Bus::Read(CSR_XOFS);
+            int y = (Sint16)Bus::Read_Word(CSR_YPOS) + (Sint8)Bus::Read(CSR_YOFS);   
+
+            int id = 0;
+            for (int v=0; v<16; v++)
             {
-                int x_ofs = 0;
-                for (auto& ch : li)
+                for (int h=0; h<16; h++)
                 {
-                    if (ch != ' ')
-                    {
-                        Byte c = 0;
-                        if (ch>='0' && ch<='9')
-                            c = ch-'0';
-                        if (ch>='a' && ch<='f')
-                            c = (ch-'a')+10;
-                        if (ch>='A' && ch<='A')
-                            c = (ch-'A')+10;
-                        gfx->_setPixel_unlocked(pixels, pitch, x+x_ofs, y+y_ofs, c);
-                    }
-                    x_ofs++;
+                    Byte c = csr_data[id++];
+                    _setPixel_cursor(pixels, pitch, h+x, v+y, c);
                 }
-                y_ofs++;
             }
         }
         SDL_UnlockTexture(_cursor_texture); 
     }   
+}
+
+void Mouse::_render_csr_buffer()
+{
+    // renders the user ledgible data from the csr_buffer to the csr_data vector
+    csr_data.clear();
+    for (auto& li : csr_buffer)    
+    {
+        for (auto& ch : li)
+        {
+            Byte c = 0xff;  // space is 100% transparent, use character index 255.
+            if (ch != ' ')
+            {
+                if (ch>='0' && ch<='9')
+                    c = ch-'0';
+                else if (ch>='a' && ch<='f')
+                    c = (ch-'a')+10;
+                else if (ch>='A' && ch<='F')
+                    c = (ch-'A')+10;
+            }
+            csr_data.push_back(c);
+        }
+    }
+}
+
+void Mouse::_setPixel_cursor(void* pixels, int pitch, int x, int y, Byte color_index)
+{    
+    Gfx* gfx = Bus::GetGfx();
+    // strict bounds checking
+    if (x<0 || y<0)         return;
+    if (x>=gfx->res_width)  return;
+    if (y>=gfx->res_height) return;
+
+    Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));
+    Uint16 pixel = *dst;	// 0xARGB
+
+    constexpr bool use_alpha = true;    // testing:  this flag does work as expected.
+                                        //      Update the _setPixel_unlocked() method in Gfx.
+    if (use_alpha)
+    {
+        Byte r1 = (pixel & 0x0f00) >> 8;
+        Byte g1 = (pixel & 0x00f0) >> 4;
+        Byte b1 = (pixel & 0x000f) >> 0;
+        
+        Byte a2 = this->alf(color_index);
+        Byte r2 = this->red(color_index);
+        Byte g2 = this->grn(color_index);
+        Byte b2 = this->blu(color_index);
+
+        Byte r = (((r1 * (16-a2))) + (r2 * (a2+1))) >> 4;
+        Byte g = (((g1 * (16-a2))) + (g2 * (a2+1))) >> 4;
+        Byte b = (((b1 * (16-a2))) + (b2 * (a2+1))) >> 4;
+
+        if (alf(color_index) != 0)
+        {
+            *dst = (
+                (a2<<12) | 
+                (r<<8) | 
+                (g<<4) | 
+                (b)
+            );          
+        }	
+    }
+    else
+    {
+        *dst = 
+        (
+            0xF000 |                    // full alpha, no color mixing
+            (red(color_index)<<8) |
+            (grn(color_index)<<4) |
+            blu(color_index)
+        );    
+       
+    }
 }
 

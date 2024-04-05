@@ -161,12 +161,12 @@ enum MEMMAP
         //       bits 7:   cursor enable
     CSR_BMP_INDX     = 0xFE25, //  (Byte) mouse cursor bitmap pixel offset
     CSR_BMP_DATA     = 0xFE26, //  (Byte) mouse cursor bitmap pixel index color
-    CSR_PAL_INDX     = 0xFE28, //  (Byte) mouse cursor color palette index (0-15)
-    CSR_PAL_DATA     = 0xFE29, //  (Word) mouse cursor color palette data RGBA4444
-    CSR_END          = 0xFE2B, // End Mouse Registers
+    CSR_PAL_INDX     = 0xFE27, //  (Byte) mouse cursor color palette index (0-15)
+    CSR_PAL_DATA     = 0xFE28, //  (Word) mouse cursor color palette data RGBA4444
+    CSR_END          = 0xFE2A, // End Mouse Registers
         
-    RESERVED         = 0xFE2B, 
-        // 453 bytes in reserve
+    RESERVED         = 0xFE2A, 
+        // 454 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -182,5 +182,6 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+
 
 

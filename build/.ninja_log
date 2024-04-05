@@ -1,9 +1,9 @@
 # ninja log v5
-1	729	1712340466255586908	CMakeFiles/main.dir/src/IDevice.cpp.o	260323fee8729fdb
-1	790	1712340466319588759	CMakeFiles/main.dir/src/main.cpp.o	66eaf30585477c76
-2	1261	1712341551526015612	CMakeFiles/main.dir/src/Debug.cpp.o	ae1cc7463ec2fe0
-2	1036	1712341551302010174	CMakeFiles/main.dir/src/Gfx.cpp.o	700ac23bb0ed37c9
-1	1182	1712341551446013670	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
-1	1544	1712340467071610509	CMakeFiles/main.dir/src/C6809.cpp.o	5710ebea0c95313c
-1261	1371	1712341551634018234	main	ddbac1f810a80a54
-2	872	1712341551138006192	CMakeFiles/main.dir/src/Mouse.cpp.o	a06ab6b64a9b8040
+1	718	1712352588506717924	CMakeFiles/main.dir/src/IDevice.cpp.o	260323fee8729fdb
+0	815	1712352588606721284	CMakeFiles/main.dir/src/main.cpp.o	66eaf30585477c76
+1	1321	1712352589110738222	CMakeFiles/main.dir/src/Debug.cpp.o	ae1cc7463ec2fe0
+1	1112	1712352588902731231	CMakeFiles/main.dir/src/Gfx.cpp.o	700ac23bb0ed37c9
+1	1255	1712352589042735936	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
+1	1564	1712352589354746420	CMakeFiles/main.dir/src/C6809.cpp.o	5710ebea0c95313c
+1564	1672	1712352589458749914	main	ddbac1f810a80a54
+1	968	1712352588746725990	CMakeFiles/main.dir/src/Mouse.cpp.o	a06ab6b64a9b8040
