@@ -85,6 +85,12 @@ void Debug::write(Word offset, Byte data, bool debug)
             if (reg_flags & 0x04)   cbIRQ();
             if (reg_flags & 0x02)   cbNMI();
             if (reg_flags & 0x01)   cbReset();
+            // activate or deactivate the debugger
+            if (s_bIsDebugActive)   // activate
+                SDL_ShowWindow(sdl_debug_window);
+            else                    // deactivate            
+                SDL_HideWindow(sdl_debug_window);
+
             break;        
         }
     }
