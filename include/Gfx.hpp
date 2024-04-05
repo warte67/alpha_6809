@@ -7,8 +7,12 @@
 
 #include "IDevice.hpp" 
 
+class Debug;
+
 class Gfx : public IDevice
 {
+    friend class Debug;
+
     public:
         Gfx() { _deviceName = "Gfx"; }
         Gfx(std::string sName) : IDevice(sName) {}
@@ -65,6 +69,7 @@ class Gfx : public IDevice
         bool VerifyGmode(Byte gmode);
 
         inline static Uint32 GetWindowID() { return SDL_GetWindowID(sdl_window); }
+        inline static SDL_Window* GetSDLWindow() { return sdl_window; }
 
 
     private:

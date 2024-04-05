@@ -335,9 +335,18 @@ void Bus::OnEvent(SDL_Event* null_event)
 
             case SDL_KEYDOWN:
             {
-                // [ESCAPE]
-                if (evnt.key.keysym.sym == SDLK_ESCAPE)
-                    s_bIsRunning = false;
+                // [ESCAPE]  KMOD_SHIFT
+                SDL_Keymod mod = SDL_GetModState();
+                if (mod & KMOD_SHIFT)
+                {
+                    if (evnt.key.keysym.sym == SDLK_ESCAPE)
+                        s_bIsRunning = false;
+                }                
+                if (mod & KMOD_ALT)
+                {
+                    if (evnt.key.keysym.sym == SDLK_x)
+                        s_bIsRunning = false;
+                }
                 break;                
             }
         }

@@ -17,6 +17,7 @@ class C6809;
 class Bus : public IDevice
 {
     friend class C6809;     // This is cheating? Maybe not, but it does make me feel a bit dirty.
+    friend class Debug;     // Again, this feels so wrong!
 
     private:
         Bus();

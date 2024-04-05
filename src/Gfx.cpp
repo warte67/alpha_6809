@@ -390,56 +390,57 @@ void Gfx::OnDeactivate()
 
 void Gfx::OnEvent(SDL_Event* evnt)
 {
-    if (evnt->window.windowID != GetWindowID())
-        return;
+    // if (evnt->window.windowID != GetWindowID())
+    //     return;
 
     // printf("%sw::OnEvent()\n", Name().c_str());
-    {        
-        switch(evnt->type)
+    switch(evnt->type)
+    {
+        case SDL_WINDOWEVENT:  
         {
-            case SDL_WINDOWEVENT:  
+            if (evnt->window.windowID == GetWindowID())     // redundant?
             {
-                if (evnt->window.windowID == GetWindowID())     // redundant
+                if (evnt->window.event == SDL_WINDOWEVENT_RESIZED)
                 {
-                    if (evnt->window.event == SDL_WINDOWEVENT_RESIZED)
-                    {
-                        window_width = evnt->window.data1;
-                        window_height = evnt->window.data2;
-                        // m_debug->_onWindowResize();
-                    }
-                    // main window is closed
-                    if (evnt->window.event == SDL_WINDOWEVENT_CLOSE)
-                    {
-                        Bus::IsRunning(false);
-                    }
+                    window_width = evnt->window.data1;
+                    window_height = evnt->window.data2;
+                    // m_debug->_onWindowResize();
                 }
-                break;
+                // main window is closed
+                if (evnt->window.event == SDL_WINDOWEVENT_CLOSE)
+                {
+                    Bus::IsRunning(false);
+                }
             }
-            
-            case SDL_KEYDOWN:
+            break;
+        }
+
+        case SDL_KEYDOWN:
+        {
+            // [ALT-X]
+            if (evnt->key.keysym.sym == SDLK_x)
             {
-                // [ALT-X]
-                if (evnt->key.keysym.sym == SDLK_x)
-                {
-                    if (SDL_GetModState() & KMOD_ALT)
-                        Bus::IsRunning(false);
-                }
-                // Testing [SPACE]
-                if (evnt->key.keysym.sym == SDLK_SPACE)
-                {
+                if (SDL_GetModState() & KMOD_ALT)
+                    Bus::IsRunning(false);
+            }
+            // Testing [ALT-ENTER]
+            if (evnt->key.keysym.sym == SDLK_RETURN && SDL_GetModState() & KMOD_ALT)
+            {
+                Byte data = Bus::Read(GFX_EMU);
+                (data & 0x80) ? data &= 0x7f : data |= 0x80;
+                Bus::Write(GFX_EMU, data);
+                // s_bIsDirty = true;
+            }
+
+            // [LEFT] & [RIGHT]
+            if (Bus::GetDebug()->IsCursorVisible() == false)
+            {
+                if (evnt->key.keysym.sym == SDLK_RIGHT)
                     Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
-                    // s_bIsDirty = true;
-                }
-                // Testing [ENTER]
-                if (evnt->key.keysym.sym == SDLK_RETURN)
-                {
-                    Byte data = Bus::Read(GFX_EMU);
-                    (data & 0x80) ? data &= 0x7f : data |= 0x80;
-                    Bus::Write(GFX_EMU, data);
-                    // s_bIsDirty = true;
-                }
-                // Testing [TAB]
-                if (evnt->key.keysym.sym == SDLK_TAB)
+                if (evnt->key.keysym.sym == SDLK_LEFT)
+                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)-1);
+                // Testing [UP] & [DOWN]
+                if (evnt->key.keysym.sym == SDLK_DOWN || evnt->key.keysym.sym == SDLK_UP)
                 {
                     Byte data = Bus::Read(GFX_MODE);
                     if (!(data & 0x80))
@@ -449,7 +450,10 @@ void Gfx::OnEvent(SDL_Event* evnt)
                     }
                     else
                     {
-                        data += 0x20;
+                        if (evnt->key.keysym.sym == SDLK_UP)
+                            data += 0x20;
+                        else
+                            data -= 0x20;
                     }
                     Bus::Write(GFX_MODE, data);
                     if (Bus::Read(GFX_MODE)!=data)
@@ -458,9 +462,11 @@ void Gfx::OnEvent(SDL_Event* evnt)
                         Bus::Write(GFX_MODE, data);
                     }
                 }
-                break;      
-            }      
+            }
+            
+            break;
         }
+
     }
 }
 
