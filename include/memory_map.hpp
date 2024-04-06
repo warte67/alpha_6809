@@ -22,8 +22,8 @@ enum MEMMAP
         
         // System Memory:
     ZERO_PAGE        = 0x0010, 
-    USER_STACK       = 0x0100, 
-    USTACK_TOP       = 0x0200, // Top of the user stack space
+    FIO_BUFFER       = 0x0100, 
+    FIO_BFR_END      = 0x01FF, // End of the File Input/Output Buffer
     SYSTEM_STACK     = 0x0200, 
     SSTACK_TOP       = 0x0400, // Top of the system stack space
         
@@ -146,7 +146,6 @@ enum MEMMAP
         //     bit 0: RESET (on low to high edge)
     DBG_END          = 0xFE1D, // End Debug Registers
         
-        
         // Mouse Cursor Hardware Registers:
     CSR_BEGIN        = 0xFE1D, //  Start of Mouse Cursor Hardware Registers
     CSR_XPOS         = 0xFE1D, //  (Word) horizontal mouse cursor coordinate
@@ -169,14 +168,15 @@ enum MEMMAP
     KEY_BEGIN        = 0xFE2A, // Start of the Keyboard Register space
     CHAR_Q_LEN       = 0xFE2A, //   (Byte) # of characters waiting in queue        (Read Only)
     CHAR_SCAN        = 0xFE2B, //   (Byte) read next character in queue (not popped when read)
-    CHAR_POP         = 0xFE2C, //   (Byte) read next character in queue (not popped when read)
+    CHAR_POP         = 0xFE2C, //   (Byte) read next character in queue (popped when read)
     XKEY_BUFFER      = 0xFE2D, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
     EDT_BFR_CSR      = 0xFE3D, //   (Byte) cursor position within edit buffer     (Read/Write)
     EDT_ENABLE       = 0xFE3E, //   (Byte) line editor enable flag                 (Read/Write)
-    EDT_BUFFER       = 0xFE3F, //   line editing character buffer                 (Read/Write)
-    KEY_END          = 0xFEBF, // End of the Keyboard Register space
-    RESERVED         = 0xFEBF, 
-        // 305 bytes in reserve
+    EDT_BUFFER       = 0xFE3F, //   line editing character buffer                 (Read Only)
+    KEY_END          = 0xFF3F, // End of the Keyboard Register space
+        
+    RESERVED         = 0xFF3F, 
+        // 177 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 

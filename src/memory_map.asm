@@ -1,4 +1,3 @@
-
 ;  memory_map.asm
 
 ;  **********************************************
@@ -18,8 +17,8 @@ SOFT_RESET          equ   $000E    ; RESET Software Interrupt Vector
         
           ; System Memory:
 ZERO_PAGE           equ   $0010  
-USER_STACK          equ   $0100  
-USTACK_TOP          equ   $0200    ; Top of the user stack space
+FIO_BUFFER          equ   $0100  
+FIO_BFR_END         equ   $01FF    ; End of the File Input/Output Buffer
 SYSTEM_STACK        equ   $0200  
 SSTACK_TOP          equ   $0400    ; Top of the system stack space
         
@@ -142,7 +141,6 @@ DBG_FLAGS           equ   $FE1C    ;    (Byte) Debug Specific Hardware Flags:
           ;     bit 0: RESET (on low to high edge)
 DBG_END             equ   $FE1D    ; End Debug Registers
         
-        
           ; Mouse Cursor Hardware Registers:
 CSR_BEGIN           equ   $FE1D    ;  Start of Mouse Cursor Hardware Registers
 CSR_XPOS            equ   $FE1D    ;  (Word) horizontal mouse cursor coordinate
@@ -165,14 +163,15 @@ CSR_END             equ   $FE2A    ; End Mouse Registers
 KEY_BEGIN           equ   $FE2A    ; Start of the Keyboard Register space
 CHAR_Q_LEN          equ   $FE2A    ;   (Byte) # of characters waiting in queue        (Read Only)
 CHAR_SCAN           equ   $FE2B    ;   (Byte) read next character in queue (not popped when read)
-CHAR_POP            equ   $FE2C    ;   (Byte) read next character in queue (not popped when read)
+CHAR_POP            equ   $FE2C    ;   (Byte) read next character in queue (popped when read)
 XKEY_BUFFER         equ   $FE2D    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
 EDT_BFR_CSR         equ   $FE3D    ;   (Byte) cursor position within edit buffer     (Read/Write)
 EDT_ENABLE          equ   $FE3E    ;   (Byte) line editor enable flag                 (Read/Write)
-EDT_BUFFER          equ   $FE3F    ;   line editing character buffer                 (Read/Write)
-KEY_END             equ   $FEBF    ; End of the Keyboard Register space
-RESERVED            equ   $FEBF  
-          ; 305 bytes in reserve
+EDT_BUFFER          equ   $FE3F    ;   line editing character buffer                 (Read Only)
+KEY_END             equ   $FF3F    ; End of the Keyboard Register space
+        
+RESERVED            equ   $FF3F  
+          ; 177 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -185,7 +184,5 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
-
 
 

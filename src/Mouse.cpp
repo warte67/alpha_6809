@@ -77,7 +77,6 @@ Word Mouse::OnAttach(Word nextAddr)
     // printf("%s::OnAttach()\n", Name().c_str());    
     Word old_addr = nextAddr;
 
-    DisplayEnum("", 0, "");
     DisplayEnum("", 0, "Mouse Cursor Hardware Registers:");
     DisplayEnum("CSR_BEGIN", nextAddr, " Start of Mouse Cursor Hardware Registers");
     DisplayEnum("CSR_XPOS", nextAddr, " (Word) horizontal mouse cursor coordinate");

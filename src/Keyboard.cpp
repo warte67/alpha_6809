@@ -33,13 +33,13 @@ Byte Keyboard::read(Word offset, bool debug)
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 		data = m_memory[offset - m_base];
 
-	// this is just a raw read from the edit buffer
-	if (offset >= EDT_BUFFER && offset < EDT_BUFFER + EDIT_BUFFER_SIZE)
-	{
-		Word index = offset - EDT_BUFFER;
-		if (index >= EDIT_BUFFER_SIZE)	index = EDIT_BUFFER_SIZE-1;
-		data = editBuffer[index];
-	}
+    // this is just a raw read from the edit buffer
+    if (offset >= EDT_BUFFER && offset < EDT_BUFFER + EDIT_BUFFER_SIZE)
+    {
+        Word index = offset - EDT_BUFFER;
+        if (index >= EDIT_BUFFER_SIZE)	index = EDIT_BUFFER_SIZE-1;
+        data = editBuffer[index];
+    }
 
     // update and return
     IDevice::write(offset,data);   // update any internal changes too
@@ -94,7 +94,7 @@ Word Keyboard::OnAttach(Word nextAddr)
 	DisplayEnum("CHAR_SCAN",   nextAddr, "  (Byte) read next character in queue (not popped when read)");
 	nextAddr += 1;
 
-	DisplayEnum("CHAR_POP",    nextAddr, "  (Byte) read next character in queue (not popped when read)");
+	DisplayEnum("CHAR_POP",    nextAddr, "  (Byte) read next character in queue (popped when read)");
 	nextAddr += 1;
 
 	DisplayEnum("XKEY_BUFFER", nextAddr, "  (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)");
@@ -106,11 +106,12 @@ Word Keyboard::OnAttach(Word nextAddr)
 	DisplayEnum("EDT_ENABLE", nextAddr, "  (Byte) line editor enable flag                 (Read/Write)");
 	nextAddr += 1;
 
-	DisplayEnum("EDT_BUFFER",  nextAddr, "  line editing character buffer                 (Read/Write)");
+	DisplayEnum("EDT_BUFFER",  nextAddr, "  line editing character buffer                 (Read Only)");
 	nextAddr += EDIT_BUFFER_SIZE;
 
 	DisplayEnum("KEY_END", nextAddr, "End of the Keyboard Register space");
 	nextAddr += 0;
+    DisplayEnum("", 0, "");
 
 	return nextAddr - old_addr;    
 }
@@ -469,35 +470,35 @@ void Keyboard::_doEditBuffer(char xkey)
 
 	Byte c = xkey;
 	auto itr = _str_edt_buffer.begin() + edt_bfr_csr;
-	Byte Cols = Bus::Read(GFX_HRES);
+	Byte Cols = Bus::Read_Word(GFX_HRES);
 
 	if (c == XKeyToAscii(XKey::LEFT))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr > 0)
 			edt_bfr_csr--;
 	}
 	else if (c == XKeyToAscii(XKey::RIGHT))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr < _str_edt_buffer.size())
 			edt_bfr_csr++;
 	}
 	else if (c == XKeyToAscii(XKey::UP))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr > Cols)
 			edt_bfr_csr -= Cols;
 	}
 	else if (c == XKeyToAscii(XKey::DOWN))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr + Cols < _str_edt_buffer.size())
 			edt_bfr_csr += Cols;
 	}
 	else if (c == XKeyToAscii(XKey::BACKSPACE))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr > 0)
 		{
 			std::string _right = _str_edt_buffer.substr(edt_bfr_csr);
@@ -508,7 +509,7 @@ void Keyboard::_doEditBuffer(char xkey)
 	}
 	else if (c == XKeyToAscii(XKey::DELETE))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		if (edt_bfr_csr < _str_edt_buffer.size())
 		{
 			std::string _right = _str_edt_buffer.substr(edt_bfr_csr + 1);
@@ -518,19 +519,19 @@ void Keyboard::_doEditBuffer(char xkey)
 	}
 	else if (c == XKeyToAscii(XKey::END))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		edt_bfr_csr = _str_edt_buffer.size();
 	}
 	else if (c == XKeyToAscii(XKey::HOME))
 	{
-		// Bus::Read(CHAR_POP);
+		            // Bus::Read(CHAR_POP);
 		edt_bfr_csr = 0;
 	}
 	else if (c >= 0x20 && c < 128)
 	{
 		if (_str_edt_buffer.size() < editBuffer.size() - 2)     // include space for null-termination
 		{
-			// Bus::Read(CHAR_POP);
+			        // Bus::Read(CHAR_POP);
 			_str_edt_buffer.insert(itr, c);
 			edt_bfr_csr++;
 		}
@@ -557,9 +558,9 @@ Byte Keyboard::charPopQueue() {
 	if (charQueue.size() == 0)
 		return 0;
 
-    // dont pop a character from the queue if the debugger window is in focus?
-    if (!(SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS))
-        return 0;
+    //    // dont pop a character from the queue if the debugger window is in focus?
+    //    if (!(SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS)) {
+    //        return 0; }
 
 	Byte ret = charQueue.front();
 	charQueue.pop();

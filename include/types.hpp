@@ -49,7 +49,17 @@ constexpr bool DEBUG_SINGLE_STEP = false;
 constexpr bool ENABLE_SDL_MOUSE_CURSOR = true;  // when the SDL cursor is displayed, the hardware cursor is not
 
 // Keyboard Device Constants
-constexpr size_t EDIT_BUFFER_SIZE = 128;        // if this is changed, the memory_map.hpp must be rebuilt
+constexpr size_t EDIT_BUFFER_SIZE = 256;        // if this is changed, the memory_map.hpp must be rebuilt
 
 
 
+/***************************
+  
+ Notes:
+    If we start running out of room to fit the hardware registers. Try reducing the EDIT_BUFFER_SIZE. The
+    Keyboard line edit buffer is using the upper hardware register space. Another option may be to hide the
+    line edit buffer behind a 'single byte out at time' type register system.
+
+
+  
+  *************************/
