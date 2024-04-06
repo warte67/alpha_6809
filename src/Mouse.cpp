@@ -179,7 +179,9 @@ void Mouse::OnDeactivate()
 
 void Mouse::OnEvent(SDL_Event* evnt) 
 {
-    // printf("%s::OnEvent()\n", Name().c_str());    
+    // printf("%s::OnEvent()\n", Name().c_str());   
+
+    static bool s_bCsr = (button_flags & 0x80); // cursor state
     
     switch (evnt->type)
     {
@@ -191,6 +193,8 @@ void Mouse::OnEvent(SDL_Event* evnt)
                     if (evnt->window.windowID == Gfx::GetWindowID())
                     {   // leaving the main window
                         // printf("EVENT: leaving the main window\n");
+                        s_bCsr = (button_flags & 0x80);
+                        _show_SDL_cursor(false);
                     }
                     else if (evnt->window.windowID == Debug::GetWindowID())
                     {   // leaving the debug window
@@ -201,6 +205,7 @@ void Mouse::OnEvent(SDL_Event* evnt)
                     if (evnt->window.windowID == Gfx::GetWindowID())
                     {   // entering the main window
                         // printf("EVENT: entering the main window\n");
+                        _show_SDL_cursor(s_bCsr);
                     }
                     else if (evnt->window.windowID == Debug::GetWindowID())
                     {   // entering the debug window

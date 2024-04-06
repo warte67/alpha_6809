@@ -49,7 +49,7 @@ constexpr bool DEBUG_SINGLE_STEP = false;
 constexpr bool ENABLE_SDL_MOUSE_CURSOR = true;  // when the SDL cursor is displayed, the hardware cursor is not
 
 // Keyboard Device Constants
-constexpr size_t EDIT_BUFFER_SIZE = 256;        // if this is changed, the memory_map.hpp must be rebuilt
+
 
 
 

@@ -89,6 +89,6 @@ class Mouse : public IDevice
 
         // private helpers
         void _show_SDL_cursor(bool b);      // hides or shows the SDL and Hardware cursors 
-        void _display_SDL_cursor();
+        void _display_SDL_cursor();         // displays the cursor bitmap image
 
 };

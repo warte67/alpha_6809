@@ -396,8 +396,9 @@ void Gfx::OnDeactivate()
 
 void Gfx::OnEvent(SDL_Event* evnt)
 {
-    // if (evnt->window.windowID != GetWindowID())
-    //     return;
+    // if not a main window event, just return now
+    if (SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS)
+        return;    
 
     // printf("%sw::OnEvent()\n", Name().c_str());
     switch(evnt->type)

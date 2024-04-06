@@ -15,6 +15,8 @@
 #include "IDevice.hpp" 
 #include "XK_Keycodes.hpp"
 
+constexpr size_t EDIT_BUFFER_SIZE = 256;        // if this is changed, the memory_map.hpp must be rebuilt
+
 class Keyboard : public IDevice
 {
     public:

@@ -357,7 +357,7 @@ void Debug::OnEvent(SDL_Event* evnt)
     }
 
     // if not a debug event, just return now
-    if (evnt->window.windowID != GetWindowID())
+    if (!(SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS)) 
         return;
 
     switch (evnt->type) {
@@ -1008,12 +1008,8 @@ void Debug::DumpMemory(int col, int row, Word addr)
     {
         int c = col;
         std::string out = _hex(ofs, 4) + " ";
-        if (use_debug_read)
-            for (int b = 0; b < 8; b++)
-                out += _hex(Bus::Read(ofs + b, true), 2) + " ";
-        else
-            for (int b = 0; b < 8; b++)
-                out += _hex(Bus::Read(ofs + b), 2) + " ";
+        for (int b = 0; b < 8; b++)
+            out += _hex(Bus::Read(ofs + b, use_debug_read), 2) + " ";
 
         c += OutText(col, row + line, out.c_str(), 0xe0);
 
@@ -1023,10 +1019,7 @@ void Debug::DumpMemory(int col, int row, Word addr)
             for (int b = 0; b < 8; b++)
             {
                 Byte data;
-                if (use_debug_read)
-                    data = Bus::Read(ofs + b, true);
-                else
-                    data = Bus::Read(ofs + b);
+                data = Bus::Read(ofs + b, use_debug_read);
                 OutGlyph(c++, row + line, data, 0xd0);
             }
         }

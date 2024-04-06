@@ -562,7 +562,6 @@ Byte Bus::Read(Word offset, bool debug)
             if (debug)
                 if (offset - a->Base() < a->Size())
                     return a->_memory((Word)(offset - a->Base()));
-
             return a->read(offset, debug);
         }
     }
