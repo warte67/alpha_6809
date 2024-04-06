@@ -10,18 +10,29 @@ else
     cmake ..
 fi
 
-# attempt to build the kernel rom
-./asm kernel_f000
-
+# build asm files
+cd ../src
+echo 'asm6809 -H -9 "kernel_f000.asm" -o "../build/kernel_f000.hex" -l "../build/kernel_f000.lst" -s "../build/kernel_f000.sym" '
+asm6809 -H -9 "kernel_f000.asm" -o "../build/kernel_f000.hex" -l "../build/kernel_f000.lst" -s "../build/kernel_f000.sym"    
 if [ $? -eq 0 ]; then
-    make
+    echo "\e[93msuccessfully built kernel_f000.hex\e[0m"
+    cd ../build
+
+    # attempt to make and run 
     if [ $? -eq 0 ]; then
-        ./main
+        make
+        if [ $? -eq 0 ]; then
+            ./main
+        else
+            echo "\e[31mmake FAILED to build!\e[0m"
+        fi
     else
-        echo "\e[31mmake FAILED to build!\e[0m"
+        echo "\e[31masm6809 FAILED!\e[0m"
     fi
 else
     echo "\e[31masm6809 FAILED!\e[0m"
+    cd ../build
 fi
+
 
 

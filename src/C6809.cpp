@@ -123,7 +123,9 @@ void C6809::clock_input()
 					(this->*opMap[opcode].operation)();
 				else
 				{
-					Bus::Error("Invalid Instruction");
+					std::string er = "Invalid Instruction at $";
+					er += C6809::hex(PC, 4);
+					Bus::Error(er.c_str());
 				}
 				 if (!waiting_cwai && !waiting_sync)
 				 	debug->ContinueSingleStep();
@@ -365,7 +367,9 @@ Word C6809::idx() {
 		}
 		default:
 		{
-			Bus::Error("Invalid Postbyte");
+			std::string er = "Invalid Postbyte at $";
+			er += C6809::hex(PC, 4);
+			Bus::Error(er.c_str());			
 			r = 0;
 		}
 		}
@@ -394,7 +398,9 @@ Word C6809::relw() {
 // invalid addressing mode
 Word C6809::nula()
 {
-	Bus::Error("Invalid Addressing Mode");
+	std::string er = "Invalid Addressing Mode at $";
+	er += C6809::hex(PC, 4);
+	Bus::Error(er.c_str());				
 	return 0;
 }
 
@@ -403,7 +409,9 @@ Word C6809::nula()
 
 
 void C6809::null() {
-	Bus::Error("Invalid Opcode");
+	std::string er = "Invalid Opcode at $";
+	er += C6809::hex(PC, 4);
+	Bus::Error(er.c_str());				
 }
 
 void C6809::abx() { X += B; }

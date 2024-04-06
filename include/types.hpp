@@ -37,7 +37,7 @@ constexpr int MAIN_MONITOR = 0;
 constexpr int DEBUG_MONITOR = 0;
 
 // Debug Device Constants
-constexpr Word DEBUG_WIDTH = 512;
+constexpr Word DEBUG_WIDTH = 576;
 constexpr Word DEBUG_HEIGHT = 296;
 constexpr int DEBUG_WINDOW_WIDTH = DEBUG_WIDTH * 2;
 constexpr int DEBUG_WINDOW_HEIGHT = DEBUG_HEIGHT * 2;
