@@ -30,6 +30,7 @@ VECT_RESET	fdb	KRNL_START	; RESET Software Interrupt Vector
 KRNL_CSR_COL	fcb	0		; (Byte) current cursor horizontal position
 KRNL_CSR_ROW	fcb	0		; (Byte) current cursor vertical position
 KRNL_ATTRIB	fcb	0		; (Byte) current character display attribute
+KRNL_LE_ANCHOR	fdb	0		; (Word) line edit anchor screen address
 
 ; *****************************************************************************
 ; * KERNEL ROM                                                                *
@@ -250,21 +251,20 @@ KRNL_CHARPOS	pshs	d		; save the used registers onto the stack
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_SCROLL	pshs	d, x, u		; save the used registers onto the stack
-		ldx	#VIDEO_START	
-		tfr	x, u
-		ldb	GFX_HRES+1
-		lslb
-		leau	b, u
-K_SCROLL_0	ldd	,u++
-		std	,x++
-		cmpu	GFX_VID_END
-		blt	K_SCROLL_0
-		lda	#' '
-K_SCROLL_1	sta	,x++
-		cmpx	GFX_VID_END
-		blt	K_SCROLL_1
-		puls	d, x, u, pc		; restore the registers and return
-
+		ldx	#VIDEO_START	; set X to the start of the video buffer
+		tfr	x, u		; copy X into U
+		ldb	GFX_HRES+1	; B = Screen Columns
+		lslb			; account for the attribute byte
+		leau	b, u		; U is now one line below X
+K_SCROLL_0	ldd	,u++		; load a character from where U points
+		std	,x++		; store it to where X points
+		cmpu	GFX_VID_END	; has U exceeded the screen buffer
+		blt	K_SCROLL_0	; continue looping of not
+		lda	#' '		; set SPACE as the current character
+K_SCROLL_1	sta	,x++		; and store it to where X points
+		cmpx	GFX_VID_END	; continue looping until the bottom ...
+		blt	K_SCROLL_1	; ... line has been cleared
+		puls	d, x, u, pc	; restore the registers and return
 
 ; ************************************************************
 ; * ROM BASED HARDWARE VECTORS                               *
