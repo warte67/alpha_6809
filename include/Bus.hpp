@@ -14,6 +14,7 @@ class Gfx;
 class Debug;
 class C6809;
 class Mouse;
+class Keyboard;
 
 class Bus : public IDevice
 {
@@ -42,6 +43,7 @@ class Bus : public IDevice
         inline static Debug* s_debug = nullptr;
         inline static C6809* s_c6809 = nullptr;
         inline static Mouse* s_mouse = nullptr;
+        inline static Keyboard* s_keyboard = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -90,6 +92,7 @@ class Bus : public IDevice
         inline static Debug* GetDebug() { return s_debug; }
         inline static C6809* GetC6809() { return s_c6809; }
         inline static Mouse* GetMouse() { return s_mouse; }
+        inline static Keyboard* GetKeyboard() { return s_keyboard; }
 
         void load_hex(const char* filename);
 

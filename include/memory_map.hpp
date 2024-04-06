@@ -165,8 +165,18 @@ enum MEMMAP
     CSR_PAL_DATA     = 0xFE28, //  (Word) mouse cursor color palette data RGBA4444
     CSR_END          = 0xFE2A, // End Mouse Registers
         
-    RESERVED         = 0xFE2A, 
-        // 454 bytes in reserve
+        // Keyboard Hardware Registers:
+    KEY_BEGIN        = 0xFE2A, // Start of the Keyboard Register space
+    CHAR_Q_LEN       = 0xFE2A, //   (Byte) # of characters waiting in queue        (Read Only)
+    CHAR_SCAN        = 0xFE2B, //   (Byte) read next character in queue (not popped when read)
+    CHAR_POP         = 0xFE2C, //   (Byte) read next character in queue (not popped when read)
+    XKEY_BUFFER      = 0xFE2D, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+    EDT_BFR_CSR      = 0xFE3D, //   (Byte) cursor position within edit buffer     (Read/Write)
+    EDT_ENABLE       = 0xFE3E, //   (Byte) line editor enable flag                 (Read/Write)
+    EDT_BUFFER       = 0xFE3F, //   line editing character buffer                 (Read/Write)
+    KEY_END          = 0xFEBF, // End of the Keyboard Register space
+    RESERVED         = 0xFEBF, 
+        // 305 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -182,6 +192,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
-
 
 

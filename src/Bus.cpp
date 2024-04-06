@@ -12,6 +12,7 @@
 #include "Debug.hpp"
 #include "C6809.hpp"
 #include "Mouse.hpp"
+#include "Keyboard.hpp"
 
 Bus::Bus()
 {
@@ -147,11 +148,15 @@ Bus::Bus()
     s_mouse = new Mouse();
     addr += Attach(s_mouse);
 
+    // attach the keyboard device
+    s_keyboard = new Keyboard();
+    addr += Attach(s_keyboard);
 
 
 
 
-    
+
+
 
 
     // RESERVED

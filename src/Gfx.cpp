@@ -438,34 +438,38 @@ void Gfx::OnEvent(SDL_Event* evnt)
                 // s_bIsDirty = true;
             }
 
-            // [LEFT] & [RIGHT]
-            if (Bus::GetDebug()->IsCursorVisible() == false)
+            // [ALT] [LEFT] & [RIGHT]
+            SDL_Keymod mod = SDL_GetModState();
+            if (mod & KMOD_ALT)
             {
-                if (evnt->key.keysym.sym == SDLK_RIGHT)
-                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
-                if (evnt->key.keysym.sym == SDLK_LEFT)
-                    Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)-1);
-                // Testing [UP] & [DOWN]
-                if (evnt->key.keysym.sym == SDLK_DOWN || evnt->key.keysym.sym == SDLK_UP)
+                if (Bus::GetDebug()->IsCursorVisible() == false)
                 {
-                    Byte data = Bus::Read(GFX_MODE);
-                    if (!(data & 0x80))
+                    if (evnt->key.keysym.sym == SDLK_RIGHT)
+                        Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)+1);
+                    if (evnt->key.keysym.sym == SDLK_LEFT)
+                        Bus::Write(GFX_MODE, Bus::Read(GFX_MODE)-1);
+                    // Testing [UP] & [DOWN]
+                    if (evnt->key.keysym.sym == SDLK_DOWN || evnt->key.keysym.sym == SDLK_UP)
                     {
-                        data &= 0x1F;
-                        data |= 0x80;
-                    }
-                    else
-                    {
-                        if (evnt->key.keysym.sym == SDLK_UP)
-                            data += 0x20;
+                        Byte data = Bus::Read(GFX_MODE);
+                        if (!(data & 0x80))
+                        {
+                            data &= 0x1F;
+                            data |= 0x80;
+                        }
                         else
-                            data -= 0x20;
-                    }
-                    Bus::Write(GFX_MODE, data);
-                    if (Bus::Read(GFX_MODE)!=data)
-                    {
-                        data &= 0x1f;
+                        {
+                            if (evnt->key.keysym.sym == SDLK_UP)
+                                data += 0x20;
+                            else
+                                data -= 0x20;
+                        }
                         Bus::Write(GFX_MODE, data);
+                        if (Bus::Read(GFX_MODE)!=data)
+                        {
+                            data &= 0x1f;
+                            Bus::Write(GFX_MODE, data);
+                        }
                     }
                 }
             }

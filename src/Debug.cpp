@@ -343,7 +343,7 @@ void Debug::OnEvent(SDL_Event* evnt)
                 }
             }
             // [F10] or [SPACE] == Step Over
-            if (evnt->key.keysym.sym == SDLK_F10 || evnt->key.keysym.sym == SDLK_SPACE)
+            if (evnt->key.keysym.sym == SDLK_F10)// || evnt->key.keysym.sym == SDLK_SPACE)
             {
                 cbStepOver();
             }    

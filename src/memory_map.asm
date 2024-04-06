@@ -161,8 +161,18 @@ CSR_PAL_INDX        equ   $FE27    ;  (Byte) mouse cursor color palette index (0
 CSR_PAL_DATA        equ   $FE28    ;  (Word) mouse cursor color palette data RGBA4444
 CSR_END             equ   $FE2A    ; End Mouse Registers
         
-RESERVED            equ   $FE2A  
-          ; 454 bytes in reserve
+          ; Keyboard Hardware Registers:
+KEY_BEGIN           equ   $FE2A    ; Start of the Keyboard Register space
+CHAR_Q_LEN          equ   $FE2A    ;   (Byte) # of characters waiting in queue        (Read Only)
+CHAR_SCAN           equ   $FE2B    ;   (Byte) read next character in queue (not popped when read)
+CHAR_POP            equ   $FE2C    ;   (Byte) read next character in queue (not popped when read)
+XKEY_BUFFER         equ   $FE2D    ;   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
+EDT_BFR_CSR         equ   $FE3D    ;   (Byte) cursor position within edit buffer     (Read/Write)
+EDT_ENABLE          equ   $FE3E    ;   (Byte) line editor enable flag                 (Read/Write)
+EDT_BUFFER          equ   $FE3F    ;   line editing character buffer                 (Read/Write)
+KEY_END             equ   $FEBF    ; End of the Keyboard Register space
+RESERVED            equ   $FEBF  
+          ; 305 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -175,6 +185,7 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
+
 
 
 
