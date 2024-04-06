@@ -13,6 +13,7 @@
 #include "C6809.hpp"
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
+#include "Gamepad.hpp"
 
 Bus::Bus()
 {
@@ -156,6 +157,10 @@ Bus::Bus()
     // attach the keyboard device
     s_keyboard = new Keyboard();
     addr += Attach(s_keyboard);
+
+    // attach the gamepad device
+    s_gamepad = new Gamepad();
+    addr += Attach(s_gamepad);
 
 
 
