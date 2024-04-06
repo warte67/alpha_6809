@@ -28,7 +28,7 @@ Byte Keyboard::read(Word offset, bool debug)
 			break;
 		case EDT_BFR_CSR:	data = edt_bfr_csr; break;
 		case EDT_ENABLE:	data = _line_editor_enable; break;
-		case EDT_BUFFER:	break;		 
+		case EDT_BFR_LEN:	data = _line_editor_length; break;
 	}
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 		data = m_memory[offset - m_base];
@@ -53,6 +53,11 @@ void Keyboard::write(Word offset, Byte data, bool debug)
 	{
 		case EDT_BFR_CSR:	edt_bfr_csr = data; break;
 		case EDT_ENABLE: _line_editor_enable = data; break;
+		case EDT_BFR_LEN: 
+			_line_editor_length = data; 
+			if (_line_editor_length >= EDIT_BUFFER_SIZE)
+				_line_editor_length = (Byte)EDIT_BUFFER_SIZE-1;
+			break;
 	}
 	if (offset >= XKEY_BUFFER && offset < XKEY_BUFFER + 16)
 	{
@@ -104,6 +109,9 @@ Word Keyboard::OnAttach(Word nextAddr)
 	nextAddr += 1;
 
 	DisplayEnum("EDT_ENABLE", nextAddr, "  (Byte) line editor enable flag                 (Read/Write)");
+	nextAddr += 1;
+
+	DisplayEnum("EDT_BFR_LEN", nextAddr, "  (Byte) Limit the line editor to this length   (Read/Write)");
 	nextAddr += 1;
 
 	DisplayEnum("EDT_BUFFER",  nextAddr, "  line editing character buffer                 (Read Only)");
@@ -532,8 +540,11 @@ void Keyboard::_doEditBuffer(char xkey)
 		if (_str_edt_buffer.size() < editBuffer.size() - 2)     // include space for null-termination
 		{
 			        // Bus::Read(CHAR_POP);
-			_str_edt_buffer.insert(itr, c);
-			edt_bfr_csr++;
+			if (_str_edt_buffer.size() < _line_editor_length)
+			{
+				_str_edt_buffer.insert(itr, c);
+				edt_bfr_csr++;
+			}
 		}
 	}
 

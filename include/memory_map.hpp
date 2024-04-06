@@ -171,30 +171,31 @@ enum MEMMAP
     XKEY_BUFFER      = 0xFE2D, //   (128 bits) 16 bytes for XK_KEY data buffer     (Read Only)
     EDT_BFR_CSR      = 0xFE3D, //   (Byte) cursor position within edit buffer     (Read/Write)
     EDT_ENABLE       = 0xFE3E, //   (Byte) line editor enable flag                 (Read/Write)
-    EDT_BUFFER       = 0xFE3F, //   line editing character buffer                 (Read Only)
-    KEY_END          = 0xFF3F, // End of the Keyboard Register space
+    EDT_BFR_LEN      = 0xFE3F, //   (Byte) Limit the line editor to this length   (Read/Write)
+    EDT_BUFFER       = 0xFE40, //   line editing character buffer                 (Read Only)
+    KEY_END          = 0xFF40, // End of the Keyboard Register space
         
-    JOYS_BEGIN       = 0xFF3F, // Start of the Game Controller Register space
-    JOYS_1_BTN       = 0xFF3F, //   (Word) button bits: room for up to 16 buttons  (realtime)
-    JOYS_1_DBND      = 0xFF41, //   (Byte) PAD 1 analog deadband; default is 5   (read/write)
-    JOYS_1_LTX       = 0xFF42, //   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_LTY       = 0xFF43, //   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_RTX       = 0xFF44, //   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_1_RTY       = 0xFF45, //   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_1_Z1        = 0xFF46, //   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
-    JOYS_1_Z2        = 0xFF47, //   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
-    JOYS_2_BTN       = 0xFF48, //   (Word) button bits: room for up to 16 buttons  (realtime)
-    JOYS_2_DBND      = 0xFF4A, //   (Byte) PAD 2 analog deadband; default is 5   (read/write)
-    JOYS_2_LTX       = 0xFF4B, //   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_LTY       = 0xFF4C, //   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_RTX       = 0xFF4D, //   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
-    JOYS_2_RTY       = 0xFF4E, //   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
-    JOYS_2_Z1        = 0xFF4F, //   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
-    JOYS_2_Z2        = 0xFF50, //   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
-    JOYS_END         = 0xFF51, // End of the Game Controller Register space
+    JOYS_BEGIN       = 0xFF40, // Start of the Game Controller Register space
+    JOYS_1_BTN       = 0xFF40, //   (Word) button bits: room for up to 16 buttons  (realtime)
+    JOYS_1_DBND      = 0xFF42, //   (Byte) PAD 1 analog deadband; default is 5   (read/write)
+    JOYS_1_LTX       = 0xFF43, //   (char) PAD 1 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_LTY       = 0xFF44, //   (char) PAD 1 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_RTX       = 0xFF45, //   (char) PAD 1 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_1_RTY       = 0xFF46, //   (char) PAD 1 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_1_Z1        = 0xFF47, //   (char) PAD 1 left analog trigger (0 - 127)     (realtime)
+    JOYS_1_Z2        = 0xFF48, //   (char) PAD 1 right analog trigger (0 - 127)    (realtime)
+    JOYS_2_BTN       = 0xFF49, //   (Word) button bits: room for up to 16 buttons  (realtime)
+    JOYS_2_DBND      = 0xFF4B, //   (Byte) PAD 2 analog deadband; default is 5   (read/write)
+    JOYS_2_LTX       = 0xFF4C, //   (char) PAD 2 LThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_LTY       = 0xFF4D, //   (char) PAD 2 LThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_RTX       = 0xFF4E, //   (char) PAD 2 RThumb-X position (-128 _ +127)   (realtime)
+    JOYS_2_RTY       = 0xFF4F, //   (char) PAD 2 RThumb-Y position (-128 _ +127)   (realtime)
+    JOYS_2_Z1        = 0xFF50, //   (char) PAD 2 left analog trigger (0 - 127)     (realtime)
+    JOYS_2_Z2        = 0xFF51, //   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
+    JOYS_END         = 0xFF52, // End of the Game Controller Register space
         
-    RESERVED         = 0xFF51, 
-        // 159 bytes in reserve
+    RESERVED         = 0xFF52, 
+        // 158 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -210,4 +211,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+
 

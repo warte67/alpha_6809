@@ -59,6 +59,7 @@ private:
 	Byte edt_bfr_csr = 0;				// internal edit character buffer cursor position
 	std::string _str_edt_buffer = "";
 	bool _line_editor_enable = false;
+    Byte _line_editor_length = (Byte)EDIT_BUFFER_SIZE-1;
 
     // helpers
 	void _doEditBuffer(char  xkey);         
