@@ -55,10 +55,10 @@ KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 ;	fcs	character string with its terminators high bit set
 ;	fcn	character string with null termination
 
-KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.1\n"
+KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.2\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
 KRNL_PROMPT2	fcn	"Under GPL V3 Liscense\n"
-KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"
+KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"  
 READY_PROMPT	fcn	"Ready\n"
 
 KRNL_CMD_TABLE	fcn	"cls"		; #0
@@ -71,6 +71,7 @@ KRNL_CMD_TABLE	fcn	"cls"		; #0
 		fcn	"chdir"		; #7
 		fcn	"exit"		; #8
 		fcn	"quit"		; #9
+		fcn	"mode"		; #10
 		fcb	$FF		; $FF = end of list
 		; ...
 
@@ -83,7 +84,8 @@ KRNL_CMD_VECTS  fdb	do_cls		; #0
 		fdb	do_cd		; #6
 		fdb	do_chdir	; #7
 		fdb	do_exit		; #8
-		fdb	do_quit		; #8
+		fdb	do_quit		; #9
+		fdb	do_mode		; #10
 		; ...
 KRNL_ERR_NFND 	fcn	"ERROR: Command Not Found\n"
 
@@ -124,7 +126,7 @@ k_init_0	clr	,x+		; clear the next byte
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
 		; default graphics mode
-		lda	#$0E		; default: 0x03 = 40x25 text
+		lda	#$03		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
 		; default text color attribute
@@ -158,8 +160,6 @@ k_init_4	lda	#$0a		; line feed character
 		jsr	KRNL_LINEOUT	; output it to the console
 		ldx	#KRNL_PROMPT3	; point to the fourth prompt line
 		jsr	KRNL_LINEOUT	; output it to the console
-
-
 
 ; *****************************************************************************
 ; * THE MAIN COMMAND LOOP                                                     *
@@ -197,8 +197,6 @@ k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
 		bra	k_main_cont	; continue within the main loop
 
 
-	; infinate loop
-inf_loop	bra 	inf_loop
 
 
 ; *****************************************************************************
@@ -225,27 +223,42 @@ str_cd		fcn	"CD\n"
 str_chdir	fcn	"CHDIR\n"
 str_exit	fcn	"EXIT\n"
 str_quit	fcn	"QUIT\n"
+str_mode	fcn	"MODE\n"
 
-do_cls		ldx	#str_cls
-		bra	str_output
+
+do_cls		; CLEAR SCREEN
+		lda	#' '
+		ldb	KRNL_ATTRIB
+		jsr	KRNL_CLS
+		rts
+
+
 do_color	ldx	#str_color
 		bra	str_output
 do_load		ldx	#str_load
 		bra	str_output
 do_exec		ldx	#str_exec
 		bra	str_output
-do_reset	ldx	#str_reset
-		bra	str_output
+
+do_reset	; RESET
+		lda	#FC_RESET
+		sta	FIO_COMMAND
+		rts
+
 do_dir		ldx	#str_dir
 		bra	str_output
 do_cd		ldx	#str_cd
 		bra	str_output
 do_chdir	ldx	#str_chdir
 		bra	str_output
-do_exit		ldx	#str_exit
-		bra	str_output
-do_quit		ldx	#str_quit
-		bra	str_output
+
+do_exit		; EXIT and QUIT
+do_quit		lda	#FC_SHUTDOWN
+		sta	FIO_COMMAND
+		rts
+
+do_mode		ldx	#str_mode
+		bra	str_output		
 
 str_output	jsr	KRNL_LINEOUT
 		rts
@@ -287,6 +300,8 @@ STUB_CLS	pshs	X		; save the used registers onto the stack
 K_CLS_0		std	,x++		; store the attrib/character or pixel data
 		cmpx	GFX_VID_END	; check for the end of the current buffer
 		blt	K_CLS_0		; loop of not yet reached the end
+		clr	KRNL_CURSOR_COL
+		clr	KRNL_CURSOR_ROW
 		puls	x,pc		; restore the registers and return
 
 ; *****************************************************************************
