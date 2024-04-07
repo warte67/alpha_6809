@@ -108,8 +108,6 @@ k_init_0	clr	,x+		; clear the next byte
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
 
-
-
 ; TESTING: Main Command Loop
 		; Initialize the line editor
 		clr	EDT_BFR_CSR
@@ -138,7 +136,7 @@ k_main_4	lda	#$0a
 
 
 
-* * ; TESTING: ...
+* ; TESTING: KRNL_CMPSTR
 * 		bra	test_1
 * str_1		fcn	"str_1"
 * str_2		fcn	"str_2"
@@ -169,7 +167,21 @@ k_main_2	; the ready prompt
 k_main_3
 		jsr	KRNL_LINEEDIT
 		; handle processing the edit buffer
-		; ...
+		bra	k_main_skip
+
+KRNL_CMD_TABLE	; fcn	"NULL"		; #0
+		fcn	"cls"		; #1
+		fcn	"color"		; #2
+		fcn	"load"		; #3
+		fcn	"exec"		; #4
+		fcn	"reset"		; #5
+		fcn	"dir"		; #6
+		fcn	"cd"		; #7
+		fcn	"chdir"		; #8
+		fcn	"exit"		; #9
+		fcb	$FF		; $FF = end of list
+
+k_main_skip	jsr	KRNL_CMD_PROC
 
 		; and other cleanup type stuffs
 		jsr 	KRNL_NEWLINE
@@ -197,9 +209,8 @@ inf_loop	bra 	inf_loop
 ; KRNL_GETKEY		; Input a character from the console
 ; KRNL_GETHEX		; Input a hex digit from the console
 ; KRNL_GETNUM		; Input a numeric digit from the console
-
 ; KRNL_CMPSTR		; Compare two strings of arbitrary lengths
-; KRNL_TBLSEARCH	; General Table Search
+; KRNL_TBLSEARCH	; Table Search (find the string and return its index)
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -219,7 +230,7 @@ STUB_CLS	pshs	X		; save the used registers onto the stack
 K_CLS_0		std	,x++		; store the attrib/character or pixel data
 		cmpx	GFX_VID_END	; check for the end of the current buffer
 		blt	K_CLS_0		; loop of not yet reached the end
-		puls	x, pc		; restore the registers and return
+		puls	x,pc		; restore the registers and return
 
 ; *****************************************************************************
 ; * KRNL_CHROUT                                                              *
@@ -233,7 +244,7 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
 KRNL_CHROUT	jmp	[VECT_CHROUT]	; proceed through the software vector
-STUB_CHROUT	pshs	d, x		; save the used registers onto the stack
+STUB_CHROUT	pshs	d,x		; save the used registers onto the stack
 		tstb			; is B a null?
 		bne	K_CHROUT_1	; nope, continue
 		ldb	KRNL_ATTRIB	; load the current color attribute
@@ -250,7 +261,7 @@ K_CHROUT_0	jsr	KRNL_CSRPOS	; position X at the cursor position
 		cmpa	GFX_HRES+1	; compare with the current screen columns
 		blt	K_CHROUT_DONE	; cleanup and return if the csr column is okay
 		jsr	KRNL_NEWLINE	; perform a new line
-K_CHROUT_DONE	puls	d, x, pc	; cleanup and return
+K_CHROUT_DONE	puls	d,x,pc		; cleanup and return
 
 ; *****************************************************************************
 ; * KRNL_NEWLINE                                                              *
@@ -262,7 +273,7 @@ K_CHROUT_DONE	puls	d, x, pc	; cleanup and return
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_NEWLINE	jmp	[VECT_NEWLINE]	; proceed through the software vector
-STUB_NEWLINE	pshs	D, X		; save the used registers onto the stack
+STUB_NEWLINE	pshs	D,X		; save the used registers onto the stack
 		clr	KRNL_CURSOR_COL	; carrage return (move to left edge)
 		inc	KRNL_CURSOR_ROW	; increment the cursors row
 		lda	KRNL_CURSOR_ROW	; load the current row
@@ -270,7 +281,7 @@ STUB_NEWLINE	pshs	D, X		; save the used registers onto the stack
 		blt	K_NEWLINE_DONE	; clean up and return if less than
 		dec	KRNL_CURSOR_ROW	; move the cursor the the bottom row
 		jsr	KRNL_SCROLL	; scroll the text screen up one line
-K_NEWLINE_DONE	puls	D, X, pc	; restore the saved registers and return
+K_NEWLINE_DONE	puls	D,X,pc		; restore the saved registers and return
 
 
 ; *****************************************************************************
@@ -283,7 +294,7 @@ K_NEWLINE_DONE	puls	D, X, pc	; restore the saved registers and return
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_LINEOUT	jmp	[VECT_LINEOUT]	; proceed through the software vector
-STUB_LINEOUT	pshs	D, U, X		; save the used registers onto the stack
+STUB_LINEOUT	pshs	D,U,X		; save the used registers onto the stack
 		tfr	x,u		; move X to U
 		jsr	KRNL_CSRPOS	; set X to the cursor position 
 K_LINEOUT_0	lda	,u+		; fetch the next character
@@ -292,7 +303,7 @@ K_LINEOUT_0	lda	,u+		; fetch the next character
 		jsr	KRNL_CHROUT	; send the character to the console
 		leax	1, x		; point to the next character
 		bra	K_LINEOUT_0	; continue looping until done
-K_LINEOUT_DONE	puls	D, U, X, pc	; restore the saved registers and return		
+K_LINEOUT_DONE	puls	D,U,X,pc	; restore the saved registers and return		
 
 ; *****************************************************************************
 ; * KRNL_CHARPOS                                                              *
@@ -315,7 +326,7 @@ STUB_CSRPOS	pshs	d		; save the used registers onto the stack
 		ldb	KRNL_CURSOR_COL	; load the current cursor column
 		lslb			; times two (account for the attribute)
 		leax	b, x		; add the column to the return address
-		puls	d, pc		; restore the saved registers and return
+		puls	d,pc		; restore the saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_SCROLL                                                               *
@@ -326,7 +337,7 @@ STUB_CSRPOS	pshs	d		; save the used registers onto the stack
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_SCROLL	jmp	[VECT_SCROLL]	; proceed through the software vector
-STUB_SCROLL	pshs	d, x, u		; save the used registers onto the stack
+STUB_SCROLL	pshs	d,x,u		; save the used registers onto the stack
 		ldx	#VIDEO_START	; set X to the start of the video buffer
 		tfr	x, u		; copy X into U
 		ldb	GFX_HRES+1	; B = Screen Columns
@@ -345,7 +356,7 @@ K_SCROLL_1	sta	,x++		; and store it to where X points
 		tst	EDT_ENABLE	; are we using the line editor?
 		beq	K_SCROLL_DONE	; nope, just clean up and return
 		dec	KRNL_ANCHOR_ROW	; yup, decrease the anchor row by one
-K_SCROLL_DONE	puls	d, x, u, pc	; restore the registers and return
+K_SCROLL_DONE	puls	d,x,u,pc	; restore the registers and return
 
 ; *****************************************************************************
 ; * KRNL_LINEEDIT                                                             *
@@ -356,7 +367,7 @@ K_SCROLL_DONE	puls	d, x, u, pc	; restore the registers and return
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_LINEEDIT	jmp	[VECT_LINEEDIT]	; proceed through the software vector
-STUB_LINEEDIT	pshs	D, X, U, CC	; save the used registers onto the stack		
+STUB_LINEEDIT	pshs	D,X,U,CC	; save the used registers onto the stack		
 		ldd 	KRNL_CURSOR_COL	; load the current cursor position
 		std	KRNL_ANCHOR_COL	;   use it to update the anchor position
 		lda	#1		; load the enable condition
@@ -417,7 +428,7 @@ KRNL_DONE	; space at the end
 		ldb	KRNL_ATTRIB	; load the color attribute
 		ldx	#EDT_BUFFER	; point to the edit buffer
 		jsr	KRNL_LINEOUT	; send the edit buffer to the console
-		puls	D, X, U, CC, PC	; cleanup saved registers and return
+		puls	D,X,U,CC,PC	; cleanup saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_GETKEY                                                                *
@@ -429,13 +440,13 @@ KRNL_DONE	; space at the end
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
 KRNL_GETKEY	jmp	[VECT_GETKEY]	; proceed through the software vector
-STUB_GETKEY	pshs	b, CC		; save the used registers onto the stack
+STUB_GETKEY	pshs	b,CC		; save the used registers onto the stack
 K_GETKEY_0	ldb	CHAR_POP	; pop the next key from the queue
 		bne	K_GETKEY_0	; continue until the queue is empty		
 K_GETKEY_1	ldb	CHAR_Q_LEN	; how many keys are in the queue
 		beq	K_GETKEY_1	; loop until a key is queued
 		lda	CHAR_POP	; pop the key into A to be returned
-		puls	b, CC, PC	; cleanup saved registers and return
+		puls	b,CC,PC	; cleanup saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_GETHEX                                                               *
@@ -462,7 +473,7 @@ K_GETHEX_0	bsr	KRNL_GETKEY	; wait for and fetch a key press
 		cmpa	#'f'		; compare with the 'f' key
 		bls	K_GETHEX_DONE	; found an appropriate key, return
 		bra	K_GETHEX_0	; keep scanning
-K_GETHEX_DONE	puls	CC, PC		; cleanup saved registers and return
+K_GETHEX_DONE	puls	CC,PC		; cleanup saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_GETNUM                                                               *
@@ -481,7 +492,7 @@ K_GETNUM_0	bsr	KRNL_GETKEY	; wait for and fetch a key press
 		cmpa	#'9'		; compare with the '9' key
 		bls	K_GETNUM_DONE	; found an appropriate key, return
 		bra	K_GETNUM_0	; keep scanning
-K_GETNUM_DONE	puls	CC, PC		; cleanup saved registers and return
+K_GETNUM_DONE	puls	CC,PC		; cleanup saved registers and return
 
 
 ; *****************************************************************************
@@ -492,45 +503,136 @@ K_GETNUM_DONE	puls	CC, PC		; cleanup saved registers and return
 ; *                     Y = starting address of string 2                      *
 ; *                                                                           *
 ; * EXIT CONDITIONS:	CC = set per the comparison (less, greater, or same)  *
+; *                     X = address last checked in string 1                  *
+; *                     Y = address last checked in string 2                  *
+; *****************************************************************************
+KRNL_CMPSTR	pshs	D		; save the used registers onto the stack		
+K_CMP_LOOP	tst	,x		; test the current character in string 1
+		bne	K_CMP_1		; if its non-null, go test in string 2
+		tst	,y		; test if character in both are null
+		beq	K_CMP_EQUAL	; if so, strings are equal
+		bra	K_CMP_LESS	; is LESS if str1 is null but str2 is not
+K_CMP_1		tst	,y		; char in str1 is not null, but str2 is
+		beq	K_CMP_GREATER	; return GREATER
+		lda	,x+		; compare character from string 1
+		cmpa	,y+		;    with character from string 2
+		blt	K_CMP_LESS	; return LESS
+		bgt	K_CMP_GREATER	; return GREATER
+		bra	K_CMP_LOOP	; otherwise continue looping
+K_CMP_LESS	lda	#1		; compare 1
+		cmpa	#2		;    with 2
+		bra	K_CMP_DONE	; return LESS
+K_CMP_GREATER	lda	#2		; compare 2
+		cmpa	#1		;    with 1
+		bra	K_CMP_DONE	; return GREATER
+K_CMP_EQUAL	clra			; set to zero
+		cmpa	#0		; return EQUAL
+K_CMP_DONE	puls	D,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_CMD_PROC                                                             *
+; * 	Parse the command from the line edit buffer.                          *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: Command text within EDT_BUFFER                        *
+; *                                                                           *
+; * EXIT CONDITIONS:	X & Y Modified                                        *
+; *                     FIO_BUFFER will be modified                           *
+; *****************************************************************************
+KRNL_CMD_PROC	pshs	D,CC	; save the used registers onto the stack
+	; copy EDT_BUFFER to FIO_BUFFER
+		ldx	#EDT_BUFFER
+		ldy	#FIO_BUFFER
+0		lda	,x+
+		sta	,y+
+		bne	0b
+	; replace the null-terminator with $FF
+		lda	#$ff
+		sta	,y	;-1,y
+	; replace SPACES with NULL (unless within '' or "")
+		ldx	#FIO_BUFFER
+1		lda	,x+
+		cmpa	#$FF
+		beq	2f
+		cmpa	#"'"
+		beq	K_CPROC_SKIP
+		cmpa	#'"'
+		beq	K_CPROC_SKIP
+		cmpa	#' '
+		bne	1b
+		clr	-1,x
+		bra	1b
+K_CPROC_SKIP	cmpa	,x+
+		beq	1b
+		cmpa	#$ff
+		beq	K_CPROC_DONE
+		bra	K_CPROC_SKIP
+	; FIO_BUFFER should now be prepared for parsing
+2		lda	#$0a
+		jsr	KRNL_CHROUT
+
+
+
+
+		ldy	#KRNL_CMD_TABLE
+		ldx	#FIO_BUFFER
+		jsr	KRNL_LINEOUT
+		ldx	#FIO_BUFFER
+
+	; X now points to the command to search for in the table
+		bsr	KRNL_TBLSEARCH
+	; A should now index the found search string
+
+		nop
+	
+
+
+
+K_CPROC_DONE	puls	D,CC,PC	; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_TBLSEARCH                                                            *
+; * 	Table Search (find the string and return its index)                   *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: X points to a string to be searched for               *
+; *                     Y points to the start of a string table               *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = string index if found, -1 ($FF) if not found      *
+; *                     X = the end of the search string(next argument)       *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
+KRNL_TBLSEARCH	pshs	D,Y,U,CC	; save the used registers onto the stack
+		tfr	X,U		; save X in U
 
-	; character at index return conditions:
-	;       EQUAL:   both strings are null			(CC.Z == 1)
-	;       LESS:    string 1 is null, but string 2 is not  (CC.N != CC.V)
-	;       GREATER: string 2 is null, but string 1 is not  (CC.N == CC.V) and (CC.Z == 0)
+		clra			; set the return index to 0
 
-KRNL_CMPSTR	pshs	D, X, Y		; save the used registers onto the stack
-		
-K_CMP_LOOP	tst	,x
-		bne	1f
+K_TBLS_0	jsr 	KRNL_CMPSTR	; compare strings at X and at Y
+		beq	K_TBLS_DONE
+		tfr	U,X		; restore X
+
+
+		; LEAY is broken!??!!!
+		leay	1,y		; skip the null
+
+
+
+		inca
 		tst	,y
-		beq	K_CMP_EQUAL	
-		bra	K_CMP_LESS	
-1	; str1 is non-null
-		tst	,y
-		beq	K_CMP_GREATER
-	; both str1 and str2 are non-null
-		lda	,x+
-		cmpa	,y+
-		; beq	K_CMP_EQUAL
-		blt	K_CMP_LESS
-		bgt	K_CMP_GREATER
-		bra	K_CMP_LOOP
+		bpl	K_TBLS_0
 
-K_CMP_LESS	lda	#1
-		cmpa	#2
-		bra	K_CMP_DONE
-K_CMP_GREATER	lda	#2
-		cmpa	#1
-		bra	K_CMP_DONE
-K_CMP_EQUAL	clra
-		cmpa	#0
-K_CMP_DONE	puls	D, X, Y, PC	; cleanup saved registers and return
+K_TBLS_NOTFOUND	nop
+K_TBLS_DONE	puls	D,Y,CC,PC	; cleanup saved registers and return
 
 
 
-; ************************************************************
+
+
+
+; KRNL_TBLSEARCH	; Table Search (find the string and return its index)
+
+
+
+
+; *******************************W*****************************
 ; * ROM BASED HARDWARE VECTORS                               *
 ; ************************************************************
 		org	$FFF0

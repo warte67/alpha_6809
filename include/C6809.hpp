@@ -246,7 +246,7 @@ inline static auto hex(uint32_t n, Byte d)
 		Byte size = 0;				// how many bytes long is this instruction?
 	};
 
-	Word* ptrReg[4] = { &X, &Y, &U, &S };	// is this needed?
+	Word* ptrReg[4] = { &X, &Y, &U, &S };
 
 	// HELPER FUNCTIONS
 
@@ -270,7 +270,7 @@ inline static auto hex(uint32_t n, Byte d)
 		if (x & 0x10)
 			return (Word)x | 0xffe0;
 		else
-			return (Word)x;
+			return (Word)x & 0x1f;
 	}
 	Word ext8(Byte x) {
 		if (x & 0x80)
