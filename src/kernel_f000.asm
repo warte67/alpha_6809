@@ -98,6 +98,14 @@ k_start_0	clr	,x+		; clear the next byte
 		; clear the default text screen buffer
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
+
+		; Initialize the line editor
+		clr	EDT_BFR_CSR
+		ldx	#EDT_BUFFER
+k_start_1	clr	,x+
+		cmpx	#KEY_END
+		blt	k_start_1
+
 		; output the startup prompts
 		ldx	#KRNL_PROMPT0
 		jsr	KRNL_LINEOUT
@@ -108,67 +116,22 @@ k_start_0	clr	,x+		; clear the next byte
 		ldx	#KRNL_PROMPT3
 		jsr	KRNL_LINEOUT
 
+k_start_2
 		; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
 
+		jsr	KRNL_LINEEDIT
+		; handle processing the edit buffer
+		; ...
+
+		; and other cleanup type stuffs
+		clr	EDT_BFR_CSR
+		clr	EDT_BUFFER		
+		jsr 	KRNL_NEWLINE
 
 
-
-
-
-; NEW Lineeditor tests
-
-		; save the line editor anchor
-		ldd 	KRNL_CURSOR_COL
-		std	KRNL_ANCHOR_COL
-		; enable the line editor
-		lda	#1
-		sta	EDT_ENABLE
-
-le_label_0
-		; display the line up to the cursor
-		ldd 	KRNL_ANCHOR_COL		; restore the line editor anchor
-		std	KRNL_CURSOR_COL
-		ldu	#EDT_BUFFER		
-		ldb	EDT_BFR_CSR		; the buffer csr position
-		stb	KRNL_LOCAL_0		; store the edit csr position locally
-		ldb	KRNL_ATTRIB		; load the cursor attribute
-
-le_label_1	
-		tst	KRNL_LOCAL_0
-		beq	le_label_2
-		dec	KRNL_LOCAL_0
-		lda	,u+
-		beq	le_label_2
-		jsr	KRNL_CHROUT
-		bra	le_label_1
-
-le_label_2
-		; display the cursor at the end of the line
-		lda	#' '
-		ldb	#$4b
-		tst	,u
-		beq	le_label_3
-		lda	,u+
-le_label_3
-		jsr	KRNL_CHROUT
-
-		; finish the line
-		ldb	KRNL_ATTRIB
-le_label_4		
-		lda	,u+	
-		beq	le_done	
-		jsr	KRNL_CHROUT
-		bra	le_label_4
-
-le_done	
-		; space at the end
-		lda	#' '
-		ldb	#$b4
-		jsr	KRNL_CHROUT
-
-		bra	le_label_0
+		bra	k_start_2
 
 
 
@@ -184,7 +147,8 @@ inf_loop	bra 	inf_loop
 ; KRNL_NEWLINE		; Perfoms a CR/LF on the console
 ; KRNL_LINEOUT		; Outputs a string to the console
 ; KRNL_CHRPOS		; Loads into X the cursor position
-; KRNLL_SCROLL		; Scroll the text screen up one line
+; KRNL_SCROLL		; Scroll the text screen up one line
+; KRNL_LINEEDIT		; Engage the text line editor
 
 ; KRNLL_CMPSTR		; Compare two strings of arbitrary lengths
 ; KRNLL_CMPSTREQ	; Compare two strings of equal length
@@ -329,7 +293,85 @@ K_SCROLL_0	ldd	,u++		; load a character from where U points
 K_SCROLL_1	sta	,x++		; and store it to where X points
 		cmpx	GFX_VID_END	; continue looping until the bottom ...
 		blt	K_SCROLL_1	; ... line has been cleared
+
+	; test to see if we're in the line editor
+		tst	EDT_ENABLE
+		beq	K_SCROLL_DONE
+		dec	KRNL_ANCHOR_ROW
+
+K_SCROLL_DONE
 		puls	d, x, u, pc	; restore the registers and return
+
+; *****************************************************************************
+; * KRNL_LINEEDIT                                                             *
+; * 	Engage the text line editor,                                          *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	All registers preserved.                              *
+; *****************************************************************************
+KRNL_LINEEDIT	pshs	D, X, U, CC	; save the used registers onto the stack		
+		ldd 	KRNL_CURSOR_COL	; load the current cursor position
+		std	KRNL_ANCHOR_COL	;   use it to update the anchor position
+		lda	#1		; load the enable condition
+		sta	EDT_ENABLE	; to enable the line editor
+KRNL_LEDIT_0	; display the line up to the cursor		
+		ldd 	KRNL_ANCHOR_COL	; restore the line editor anchor
+		std	KRNL_CURSOR_COL ; into the console cursor position
+		ldu	#EDT_BUFFER	; point to the start of the edit buffer
+		ldb	EDT_BFR_CSR	; the buffer csr position
+		stb	KRNL_LOCAL_0	; store the edit csr position locally
+		ldb	KRNL_ATTRIB	; load the cursor attribute
+KRNL_LEDIT_1	tst	KRNL_LOCAL_0	; test the edit csr position
+		beq	KRNL_LEDIT_2	; if we're there, go display the cursor
+		dec	KRNL_LOCAL_0	; decrement the edit csr position
+		lda	,u+		; load the next character from the buffer
+		beq	KRNL_LEDIT_2	; display csr if at the null terminator
+		jsr	KRNL_CHROUT	; output the character to the console
+		bra	KRNL_LEDIT_1	; loop until we're at the cursor
+KRNL_LEDIT_2	; display the cursor at the end of the line
+		lda	#' '		; load a blank SPACE character
+		ldb	SYS_CLOCK_DIV	; load clock timer data
+		lsrb			;	divide by 2
+		lsrb			;	divide by 2
+		lsrb			;	divide by 2
+		lsrb			;	divide by 2
+		andb	#$0F		; B now holds color cycled attribute
+		tst	,u		; test the next character in the buffer
+		beq	KRNL_LEDIT_3	; use the SPACE if we're at a null
+		lda	,u+		; load the next character from buffer
+KRNL_LEDIT_3	; finish the line
+		jsr	KRNL_CHRPOS	; load X with the current cursor positino 
+		std	,x		; store the character where X points to
+		inc	KRNL_CURSOR_COL	; ipdate the cursor column number
+		ldb	KRNL_ATTRIB	; load the default color attribute
+KRNL_LEDIT_4	lda	,u+		; fetch the next character from the buffer
+		beq	KRNL_DONE	; if it's null, we're done
+		jsr	KRNL_CHROUT	; output it to the console
+		bra	KRNL_LEDIT_4	; continue looping until we find the null
+KRNL_DONE	; space at the end	
+		lda	#' '		; load the SPACE character
+		ldb	KRNL_ATTRIB	; load the default color attribute	
+		jsr	KRNL_CHRPOS	; fetch the cursor position into X
+		lda	#' '		; load the SPACE character
+		ldb	KRNL_ATTRIB	; load the current color attribute
+		std	,x		; update the console
+		; test for the user pressing ENTER / RETURN
+		lda	CHAR_POP	; Pop the top key from the queue
+		beq	KRNL_LEDIT_0	; loop to the top if no keys we're pressed
+		cmpa	#$0d		; check for the RETURN / ENTER key press
+		bne	KRNL_LEDIT_0	; if not pressend, loop back to the top		
+		clr	EDT_ENABLE	; disable the line editor		
+		jsr	KRNL_CHRPOS	; load the cursor position into X
+		lda	#' '		; load a SPACE character
+		ldb	KRNL_ATTRIB	; load the current attribute
+		std	-2,x		; store the character, clean up artifacts
+		ldd 	KRNL_ANCHOR_COL	; restore the line editor anchor
+		std	KRNL_CURSOR_COL ; into the console cursor position
+		ldb	KRNL_ATTRIB	; load the color attribute
+		ldx	#EDT_BUFFER	; point to the edit buffer
+		jsr	KRNL_LINEOUT	; send the edit buffer to the console
+		puls	D, X, U, CC, PC	; cleanup saved registers and return
 
 ; ************************************************************
 ; * ROM BASED HARDWARE VECTORS                               *
