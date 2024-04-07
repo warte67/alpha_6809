@@ -89,7 +89,7 @@ k_start_0	clr	,x+		; clear the next byte
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
 		; default graphics mode
-		lda	#$0E		; default: 0x03 = 40x25 text
+		lda	#$10		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
 		; default text color attribute
@@ -99,6 +99,10 @@ k_start_0	clr	,x+		; clear the next byte
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
 
+
+
+
+; TESTING: Main Command Loop
 		; Initialize the line editor
 		clr	EDT_BFR_CSR
 		ldx	#EDT_BUFFER
@@ -115,25 +119,23 @@ k_start_1	clr	,x+
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT3
 		jsr	KRNL_LINEOUT
-
 k_start_2
 		; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
-
+k_start_3
 		jsr	KRNL_LINEEDIT
 		; handle processing the edit buffer
 		; ...
 
 		; and other cleanup type stuffs
-		clr	EDT_BFR_CSR
-		clr	EDT_BUFFER		
 		jsr 	KRNL_NEWLINE
-
+		clr	EDT_BFR_CSR
+		tst	EDT_BUFFER
+		beq	k_start_3
+		clr	EDT_BUFFER	
 
 		bra	k_start_2
-
-
 
 	; infinate loop
 inf_loop	bra 	inf_loop
@@ -284,7 +286,8 @@ KRNL_SCROLL	pshs	d, x, u		; save the used registers onto the stack
 		tfr	x, u		; copy X into U
 		ldb	GFX_HRES+1	; B = Screen Columns
 		lslb			; account for the attribute byte
-		leau	b, u		; U is now one line below X
+		clra			; MSB of D needs to not be negative
+		leau	d, u		; U is now one line below X
 K_SCROLL_0	ldd	,u++		; load a character from where U points
 		std	,x++		; store it to where X points
 		cmpu	GFX_VID_END	; has U exceeded the screen buffer
