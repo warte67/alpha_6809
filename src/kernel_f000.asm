@@ -81,15 +81,15 @@ RESET_start	bra	RESET_start	; RESET Implementation
 ; *****************************************************************************
 KRNL_START	; initialize the system stack (and the zero page)
 		ldx	#ZERO_PAGE	; point to the start of zero-page
-k_start_0	clr	,x+		; clear the next byte
+k_init_0	clr	,x+		; clear the next byte
 		cmpx	#SSTACK_TOP	; at the end of the stack space?
-		bne	k_start_0	; loop if not there yet	
+		bne	k_init_0	; loop if not there yet	
 		lds	#SSTACK_TOP	; set the S to the top of the stack
 		; CPU clock speed
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
 		; default graphics mode
-		lda	#$10		; default: 0x03 = 40x25 text
+		lda	#$0E		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
 		; default text color attribute
@@ -106,9 +106,9 @@ k_start_0	clr	,x+		; clear the next byte
 		; Initialize the line editor
 		clr	EDT_BFR_CSR
 		ldx	#EDT_BUFFER
-k_start_1	clr	,x+
+k_main_1	clr	,x+
 		cmpx	#KEY_END
-		blt	k_start_1
+		blt	k_main_1
 
 		; output the startup prompts
 		ldx	#KRNL_PROMPT0
@@ -119,11 +119,11 @@ k_start_1	clr	,x+
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT3
 		jsr	KRNL_LINEOUT
-k_start_2
+k_main_2
 		; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
-k_start_3
+k_main_3
 		jsr	KRNL_LINEEDIT
 		; handle processing the edit buffer
 		; ...
@@ -132,10 +132,10 @@ k_start_3
 		jsr 	KRNL_NEWLINE
 		clr	EDT_BFR_CSR
 		tst	EDT_BUFFER
-		beq	k_start_3
+		beq	k_main_3
 		clr	EDT_BUFFER	
 
-		bra	k_start_2
+		bra	k_main_2
 
 	; infinate loop
 inf_loop	bra 	inf_loop
