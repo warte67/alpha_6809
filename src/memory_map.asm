@@ -190,8 +190,70 @@ JOYS_2_Z1           equ   $FF50    ;   (char) PAD 2 left analog trigger (0 - 127
 JOYS_2_Z2           equ   $FF51    ;   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
 JOYS_END            equ   $FF52    ; End of the Game Controller Register space
         
-RESERVED            equ   $FF52  
-          ; 158 bytes in reserve
+        
+FIO_BEGIN           equ   $FF52    ; Start of the FileIO register space
+FIO_ERR_FLAGS       equ   $FF52    ; (Byte) File IO error flags
+          ; FIO_ERR_FLAGS: ABCD.EFGH
+          ;      A:  file was not found
+          ;      B:  directory was not found
+          ;      C:  file not open
+          ;      D:  end of file
+          ;      E:  buffer overrun
+          ;      F:  wrong file type
+          ;      G:  invalid command
+          ;      H:  incorrect file stream
+        
+FIO_COMMAND         equ   $FF53    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
+          ; Begin FIO_COMMANDS
+FC_RESET            equ   $0000    ;        Reset
+FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
+FC_COMPDATE         equ   $0002    ;        SYSTEM: Load Compilation Date
+FC_NEWFILE          equ   $0003    ;      * New File Stream
+FC_OPENFILE         equ   $0004    ;      * Open File
+FC_ISOPEN           equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+FC_CLOSEFILE        equ   $0006    ;      * Close File
+FC_READBYTE         equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
+FC_WRITEBYTE        equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
+FC_LOADHEX          equ   $0009    ;      * Load Hex Format File
+FC_GETLENGTH        equ   $000A    ;      * Get File Length (into FIO_IOWORD)
+FC_LISTDIR          equ   $000B    ;        List Directory
+FC_MAKEDIR          equ   $000C    ;      * Make Directory
+FC_CHANGEDIR        equ   $000D    ;        Change Directory
+FC_GETPATH          equ   $000E    ;        Fetch Current Path
+FC_REN_DIR          equ   $000F    ;      * Rename Directory
+FC_DEL_DIR          equ   $0010    ;      * Delete Directory
+FC_DEL_FILE         equ   $0011    ;      * Delete File
+FC_REN_FILE         equ   $0012    ;      * Rename file
+FC_COPYFILE         equ   $0013    ;      * Copy File
+FC_SEEKSTART        equ   $0014    ;      * Seek Start
+FC_SEEKEND          equ   $0015    ;      * Seek End
+FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
+FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
+          ; End FIO_COMMANDS
+        
+FIO_STREAM          equ   $FF54    ; (Byte) current file stream index (0-15)
+FIO_MODE            equ   $FF55    ; (Byte) Flags describing the I/O mode for the file
+          ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
+          ;      A:  INPUT - File open for reading
+          ;      B:  OUTPUT - File open for writing
+          ;      C:  BINARY - 1: Binary Mode, 0: Text Mode
+          ;      D:  AT_END - Output starts at the end of the file
+          ;      E:  APPEND - All output happens at end of the file
+          ;      F:  TRUNC - discard all previous file data
+FIO_SEEKPOS         equ   $FF56    ; (DWord) file seek position
+FIO_IOBYTE          equ   $FF5A    ; (Byte) input / output character
+FIO_IOWORD          equ   $FF5B    ; (Byte) input / output character
+FIO_PATH_LEN        equ   $FF5C    ; (Byte) length of the filepath
+FIO_PATH_POS        equ   $FF5D    ; (Byte) character position within the filepath
+FIO_PATH_DATA       equ   $FF5E    ; (Byte) data at the character position of the path
+FIO_DIR_DATA        equ   $FF5F    ; (Byte) a series of null-terminated filenames
+          ;     NOTES: Current read-position is reset to the beginning following a 
+          ;             List Directory command. The read-position is automatically 
+          ;             advanced on read from this register. Each filename is 
+          ;             $0a-terminated. The list itself is null-terminated.
+FIO_END             equ   $FF60    ; End of the FileIO register space
+RESERVED            equ   $FF60  
+          ; 144 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  

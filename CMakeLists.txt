@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
     ./src/Mouse.cpp
     ./src/Keyboard.cpp
     ./src/Gamepad.cpp
+    ./src/FileIO.cpp
 )
 
 # INCLUDE DIRECTORIES

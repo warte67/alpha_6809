@@ -16,6 +16,7 @@ class C6809;
 class Mouse;
 class Keyboard;
 class Gamepad;
+class FileIO;
 
 class Bus : public IDevice
 {
@@ -46,6 +47,7 @@ class Bus : public IDevice
         inline static Mouse* s_mouse = nullptr;
         inline static Keyboard* s_keyboard = nullptr;
         inline static Gamepad* s_gamepad = nullptr;
+        inline static FileIO* s_fileio = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -96,6 +98,7 @@ class Bus : public IDevice
         inline static Mouse* GetMouse() { return s_mouse; }
         inline static Keyboard* GetKeyboard() { return s_keyboard; }
         inline static Gamepad* GetGamepad() { return s_gamepad; }
+        inline static FileIO* GetFileIO() { return s_fileio; }
 
         void load_hex(const char* filename);
 

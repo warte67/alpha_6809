@@ -194,8 +194,70 @@ enum MEMMAP
     JOYS_2_Z2        = 0xFF51, //   (char) PAD 2 right analog trigger (0 - 127)    (realtime)
     JOYS_END         = 0xFF52, // End of the Game Controller Register space
         
-    RESERVED         = 0xFF52, 
-        // 158 bytes in reserve
+        
+    FIO_BEGIN        = 0xFF52, // Start of the FileIO register space
+    FIO_ERR_FLAGS    = 0xFF52, // (Byte) File IO error flags
+        // FIO_ERR_FLAGS: ABCD.EFGH
+        //      A:  file was not found
+        //      B:  directory was not found
+        //      C:  file not open
+        //      D:  end of file
+        //      E:  buffer overrun
+        //      F:  wrong file type
+        //      G:  invalid command
+        //      H:  incorrect file stream
+        
+    FIO_COMMAND      = 0xFF53, // (Byte) OnWrite, execute a file command (FC_<cmd>)
+        // Begin FIO_COMMANDS
+    FC_RESET         = 0x0000, //        Reset
+    FC_SHUTDOWN      = 0x0001, //        SYSTEM: Shutdown
+    FC_COMPDATE      = 0x0002, //        SYSTEM: Load Compilation Date
+    FC_NEWFILE       = 0x0003, //      * New File Stream
+    FC_OPENFILE      = 0x0004, //      * Open File
+    FC_ISOPEN        = 0x0005, //      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+    FC_CLOSEFILE     = 0x0006, //      * Close File
+    FC_READBYTE      = 0x0007, //      * Read Byte (into FIO_IOBYTE)
+    FC_WRITEBYTE     = 0x0008, //      * Write Byte (from FIO_IOBYTE)
+    FC_LOADHEX       = 0x0009, //      * Load Hex Format File
+    FC_GETLENGTH     = 0x000A, //      * Get File Length (into FIO_IOWORD)
+    FC_LISTDIR       = 0x000B, //        List Directory
+    FC_MAKEDIR       = 0x000C, //      * Make Directory
+    FC_CHANGEDIR     = 0x000D, //        Change Directory
+    FC_GETPATH       = 0x000E, //        Fetch Current Path
+    FC_REN_DIR       = 0x000F, //      * Rename Directory
+    FC_DEL_DIR       = 0x0010, //      * Delete Directory
+    FC_DEL_FILE      = 0x0011, //      * Delete File
+    FC_REN_FILE      = 0x0012, //      * Rename file
+    FC_COPYFILE      = 0x0013, //      * Copy File
+    FC_SEEKSTART     = 0x0014, //      * Seek Start
+    FC_SEEKEND       = 0x0015, //      * Seek End
+    FC_SET_SEEK      = 0x0016, //      * Set Seek Position (from FIO_IOWORD)
+    FC_GET_SEEK      = 0x0017, //      * Get Seek Position (into FIO_IOWORD)
+        // End FIO_COMMANDS
+        
+    FIO_STREAM       = 0xFF54, // (Byte) current file stream index (0-15)
+    FIO_MODE         = 0xFF55, // (Byte) Flags describing the I/O mode for the file
+        // FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
+        //      A:  INPUT - File open for reading
+        //      B:  OUTPUT - File open for writing
+        //      C:  BINARY - 1: Binary Mode, 0: Text Mode
+        //      D:  AT_END - Output starts at the end of the file
+        //      E:  APPEND - All output happens at end of the file
+        //      F:  TRUNC - discard all previous file data
+    FIO_SEEKPOS      = 0xFF56, // (DWord) file seek position
+    FIO_IOBYTE       = 0xFF5A, // (Byte) input / output character
+    FIO_IOWORD       = 0xFF5B, // (Byte) input / output character
+    FIO_PATH_LEN     = 0xFF5C, // (Byte) length of the filepath
+    FIO_PATH_POS     = 0xFF5D, // (Byte) character position within the filepath
+    FIO_PATH_DATA    = 0xFF5E, // (Byte) data at the character position of the path
+    FIO_DIR_DATA     = 0xFF5F, // (Byte) a series of null-terminated filenames
+        //     NOTES: Current read-position is reset to the beginning following a 
+        //             List Directory command. The read-position is automatically 
+        //             advanced on read from this register. Each filename is 
+        //             $0a-terminated. The list itself is null-terminated.
+    FIO_END          = 0xFF60, // End of the FileIO register space
+    RESERVED         = 0xFF60, 
+        // 144 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -211,5 +273,4 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
-
 

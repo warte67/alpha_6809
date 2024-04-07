@@ -14,6 +14,7 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 #include "Gamepad.hpp"
+#include "FileIO.hpp"
 
 Bus::Bus()
 {
@@ -161,6 +162,10 @@ Bus::Bus()
     // attach the gamepad device
     s_gamepad = new Gamepad();
     addr += Attach(s_gamepad);
+
+    // attach the FileIO device
+    s_fileio = new FileIO();
+    addr += Attach(s_fileio);
 
 
 

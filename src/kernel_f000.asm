@@ -47,7 +47,7 @@ KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 ;	fcn	character string with null termination
 
 KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.1\n"
-KRNL_PROMPT1	fcn	"Emulator compiled on \n"
+KRNL_PROMPT1	fcn	"Emulator compiled "
 KRNL_PROMPT2	fcn	"Under GPL V3 Liscense\n"
 KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"
 READY_PROMPT	fcn	"Ready\n"
@@ -109,18 +109,27 @@ k_init_0	clr	,x+		; clear the next byte
 k_main_1	clr	,x+
 		cmpx	#KEY_END
 		blt	k_main_1
-
 		; output the startup prompts
 		ldx	#KRNL_PROMPT0
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT1
 		jsr	KRNL_LINEOUT
+		; fetch compilation date
+		lda	#FC_COMPDATE
+		sta	FIO_COMMAND
+k_main_5	lda	FIO_PATH_DATA
+		beq	k_main_4
+		jsr	KRNL_CHROUT
+		bra	k_main_5
+k_main_4	lda	#$0a
+		jsr	KRNL_CHROUT
 		ldx	#KRNL_PROMPT2
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT3
 		jsr	KRNL_LINEOUT
-k_main_2
-		; the ready prompt
+
+
+k_main_2	; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
 k_main_3
