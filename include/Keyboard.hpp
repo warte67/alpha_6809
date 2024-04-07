@@ -15,6 +15,8 @@
 #include "IDevice.hpp" 
 #include "XK_Keycodes.hpp"
 
+
+// This should never be increased. There is an 8-bit math limitation imposed on the 6809.
 constexpr size_t EDIT_BUFFER_SIZE = 256;        // if this is changed, the memory_map.hpp must be rebuilt
 
 

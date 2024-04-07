@@ -27,10 +27,15 @@ VECT_RESET	fdb	KRNL_START	; RESET Software Interrupt Vector
 ; *****************************************************************************
 ; * RESERVED ZERO PAGE KERNAL VARIABLES                                       *
 ; *****************************************************************************
-KRNL_CSR_COL	fcb	0		; (Byte) current cursor horizontal position
-KRNL_CSR_ROW	fcb	0		; (Byte) current cursor vertical position
+KRNL_CURSOR_COL	fcb	0		; (Byte) current cursor horizontal position
+KRNL_CURSOR_ROW	fcb	0		; (Byte) current cursor vertical position
 KRNL_ATTRIB	fcb	0		; (Byte) current character display attribute
-KRNL_LE_ANCHOR	fdb	0		; (Word) line edit anchor screen address
+KRNL_ANCHOR_COL	fcb	0		; (Byte) line edit anchor column
+KRNL_ANCHOR_ROW	fcb	0		; (Byte) line edit anchor row
+KRNL_LOCAL_0	fcb	0		; (Byte) used locally for some KRNL calls
+KRNL_LOCAL_1	fcb	0		; (Byte) used locally for some KRNL calls
+KRNL_LOCAL_2	fcb	0		; (Byte) used locally for some KRNL calls
+KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 
 ; *****************************************************************************
 ; * KERNEL ROM                                                                *
@@ -93,9 +98,7 @@ k_start_0	clr	,x+		; clear the next byte
 		; clear the default text screen buffer
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
-
-	; TESTING
-
+		; output the startup prompts
 		ldx	#KRNL_PROMPT0
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT1
@@ -104,8 +107,70 @@ k_start_0	clr	,x+		; clear the next byte
 		jsr	KRNL_LINEOUT
 		ldx	#KRNL_PROMPT3
 		jsr	KRNL_LINEOUT
+
+		; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
+
+
+
+
+
+
+; NEW Lineeditor tests
+
+		; save the line editor anchor
+		ldd 	KRNL_CURSOR_COL
+		std	KRNL_ANCHOR_COL
+		; enable the line editor
+		lda	#1
+		sta	EDT_ENABLE
+
+le_label_0
+		; display the line up to the cursor
+		ldd 	KRNL_ANCHOR_COL		; restore the line editor anchor
+		std	KRNL_CURSOR_COL
+		ldu	#EDT_BUFFER		
+		ldb	EDT_BFR_CSR		; the buffer csr position
+		stb	KRNL_LOCAL_0		; store the edit csr position locally
+		ldb	KRNL_ATTRIB		; load the cursor attribute
+
+le_label_1	
+		tst	KRNL_LOCAL_0
+		beq	le_label_2
+		dec	KRNL_LOCAL_0
+		lda	,u+
+		beq	le_label_2
+		jsr	KRNL_CHROUT
+		bra	le_label_1
+
+le_label_2
+		; display the cursor at the end of the line
+		lda	#' '
+		ldb	#$4b
+		tst	,u
+		beq	le_label_3
+		lda	,u+
+le_label_3
+		jsr	KRNL_CHROUT
+
+		; finish the line
+		ldb	KRNL_ATTRIB
+le_label_4		
+		lda	,u+	
+		beq	le_done	
+		jsr	KRNL_CHROUT
+		bra	le_label_4
+
+le_done	
+		; space at the end
+		lda	#' '
+		ldb	#$b4
+		jsr	KRNL_CHROUT
+
+		bra	le_label_0
+
+
 
 	; infinate loop
 inf_loop	bra 	inf_loop
@@ -118,7 +183,7 @@ inf_loop	bra 	inf_loop
 ; KRNL_CHROUT		; Output a character to the console
 ; KRNL_NEWLINE		; Perfoms a CR/LF on the console
 ; KRNL_LINEOUT		; Outputs a string to the console
-; KRNL_CHARPOS		; Loads into X the cursor position
+; KRNL_CHRPOS		; Loads into X the cursor position
 ; KRNLL_SCROLL		; Scroll the text screen up one line
 
 ; KRNLL_CMPSTR		; Compare two strings of arbitrary lengths
@@ -149,7 +214,7 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 		puls	x, pc		; restore the registers and return
 
 ; *****************************************************************************
-; * KRNL_CHAROUT                                                              *
+; * KRNL_CHROUT                                                              *
 ; * 	Outputs a character to the console at the current                     *
 ; *     cursor position. This routine should the cursors                      *
 ; *     position and handles text scrolling as needed.                        *
@@ -159,25 +224,25 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
-KRNL_CHAROUT	
+KRNL_CHROUT	
 		pshs	d, x		; save the used registers onto the stack
 		tstb			; is B a null?
-		bne	K_CHAROUT_1	; nope, continue
+		bne	K_CHROUT_1	; nope, continue
 		ldb	KRNL_ATTRIB	; load the current color attribute
-K_CHAROUT_1	tsta			; is A a null?
-		beq	K_CHAROUT_DONE	;    A is null, just return and do nothing		
+K_CHROUT_1	tsta			; is A a null?
+		beq	K_CHROUT_DONE	;    A is null, just return and do nothing		
 		cmpa	#$0A		; is it a newline character?
-		bne	K_CHAROUT_0	; nope, don't do a newline
+		bne	K_CHROUT_0	; nope, don't do a newline
 		jsr	KRNL_NEWLINE	; advance the cursor 
-		bra	K_CHAROUT_DONE	; clean up and return
-K_CHAROUT_0	jsr	KRNL_CHARPOS	; position X at the cursor position
+		bra	K_CHROUT_DONE	; clean up and return
+K_CHROUT_0	jsr	KRNL_CHRPOS	; position X at the cursor position
 		std	,x		; display the character/attribute combo
-		inc	KRNL_CSR_COL	; increment current cursor column position
-		lda	KRNL_CSR_COL	; load current cursor column position					
+		inc	KRNL_CURSOR_COL	; increment current cursor column position
+		lda	KRNL_CURSOR_COL	; load current cursor column position					
 		cmpa	GFX_HRES+1	; compare with the current screen columns
-		blt	K_CHAROUT_DONE	; cleanup and return if the csr column is okay
+		blt	K_CHROUT_DONE	; cleanup and return if the csr column is okay
 		jsr	KRNL_NEWLINE	; perform a new line
-K_CHAROUT_DONE	puls	d, x, pc	; cleanup and return
+K_CHROUT_DONE	puls	d, x, pc	; cleanup and return
 
 ; *****************************************************************************
 ; * KRNL_NEWLINE                                                              *
@@ -189,12 +254,12 @@ K_CHAROUT_DONE	puls	d, x, pc	; cleanup and return
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
 KRNL_NEWLINE	pshs	D, X		; save the used registers onto the stack
-		clr	KRNL_CSR_COL	; carrage return (move to left edge)
-		inc	KRNL_CSR_ROW	; increment the cursors row
-		lda	KRNL_CSR_ROW	; load the current row
+		clr	KRNL_CURSOR_COL	; carrage return (move to left edge)
+		inc	KRNL_CURSOR_ROW	; increment the cursors row
+		lda	KRNL_CURSOR_ROW	; load the current row
 		cmpa	GFX_VRES+1	; compared to the current screen rows
 		blt	K_NEWLINE_DONE	; clean up and return if less than
-		dec	KRNL_CSR_ROW	; move the cursor the the bottom row
+		dec	KRNL_CURSOR_ROW	; move the cursor the the bottom row
 		jsr	KRNL_SCROLL	; scroll the text screen up one line
 K_NEWLINE_DONE	puls	D, X, pc	; restore the saved registers and return
 
@@ -211,11 +276,11 @@ K_NEWLINE_DONE	puls	D, X, pc	; restore the saved registers and return
 KRNL_LINEOUT	
 		pshs	D, U, X		; save the used registers onto the stack
 		tfr	x,u		; move X to U
-		jsr	KRNL_CHARPOS	; set X to the cursor position 
+		jsr	KRNL_CHRPOS	; set X to the cursor position 
 K_LINEOUT_0	lda	,u+		; fetch the next character
 		beq	K_LINEOUT_DONE	; cleanup and return if null-terminator
 		bmi	K_LINEOUT_DONE	; cleanup and return if neg-terminator
-		jsr	KRNL_CHAROUT	; send the character to the console
+		jsr	KRNL_CHROUT	; send the character to the console
 		leax	1, x		; point to the next character
 		bra	K_LINEOUT_0	; continue looping until done
 K_LINEOUT_DONE	puls	D, U, X, pc	; restore the saved registers and return		
@@ -230,14 +295,14 @@ K_LINEOUT_DONE	puls	D, U, X, pc	; restore the saved registers and return
 ; *                         where the cursor is positioned.                   *   
 ; *                     All other registers preserved.                        *
 ; *****************************************************************************
-KRNL_CHARPOS	pshs	d		; save the used registers onto the stack
-		lda	KRNL_CSR_ROW	; current cursor row
+KRNL_CHRPOS	pshs	d		; save the used registers onto the stack
+		lda	KRNL_CURSOR_ROW	; current cursor row
 		ldb	GFX_HRES+1	; current text columns
 		lslb			; times two (account for the attribute)
 		mul			; row * columns
 		ldx	#VIDEO_START	; the buffer starting address
 		leax	d, x		; add the video base address
-		ldb	KRNL_CSR_COL	; load the current cursor column
+		ldb	KRNL_CURSOR_COL	; load the current cursor column
 		lslb			; times two (account for the attribute)
 		leax	b, x		; add the column to the return address
 		puls	d, pc		; restore the saved registers and return
