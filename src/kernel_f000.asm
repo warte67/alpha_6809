@@ -61,6 +61,32 @@ KRNL_PROMPT2	fcn	"Under GPL V3 Liscense\n"
 KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"
 READY_PROMPT	fcn	"Ready\n"
 
+KRNL_CMD_TABLE	fcn	"cls"		; #0
+		fcn	"color"		; #1
+		fcn	"load"		; #2
+		fcn	"exec"		; #3
+		fcn	"reset"		; #4
+		fcn	"dir"		; #5
+		fcn	"cd"		; #6
+		fcn	"chdir"		; #7
+		fcn	"exit"		; #8
+		fcn	"quit"		; #9
+		fcb	$FF		; $FF = end of list
+		; ...
+
+KRNL_CMD_VECTS  fdb	do_cls		; #0
+		fdb	do_color	; #1
+		fdb	do_load		; #2
+		fdb	do_exec		; #3
+		fdb	do_reset	; #4
+		fdb	do_dir		; #5
+		fdb	do_cd		; #6
+		fdb	do_chdir	; #7
+		fdb	do_exit		; #8
+		fdb	do_quit		; #8
+		; ...
+KRNL_ERR_NFND 	fcn	"ERROR: Command Not Found\n"
+
 ; *****************************************************************************
 ; * KERNEL JUMP VECTORS                                                       *
 ; *****************************************************************************
@@ -88,7 +114,7 @@ RESET_start	bra	RESET_start	; RESET Implementation
 ; *****************************************************************************
 ; * KERNEL INITIALIZATION                                                     *
 ; *****************************************************************************
-KRNL_START	; initialize the system stack (and the zero page)
+KRNL_START	; initialize the system
 		ldx	#SYSTEM_STACK	; point to the start of stack space
 k_init_0	clr	,x+		; clear the next byte
 		cmpx	#SSTACK_TOP	; at the end of the stack space?
@@ -108,109 +134,140 @@ k_init_0	clr	,x+		; clear the next byte
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
 
-; TESTING: Main Command Loop
 		; Initialize the line editor
-		clr	EDT_BFR_CSR
-		ldx	#EDT_BUFFER
-k_main_1	clr	,x+
-		cmpx	#KEY_END
-		blt	k_main_1
+		clr	EDT_BFR_CSR	; set the buffer cursor to the start
+		ldx	#EDT_BUFFER	; point to the edit buffer
+k_init_1	clr	,x+		; clear an entry and advance to next
+		cmpx	#KEY_END	; are we at the end of the buffer?
+		blt	k_init_1	;   not yet, continue looping
 		; output the startup prompts
-		ldx	#KRNL_PROMPT0
-		jsr	KRNL_LINEOUT
-		ldx	#KRNL_PROMPT1
-		jsr	KRNL_LINEOUT
+		ldx	#KRNL_PROMPT0	; point to the first prompt line
+		jsr	KRNL_LINEOUT	; output it to the console
+		ldx	#KRNL_PROMPT1	; point to the second prompt line
+		jsr	KRNL_LINEOUT	; output it to the console
 		; fetch compilation date
-		lda	#FC_COMPDATE
-		sta	FIO_COMMAND
-k_main_5	lda	FIO_PATH_DATA
-		beq	k_main_4
-		jsr	KRNL_CHROUT
-		bra	k_main_5
-k_main_4	lda	#$0a
-		jsr	KRNL_CHROUT
-		ldx	#KRNL_PROMPT2
-		jsr	KRNL_LINEOUT
-		ldx	#KRNL_PROMPT3
-		jsr	KRNL_LINEOUT
+		lda	#FC_COMPDATE	; command to fetch the compilation date
+		sta	FIO_COMMAND	; issue the command to the FileIO device
+k_init_5	lda	FIO_PATH_DATA	; load a character from the response data
+		beq	k_init_4	; if we've received a NULL, stop looping
+		jsr	KRNL_CHROUT	; output the retrieved character to concole
+		bra	k_init_5	; continue looping while theres still data
+k_init_4	lda	#$0a		; line feed character
+		jsr	KRNL_CHROUT	; send the line feed to the console
+		ldx	#KRNL_PROMPT2	; point to the third prompt line
+		jsr	KRNL_LINEOUT	; output it to the console
+		ldx	#KRNL_PROMPT3	; point to the fourth prompt line
+		jsr	KRNL_LINEOUT	; output it to the console
 
 
 
-* ; TESTING: KRNL_CMPSTR
-* 		bra	test_1
-* str_1		fcn	"str_1"
-* str_2		fcn	"str_2"
-* str_equal	fcn	"EQUAL\n"
-* str_less	fcn	"LESS\n"
-* str_greater	fcn	"GREATER\n"
-* str_error	fcn	"ERROR\n"
-* test_1		ldx	#str_1
-* 		ldy	#str_2
-* 		jsr	KRNL_CMPSTR
-* 		beq	test_equal
-* 		blt	test_less
-* 		bgt	test_greater
-* 		ldx	#str_error
-* 		bra	test_done
-* test_equal	ldx	#str_equal
-* 		bra	test_done
-* test_less	ldx	#str_less
-* 		bra	test_done
-* test_greater	ldx	#str_greater
-* test_done	jsr	KRNL_LINEOUT
+; *****************************************************************************
+; * THE MAIN COMMAND LOOP                                                     *
+; *****************************************************************************
+; *                                                                           *
+; * 	1) Displays the "Ready" prompt                                        *
+; *     2) Runs the Command Input Line Editor                                 *
+; *     3) Dispatches the Operating System Commands                           *
+; *                                                                           *
+; *****************************************************************************
+MAIN_LOOP	ldx	#READY_PROMPT	; the ready prompt
+		jsr	KRNL_LINEOUT	; output to the console
+		lda	#$ff		; Initialize the line editor
+		sta	EDT_BFR_LEN	; allow for the full sized buffer
+		clr	EDT_BFR_CSR	; set the buffer cursor to the start
+		clr	EDT_BUFFER		
+		ldx	#EDT_BUFFER	; point to the edit buffer
+k_main_clr	clr	,x+		; clear an entry and advance to next
+		cmpx	#KEY_END	; are we at the end of the buffer?
+		blt	k_main_clr	;   not yet, continue looping
+k_main_0	jsr	KRNL_LINEEDIT	; run the command line editor
+		jsr	KRNL_CMD_PROC	; decode the command; A = Table Index
+		tst	FIO_BUFFER	; test the buffer for a null
+		beq	k_main_cont	; skip, nothing was entered
+		cmpa	#$FF		; ERROR: command not found 
+		beq	k_main_error	;    display the error
+		lsla			; index two byte addresses
+		ldx	#KRNL_CMD_VECTS	; the start of the command vector table
+		jsr	[a,x]		; call the command subroutine
+k_main_cont	tst	EDT_BUFFER	; nothing entered in the command line?
+		beq	k_main_0	;   nope, skip the ready prompt
+		bra	MAIN_LOOP	; back to the top of the main loop
+k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
+		jsr	KRNL_LINEOUT	; send it to the console
+		bra	k_main_cont	; continue within the main loop
 
-
-
-k_main_2	; the ready prompt
-		ldx	#READY_PROMPT
-		jsr	KRNL_LINEOUT
-k_main_3
-		jsr	KRNL_LINEEDIT
-		; handle processing the edit buffer
-		bra	k_main_skip
-
-KRNL_CMD_TABLE	; fcn	"NULL"		; #0
-		fcn	"cls"		; #1
-		fcn	"color"		; #2
-		fcn	"load"		; #3
-		fcn	"exec"		; #4
-		fcn	"reset"		; #5
-		fcn	"dir"		; #6
-		fcn	"cd"		; #7
-		fcn	"chdir"		; #8
-		fcn	"exit"		; #9
-		fcb	$FF		; $FF = end of list
-
-k_main_skip	jsr	KRNL_CMD_PROC
-
-		; and other cleanup type stuffs
-		jsr 	KRNL_NEWLINE
-		clr	EDT_BFR_CSR
-		tst	EDT_BUFFER
-		beq	k_main_3
-		clr	EDT_BUFFER	
-
-		bra	k_main_2
 
 	; infinate loop
 inf_loop	bra 	inf_loop
 
 
 ; *****************************************************************************
+; * MAIN KERNEL COMMAND SUBROUTINES (Prototypes)                              *
+; *****************************************************************************
+;	do_cls		; #0
+;	do_color	; #1
+;	do_load		; #2
+;	do_exec		; #3
+;	do_reset	; #4
+;	do_dir		; #5
+;	do_cd		; #6
+;	do_chdir	; #7
+;	do_exit		; #8
+;	do_quit		; #9
+
+str_cls		fcn	"CLS\n"
+str_color	fcn	"COLOR\n"
+str_load	fcn	"LOAD\n"
+str_exec	fcn	"EXEC\n"
+str_reset	fcn	"RESET\n"
+str_dir		fcn	"DIR\n"
+str_cd		fcn	"CD\n"
+str_chdir	fcn	"CHDIR\n"
+str_exit	fcn	"EXIT\n"
+str_quit	fcn	"QUIT\n"
+
+do_cls		ldx	#str_cls
+		bra	str_output
+do_color	ldx	#str_color
+		bra	str_output
+do_load		ldx	#str_load
+		bra	str_output
+do_exec		ldx	#str_exec
+		bra	str_output
+do_reset	ldx	#str_reset
+		bra	str_output
+do_dir		ldx	#str_dir
+		bra	str_output
+do_cd		ldx	#str_cd
+		bra	str_output
+do_chdir	ldx	#str_chdir
+		bra	str_output
+do_exit		ldx	#str_exit
+		bra	str_output
+do_quit		ldx	#str_quit
+		bra	str_output
+
+str_output	jsr	KRNL_LINEOUT
+		rts
+
+
+
+
+; *****************************************************************************
 ; * KERNEL SUBROUTINES (Prototypes)                                           *
 ; *****************************************************************************
-; KRNL_CLS		; Clears the current screen buffer
-; KRNL_CHROUT		; Output a character to the console
-; KRNL_NEWLINE		; Perfoms a CR/LF on the console
-; KRNL_LINEOUT		; Outputs a string to the console
-; KRNL_CSRPOS		; Loads into X the cursor position
-; KRNL_SCROLL		; Scroll the text screen up one line
-; KRNL_LINEEDIT		; Engage the text line editor
-; KRNL_GETKEY		; Input a character from the console
-; KRNL_GETHEX		; Input a hex digit from the console
-; KRNL_GETNUM		; Input a numeric digit from the console
-; KRNL_CMPSTR		; Compare two strings of arbitrary lengths
-; KRNL_TBLSEARCH	; Table Search (find the string and return its index)
+; 	KRNL_CLS	; Clears the current screen buffer                    
+; 	KRNL_CHROUT	; Output a character to the console                   
+; 	KRNL_NEWLINE	; Perfoms a CR/LF on the console                      
+; 	KRNL_LINEOUT	; Outputs a string to the console                     
+; 	KRNL_CSRPOS	; Loads into X the cursor position                    
+; 	KRNL_SCROLL	; Scroll the text screen up one line
+; 	KRNL_LINEEDIT	; Engage the text line editor
+; 	KRNL_GETKEY	; Input a character from the console
+; 	KRNL_GETHEX	; Input a hex digit from the console
+; 	KRNL_GETNUM	; Input a numeric digit from the console
+; 	KRNL_CMPSTR	; Compare two strings of arbitrary lengths
+; 	KRNL_TBLSEARCH	; Table Search (find the string and return its index)
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -535,59 +592,52 @@ K_CMP_DONE	puls	D,PC		; cleanup saved registers and return
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: Command text within EDT_BUFFER                        *
 ; *                                                                           *
-; * EXIT CONDITIONS:	X & Y Modified                                        *
+; * EXIT CONDITIONS:	A = search string table index (or $FF if not found)   *
+' *                     X & Y Modified                                        *
 ; *                     FIO_BUFFER will be modified                           *
 ; *****************************************************************************
-KRNL_CMD_PROC	pshs	D,CC	; save the used registers onto the stack
+KRNL_CMD_PROC	pshs	B,CC		; save the used registers onto the stack
 	; copy EDT_BUFFER to FIO_BUFFER
-		ldx	#EDT_BUFFER
-		ldy	#FIO_BUFFER
-0		lda	,x+
-		sta	,y+
-		bne	0b
+		ldx	#EDT_BUFFER	; the start of the input buffer
+		ldy	#FIO_BUFFER	; use the I/O buffer temporarily
+K_CMDP_0	lda	,x+		; load a character from the input
+		cmpa	#'A'		; make sure input is in lower case
+		blt	K_CMDP_3	;   valid character if < 'A'
+		cmpa	#'Z'		; all other characters are good to go
+		bgt	K_CMDP_3	;   valid charcters above 'Z'
+		ora	#$20		; convert all letters to lower case
+K_CMDP_3	sta	,y+		; copy it to the output
+		bne	K_CMDP_0	; branch until done copying
 	; replace the null-terminator with $FF
-		lda	#$ff
-		sta	,y	;-1,y
+		lda	#$ff		; the new character $FF
+		sta	,y		; replace the null-terminator
 	; replace SPACES with NULL (unless within '' or "")
-		ldx	#FIO_BUFFER
-1		lda	,x+
-		cmpa	#$FF
-		beq	2f
-		cmpa	#"'"
-		beq	K_CPROC_SKIP
-		cmpa	#'"'
-		beq	K_CPROC_SKIP
-		cmpa	#' '
-		bne	1b
-		clr	-1,x
-		bra	1b
-K_CPROC_SKIP	cmpa	,x+
-		beq	1b
-		cmpa	#$ff
-		beq	K_CPROC_DONE
-		bra	K_CPROC_SKIP
+		ldx	#FIO_BUFFER	; the start of the temp buffer
+K_CMDP_1	lda	,x+		; load the next character from buffer
+		cmpa	#$FF		; are we at the end of the buffer?
+		beq	K_CMDP_2	;   yes, go parse the buffer
+		cmpa	#"'"		; are we at a single-quote character?
+		beq	K_CPROC_SKIP	;   skip through until we find another
+		cmpa	#'"'		; are we at a double-quote character?
+		beq	K_CPROC_SKIP	;   skip through until we find another
+		cmpa	#' '		; are we at a SPACE character?
+		bne	K_CMDP_1	; nope, continue scanning	
+		clr	-1,x		; convert the SPACE to a NULL
+		bra	K_CMDP_1	; continue scanning through the buffer
+K_CPROC_SKIP	cmpa	,x+		; is character a quote character?
+		beq	K_CMDP_1	;    yes, go back to scanning the buffer
+		cmpa	#$ff		; are we at the end of the buffer?
+		beq	K_CPROC_DONE	;    yes, cleanup and return
+		bra	K_CPROC_SKIP	; continue looking for a quote character
 	; FIO_BUFFER should now be prepared for parsing
-2		lda	#$0a
-		jsr	KRNL_CHROUT
-
-
-
-
-		ldy	#KRNL_CMD_TABLE
-		ldx	#FIO_BUFFER
-		jsr	KRNL_LINEOUT
-		ldx	#FIO_BUFFER
-
+K_CMDP_2	lda	#$0a		; line feed character
+		jsr	KRNL_CHROUT	; send the line feed
+		ldy	#KRNL_CMD_TABLE	; point to the command table to search
+		ldx	#FIO_BUFFER	; point to the command to search for
 	; X now points to the command to search for in the table
-		bsr	KRNL_TBLSEARCH
-	; A should now index the found search string
-
-		nop
-	
-
-
-
-K_CPROC_DONE	puls	D,CC,PC	; cleanup saved registers and return
+		bsr	KRNL_TBLSEARCH	; seach the table for the command
+	; A = index of the found search string table index
+K_CPROC_DONE	puls	B,CC,PC	; cleanup saved registers and return
 
 ; *****************************************************************************
 ; * KRNL_TBLSEARCH                                                            *
@@ -600,41 +650,25 @@ K_CPROC_DONE	puls	D,CC,PC	; cleanup saved registers and return
 ; *                     X = the end of the search string(next argument)       *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
-KRNL_TBLSEARCH	pshs	D,Y,U,CC	; save the used registers onto the stack
+KRNL_TBLSEARCH	pshs	B,Y,U,CC	; save the used registers onto the stack
 		tfr	X,U		; save X in U
-
 		clra			; set the return index to 0
+K_TBLS_0	tfr	U,X		; restore X
+		jsr 	KRNL_CMPSTR	; compare strings at X and at Y
+		beq	K_TBLS_DONE	; found the string in the table		
+		inca			; increment the index return value
+K_TBLS_1	ldb	,y+		; look at the next character in table
+		cmpb	#$ff		; is it the $ff terminator?
+		beq	K_TBLS_NOTFOUND	; yes, the entry is not in the table
+		tstb			; are we looking at a null character?
+		bne	K_TBLS_1	; loop until the end of this entry
+		bra	K_TBLS_0	; look at the next entry
+K_TBLS_NOTFOUND	lda	#$ff		; not found error code
+K_TBLS_DONE	puls	B,Y,U,CC,PC	; cleanup saved registers and return
 
-K_TBLS_0	jsr 	KRNL_CMPSTR	; compare strings at X and at Y
-		beq	K_TBLS_DONE
-		tfr	U,X		; restore X
-
-
-		; LEAY is broken!??!!!
-		leay	1,y		; skip the null
-
-
-
-		inca
-		tst	,y
-		bpl	K_TBLS_0
-
-K_TBLS_NOTFOUND	nop
-K_TBLS_DONE	puls	D,Y,CC,PC	; cleanup saved registers and return
-
-
-
-
-
-
-; KRNL_TBLSEARCH	; Table Search (find the string and return its index)
-
-
-
-
-; *******************************W*****************************
-; * ROM BASED HARDWARE VECTORS                               *
-; ************************************************************
+; *****************************************************************************
+; * ROM BASED HARDWARE VECTORS                                                *
+; *****************************************************************************
 		org	$FFF0
 
 		fdb	KRNL_EXEC	; HARD_RSRVD       EXEC Interrupt Vector
@@ -645,3 +679,34 @@ K_TBLS_DONE	puls	D,Y,CC,PC	; cleanup saved registers and return
 		fdb	KRNL_SWI    	; HARD_SWI         SWI / SYS Hardware Interrupt Vector
 		fdb	KRNL_NMI    	; HARD_NMI         NMI Hardware Interrupt Vector
 		fdb	KRNL_RESET 	; HARD_RESET       RESET Hardware Interrupt Vector
+
+
+
+
+
+
+
+
+* ; TESTING: KRNL_CMPSTR
+* 		bra	test_1
+* str_1		fcn	"str_1"
+* str_2		fcn	"str_2"
+* str_equal	fcn	"EQUAL\n"
+* str_less	fcn	"LESS\n"
+* str_greater	fcn	"GREATER\n"
+* str_error	fcn	"ERROR\n"
+* test_1		ldx	#str_1
+* 		ldy	#str_2
+* 		jsr	KRNL_CMPSTR
+* 		beq	test_equal
+* 		blt	test_less
+* 		bgt	test_greater
+* 		ldx	#str_error
+* 		bra	test_done
+* test_equal	ldx	#str_equal
+* 		bra	test_done
+* test_less	ldx	#str_less
+* 		bra	test_done
+* test_greater	ldx	#str_greater
+* test_done	jsr	KRNL_LINEOUT
+
