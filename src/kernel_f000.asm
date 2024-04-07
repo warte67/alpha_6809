@@ -22,7 +22,13 @@ VECT_RESET	fdb	KRNL_START	; RESET Software Interrupt Vector
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
 ; *****************************************************************************
-; ... add these
+VECT_CLS	fdb	STUB_CLS	; CLS function Software Vector
+VECT_CHROUT	fdb	STUB_CHROUT	; Character Out Software Vector
+VECT_NEWLINE	fdb	STUB_NEWLINE	; Kernel Newline Software Vector
+VECT_LINEOUT	fdb	STUB_LINEOUT	; String to Console Software Vector
+VECT_CSRPOS	fdb	STUB_CSRPOS	; Cursor Position Software Vector
+VECT_SCROLL	fdb	STUB_SCROLL	; Scroll Text Screen Software Vector
+VECT_LINEEDIT	fdb	STUB_LINEEDIT	; Console Line Editor Software Vector
 
 ; *****************************************************************************
 ; * RESERVED ZERO PAGE KERNAL VARIABLES                                       *
@@ -80,7 +86,7 @@ RESET_start	bra	RESET_start	; RESET Implementation
 ; * KERNEL INITIALIZATION                                                     *
 ; *****************************************************************************
 KRNL_START	; initialize the system stack (and the zero page)
-		ldx	#ZERO_PAGE	; point to the start of zero-page
+		ldx	#SYSTEM_STACK	; point to the start of stack space
 k_init_0	clr	,x+		; clear the next byte
 		cmpx	#SSTACK_TOP	; at the end of the stack space?
 		bne	k_init_0	; loop if not there yet	
@@ -98,7 +104,6 @@ k_init_0	clr	,x+		; clear the next byte
 		; clear the default text screen buffer
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
-
 
 
 
@@ -157,17 +162,16 @@ inf_loop	bra 	inf_loop
 ; KRNL_CHROUT		; Output a character to the console
 ; KRNL_NEWLINE		; Perfoms a CR/LF on the console
 ; KRNL_LINEOUT		; Outputs a string to the console
-; KRNL_CHRPOS		; Loads into X the cursor position
+; KRNL_CSRPOS		; Loads into X the cursor position
 ; KRNL_SCROLL		; Scroll the text screen up one line
 ; KRNL_LINEEDIT		; Engage the text line editor
 
-; KRNLL_CMPSTR		; Compare two strings of arbitrary lengths
-; KRNLL_CMPSTREQ	; Compare two strings of equal length
+; TODO: ...
+; KRNLL_CMPSTR		; Compare two strings of equal length
+; KRNLL_CMPNSTR		; Compare two strings of arbitrary lengths
 ; KRNLL_TBLSEARCH	; General Table Search
-; KRNLL_LINEEDIT	; Line edit characters in the EDT_BUFFER
-; KRNLL_INCHR		; Input a character from the console
-; KRNLL_SCROLL		; Scroll the text screen up one line
-; KRNLL_INHEX		; Input a hex digit from the console
+; KRNLL_CHRIN		; Input a character from the console
+; KRNLL_HEXIN		; Input a hex digit from the console
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -181,7 +185,8 @@ inf_loop	bra 	inf_loop
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
-KRNL_CLS	pshs	X		; save the used registers onto the stack
+KRNL_CLS	jmp	[VECT_CLS]	; proceed through the software vector
+STUB_CLS	pshs	X		; save the used registers onto the stack
 		ldx	#VIDEO_START	; point X to the start of the video buffer
 K_CLS_0		std	,x++		; store the attrib/character or pixel data
 		cmpx	GFX_VID_END	; check for the end of the current buffer
@@ -199,8 +204,8 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
-KRNL_CHROUT	
-		pshs	d, x		; save the used registers onto the stack
+KRNL_CHROUT	jmp	[VECT_CHROUT]	; proceed through the software vector
+STUB_CHROUT	pshs	d, x		; save the used registers onto the stack
 		tstb			; is B a null?
 		bne	K_CHROUT_1	; nope, continue
 		ldb	KRNL_ATTRIB	; load the current color attribute
@@ -210,7 +215,7 @@ K_CHROUT_1	tsta			; is A a null?
 		bne	K_CHROUT_0	; nope, don't do a newline
 		jsr	KRNL_NEWLINE	; advance the cursor 
 		bra	K_CHROUT_DONE	; clean up and return
-K_CHROUT_0	jsr	KRNL_CHRPOS	; position X at the cursor position
+K_CHROUT_0	jsr	KRNL_CSRPOS	; position X at the cursor position
 		std	,x		; display the character/attribute combo
 		inc	KRNL_CURSOR_COL	; increment current cursor column position
 		lda	KRNL_CURSOR_COL	; load current cursor column position					
@@ -228,7 +233,8 @@ K_CHROUT_DONE	puls	d, x, pc	; cleanup and return
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
-KRNL_NEWLINE	pshs	D, X		; save the used registers onto the stack
+KRNL_NEWLINE	jmp	[VECT_NEWLINE]	; proceed through the software vector
+STUB_NEWLINE	pshs	D, X		; save the used registers onto the stack
 		clr	KRNL_CURSOR_COL	; carrage return (move to left edge)
 		inc	KRNL_CURSOR_ROW	; increment the cursors row
 		lda	KRNL_CURSOR_ROW	; load the current row
@@ -248,10 +254,10 @@ K_NEWLINE_DONE	puls	D, X, pc	; restore the saved registers and return
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
-KRNL_LINEOUT	
-		pshs	D, U, X		; save the used registers onto the stack
+KRNL_LINEOUT	jmp	[VECT_LINEOUT]	; proceed through the software vector
+STUB_LINEOUT	pshs	D, U, X		; save the used registers onto the stack
 		tfr	x,u		; move X to U
-		jsr	KRNL_CHRPOS	; set X to the cursor position 
+		jsr	KRNL_CSRPOS	; set X to the cursor position 
 K_LINEOUT_0	lda	,u+		; fetch the next character
 		beq	K_LINEOUT_DONE	; cleanup and return if null-terminator
 		bmi	K_LINEOUT_DONE	; cleanup and return if neg-terminator
@@ -270,7 +276,8 @@ K_LINEOUT_DONE	puls	D, U, X, pc	; restore the saved registers and return
 ; *                         where the cursor is positioned.                   *   
 ; *                     All other registers preserved.                        *
 ; *****************************************************************************
-KRNL_CHRPOS	pshs	d		; save the used registers onto the stack
+KRNL_CSRPOS	jmp	[VECT_CSRPOS]	; proceed through the software vector
+STUB_CSRPOS	pshs	d		; save the used registers onto the stack
 		lda	KRNL_CURSOR_ROW	; current cursor row
 		ldb	GFX_HRES+1	; current text columns
 		lslb			; times two (account for the attribute)
@@ -290,7 +297,8 @@ KRNL_CHRPOS	pshs	d		; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
-KRNL_SCROLL	pshs	d, x, u		; save the used registers onto the stack
+KRNL_SCROLL	jmp	[VECT_SCROLL]	; proceed through the software vector
+STUB_SCROLL	pshs	d, x, u		; save the used registers onto the stack
 		ldx	#VIDEO_START	; set X to the start of the video buffer
 		tfr	x, u		; copy X into U
 		ldb	GFX_HRES+1	; B = Screen Columns
@@ -306,13 +314,10 @@ K_SCROLL_1	sta	,x++		; and store it to where X points
 		cmpx	GFX_VID_END	; continue looping until the bottom ...
 		blt	K_SCROLL_1	; ... line has been cleared
 
-	; test to see if we're in the line editor
-		tst	EDT_ENABLE
-		beq	K_SCROLL_DONE
-		dec	KRNL_ANCHOR_ROW
-
-K_SCROLL_DONE
-		puls	d, x, u, pc	; restore the registers and return
+		tst	EDT_ENABLE	; are we using the line editor?
+		beq	K_SCROLL_DONE	; nope, just clean up and return
+		dec	KRNL_ANCHOR_ROW	; yup, decrease the anchor row by one
+K_SCROLL_DONE	puls	d, x, u, pc	; restore the registers and return
 
 ; *****************************************************************************
 ; * KRNL_LINEEDIT                                                             *
@@ -322,7 +327,8 @@ K_SCROLL_DONE
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved.                              *
 ; *****************************************************************************
-KRNL_LINEEDIT	pshs	D, X, U, CC	; save the used registers onto the stack		
+KRNL_LINEEDIT	jmp	[VECT_LINEEDIT]	; proceed through the software vector
+STUB_LINEEDIT	pshs	D, X, U, CC	; save the used registers onto the stack		
 		ldd 	KRNL_CURSOR_COL	; load the current cursor position
 		std	KRNL_ANCHOR_COL	;   use it to update the anchor position
 		lda	#1		; load the enable condition
@@ -353,7 +359,7 @@ KRNL_LEDIT_2	; display the cursor at the end of the line
 		beq	KRNL_LEDIT_3	; use the SPACE if we're at a null
 		lda	,u+		; load the next character from buffer
 KRNL_LEDIT_3	; finish the line
-		jsr	KRNL_CHRPOS	; load X with the current cursor positino 
+		jsr	KRNL_CSRPOS	; load X with the current cursor positino 
 		std	,x		; store the character where X points to
 		inc	KRNL_CURSOR_COL	; ipdate the cursor column number
 		ldb	KRNL_ATTRIB	; load the default color attribute
@@ -364,7 +370,7 @@ KRNL_LEDIT_4	lda	,u+		; fetch the next character from the buffer
 KRNL_DONE	; space at the end	
 		lda	#' '		; load the SPACE character
 		ldb	KRNL_ATTRIB	; load the default color attribute	
-		jsr	KRNL_CHRPOS	; fetch the cursor position into X
+		jsr	KRNL_CSRPOS	; fetch the cursor position into X
 		lda	#' '		; load the SPACE character
 		ldb	KRNL_ATTRIB	; load the current color attribute
 		std	,x		; update the console
@@ -374,7 +380,7 @@ KRNL_DONE	; space at the end
 		cmpa	#$0d		; check for the RETURN / ENTER key press
 		bne	KRNL_LEDIT_0	; if not pressend, loop back to the top		
 		clr	EDT_ENABLE	; disable the line editor		
-		jsr	KRNL_CHRPOS	; load the cursor position into X
+		jsr	KRNL_CSRPOS	; load the cursor position into X
 		lda	#' '		; load a SPACE character
 		ldb	KRNL_ATTRIB	; load the current attribute
 		std	-2,x		; store the character, clean up artifacts
