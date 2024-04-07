@@ -29,6 +29,9 @@ VECT_LINEOUT	fdb	STUB_LINEOUT	; String to Console Software Vector
 VECT_CSRPOS	fdb	STUB_CSRPOS	; Cursor Position Software Vector
 VECT_SCROLL	fdb	STUB_SCROLL	; Scroll Text Screen Software Vector
 VECT_LINEEDIT	fdb	STUB_LINEEDIT	; Console Line Editor Software Vector
+VECT_GETKEY	fdb	STUB_GETKEY	; Wait for Key Press Software Vector
+VECT_GETHEX	fdb	STUB_GETHEX	; Wait for Hex Character Software Vector
+VECT_GETNUM	fdb	STUB_GETNUM	; Wait for Numeric Character Vector
 
 ; *****************************************************************************
 ; * RESERVED ZERO PAGE KERNAL VARIABLES                                       *
@@ -73,7 +76,7 @@ KRNL_RESET	jmp	[VECT_RESET]	; RESET Software Interrupt Vector
 ; *****************************************************************************
 ; * DEFAULT VECTOR SUBROUTINES                                                *
 ; *****************************************************************************
-EXEC_start	bra	EXEC_start	; EXEC program
+EXEC_start	rts			; EXEC program
 SWI3_start	bra	SWI3_start	; SWI3 Implementation
 SWI2_start	bra	SWI2_start	; SWI2 Implementation
 FIRQ_start	bra	FIRQ_start	; FIRQ Implementation
@@ -134,6 +137,32 @@ k_main_4	lda	#$0a
 		jsr	KRNL_LINEOUT
 
 
+
+* * ; TESTING: ...
+* 		bra	test_1
+* str_1		fcn	"str_1"
+* str_2		fcn	"str_2"
+* str_equal	fcn	"EQUAL\n"
+* str_less	fcn	"LESS\n"
+* str_greater	fcn	"GREATER\n"
+* str_error	fcn	"ERROR\n"
+* test_1		ldx	#str_1
+* 		ldy	#str_2
+* 		jsr	KRNL_CMPSTR
+* 		beq	test_equal
+* 		blt	test_less
+* 		bgt	test_greater
+* 		ldx	#str_error
+* 		bra	test_done
+* test_equal	ldx	#str_equal
+* 		bra	test_done
+* test_less	ldx	#str_less
+* 		bra	test_done
+* test_greater	ldx	#str_greater
+* test_done	jsr	KRNL_LINEOUT
+
+
+
 k_main_2	; the ready prompt
 		ldx	#READY_PROMPT
 		jsr	KRNL_LINEOUT
@@ -165,13 +194,12 @@ inf_loop	bra 	inf_loop
 ; KRNL_CSRPOS		; Loads into X the cursor position
 ; KRNL_SCROLL		; Scroll the text screen up one line
 ; KRNL_LINEEDIT		; Engage the text line editor
+; KRNL_GETKEY		; Input a character from the console
+; KRNL_GETHEX		; Input a hex digit from the console
+; KRNL_GETNUM		; Input a numeric digit from the console
 
-; TODO: ...
-; KRNLL_CMPSTR		; Compare two strings of equal length
-; KRNLL_CMPNSTR		; Compare two strings of arbitrary lengths
-; KRNLL_TBLSEARCH	; General Table Search
-; KRNLL_CHRIN		; Input a character from the console
-; KRNLL_HEXIN		; Input a hex digit from the console
+; KRNL_CMPSTR		; Compare two strings of arbitrary lengths
+; KRNL_TBLSEARCH	; General Table Search
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -390,6 +418,117 @@ KRNL_DONE	; space at the end
 		ldx	#EDT_BUFFER	; point to the edit buffer
 		jsr	KRNL_LINEOUT	; send the edit buffer to the console
 		puls	D, X, U, CC, PC	; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_GETKEY                                                                *
+; * 	Input a character from the console. Waits for the keypress.           *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
+; *                         All other registers preserved                     *
+; *****************************************************************************
+KRNL_GETKEY	jmp	[VECT_GETKEY]	; proceed through the software vector
+STUB_GETKEY	pshs	b, CC		; save the used registers onto the stack
+K_GETKEY_0	ldb	CHAR_POP	; pop the next key from the queue
+		bne	K_GETKEY_0	; continue until the queue is empty		
+K_GETKEY_1	ldb	CHAR_Q_LEN	; how many keys are in the queue
+		beq	K_GETKEY_1	; loop until a key is queued
+		lda	CHAR_POP	; pop the key into A to be returned
+		puls	b, CC, PC	; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_GETHEX                                                               *
+; * 	Input a hex digit from the console. Waits for the keypress.           *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
+; *                         All other registers preserved                     *
+; *****************************************************************************
+KRNL_GETHEX	jmp	[VECT_GETHEX]	; proceed through the software vector
+STUB_GETHEX	pshs	CC		; save the used registers onto the stack
+K_GETHEX_0	bsr	KRNL_GETKEY	; wait for and fetch a key press
+		cmpa	#'0'		; compare with the '0' key
+		blt	K_GETHEX_0	; keep scanning if less
+		cmpa	#'9'		; compare with the '9' key
+		bls	K_GETHEX_DONE	; found an appropriate key, return
+		cmpa	#'A'		; compare with the 'A' key
+		blt	K_GETHEX_0	; keep scanning if less
+		cmpa	#'F'		; compare with the 'F' key
+		bls	K_GETHEX_DONE	; found an appropriate key, return
+		cmpa	#'a'		; compare with the 'a' key
+		blt	K_GETHEX_0	; keep scanning if less
+		cmpa	#'f'		; compare with the 'f' key
+		bls	K_GETHEX_DONE	; found an appropriate key, return
+		bra	K_GETHEX_0	; keep scanning
+K_GETHEX_DONE	puls	CC, PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_GETNUM                                                               *
+; * 	Input a numeric digit from the console. Waits for the keypress.       *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: NONE                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = key code of the key that was pressed              *
+; *                         All other registers preserved                     *
+; *****************************************************************************
+KRNL_GETNUM	jmp	[VECT_GETNUM]	; proceed through the software vector
+STUB_GETNUM	pshs	CC		; save the used registers onto the stack
+K_GETNUM_0	bsr	KRNL_GETKEY	; wait for and fetch a key press
+		cmpa	#'0'		; compare with the '0' key
+		blt	K_GETNUM_0	; keep scanning if less
+		cmpa	#'9'		; compare with the '9' key
+		bls	K_GETNUM_DONE	; found an appropriate key, return
+		bra	K_GETNUM_0	; keep scanning
+K_GETNUM_DONE	puls	CC, PC		; cleanup saved registers and return
+
+
+; *****************************************************************************
+; * KRNL_CMPSTR                                                               *
+; * 	Compare two null-terminated strings of arbitrary lengths.             *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: X = starting address of string 1                      *
+; *                     Y = starting address of string 2                      *
+; *                                                                           *
+; * EXIT CONDITIONS:	CC = set per the comparison (less, greater, or same)  *
+; *                         All other registers preserved                     *
+; *****************************************************************************
+
+	; character at index return conditions:
+	;       EQUAL:   both strings are null			(CC.Z == 1)
+	;       LESS:    string 1 is null, but string 2 is not  (CC.N != CC.V)
+	;       GREATER: string 2 is null, but string 1 is not  (CC.N == CC.V) and (CC.Z == 0)
+
+KRNL_CMPSTR	pshs	D, X, Y		; save the used registers onto the stack
+		
+K_CMP_LOOP	tst	,x
+		bne	1f
+		tst	,y
+		beq	K_CMP_EQUAL	
+		bra	K_CMP_LESS	
+1	; str1 is non-null
+		tst	,y
+		beq	K_CMP_GREATER
+	; both str1 and str2 are non-null
+		lda	,x+
+		cmpa	,y+
+		; beq	K_CMP_EQUAL
+		blt	K_CMP_LESS
+		bgt	K_CMP_GREATER
+		bra	K_CMP_LOOP
+
+K_CMP_LESS	lda	#1
+		cmpa	#2
+		bra	K_CMP_DONE
+K_CMP_GREATER	lda	#2
+		cmpa	#1
+		bra	K_CMP_DONE
+K_CMP_EQUAL	clra
+		cmpa	#0
+K_CMP_DONE	puls	D, X, Y, PC	; cleanup saved registers and return
+
+
 
 ; ************************************************************
 ; * ROM BASED HARDWARE VECTORS                               *

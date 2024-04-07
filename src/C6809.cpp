@@ -1517,7 +1517,7 @@ std::string C6809::disasm(Word addr, Word& next)
 {
 	std::string ret = "";
 	Byte InstTab = 14;
-	Byte PostTab = 18;
+	Byte PostTab = 19;
 
 	auto hex = [](uint32_t n, uint8_t d)
 	{
@@ -1571,7 +1571,7 @@ std::string C6809::disasm(Word addr, Word& next)
 		{	// PSHS, PULS, PSHS, or PSHU
 			std::map<Byte, std::string> R;
 			R[0x01] = "CC"; R[0x02] = "A"; R[0x04] = "B";  R[0x08] = "DP";
-			R[0x10] = "X"; 	R[0x20] = "Y"; R[0x40] = "S/U"; R[0x80] = "PC";
+			R[0x10] = "X"; 	R[0x20] = "Y"; R[0x40] = "S"; R[0x80] = "PC";
 			Byte data = read(addr++);
 			for (int bit = 0; bit < 8; bit++)
 			{
