@@ -161,33 +161,6 @@ k_init_4	lda	#$0a		; line feed character
 		ldx	#KRNL_PROMPT3	; point to the fourth prompt line
 		jsr	KRNL_LINEOUT	; output it to the console
 
-
-		bra	k_tests
-
-num_1		fcn	"18000"
-num_2		fcn	"100"
-
-k_tests	
-		ldx	#num_1
-		jsr	KRNL_WRITE_ACA		
-		ldx	#num_2
-		jsr	KRNL_WRITE_ACB
-		lda	#MOP_SQRT
-		sta	MATH_OPERATION
-
-		jsr	KRNL_DSP_ACA
-		jsr	KRNL_NEWLINE
-
-		jsr	KRNL_DSP_ACB
-		jsr	KRNL_NEWLINE
-
-		jsr	KRNL_DSP_ACR
-		jsr	KRNL_NEWLINE
-
-
-
-
-
 ; *****************************************************************************
 ; * THE MAIN COMMAND LOOP                                                     *
 ; *****************************************************************************
@@ -215,8 +188,9 @@ k_main_0	jsr	KRNL_LINEEDIT	; run the command line editor
 		cmpa	#$FF		; ERROR: command not found 
 		beq	k_main_error	;    display the error
 		lsla			; index two byte addresses
-		ldx	#KRNL_CMD_VECTS	; the start of the command vector table
-		jsr	[a,x]		; call the command subroutine
+		leax	1,x
+		ldy	#KRNL_CMD_VECTS	; the start of the command vector table
+		jsr	[a,y]		; call the command subroutine
 k_main_cont	tst	EDT_BUFFER	; nothing entered in the command line?
 		beq	k_main_0	;   nope, skip the ready prompt
 		bra	MAIN_LOOP	; back to the top of the main loop
@@ -237,6 +211,7 @@ k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
 ;	do_chdir	; #7
 ;	do_exit		; #8
 ;	do_quit		; #9
+;	do_mode		; #10
 
 str_cls		fcn	"CLS\n"
 str_color	fcn	"COLOR\n"
@@ -251,39 +226,72 @@ str_quit	fcn	"QUIT\n"
 str_mode	fcn	"MODE\n"
 
 
-do_cls		; CLEAR SCREEN
-		lda	#' '
+do_cls		; CLEAR SCREEN			ARG1 = Color Attribute
+
+		tst	,x
+		beq	do_cls_0
+		jsr 	KRNL_ARG_TO_A
+		tsta
+		beq	do_cls_0
+		sta	KRNL_ATTRIB
+do_cls_0	lda	#' '
 		ldb	KRNL_ATTRIB
-		jsr	KRNL_CLS
+		jsr	KRNL_CLS		
 		rts
 
+do_color	; COLOR				ARG1 = Color Attribute
+		tst	,x
+		beq	do_color_0
+		jsr 	KRNL_ARG_TO_A
+		tsta
+		beq	do_color_0
+		cmpa	#$ff
+		beq	do_color_0
+		sta	KRNL_ATTRIB
+do_color_0	rts		
 
-do_color	ldx	#str_color
-		bra	str_output
-do_load		ldx	#str_load
-		bra	str_output
-do_exec		ldx	#str_exec
+do_load		; LOAD 				ARG1 = {filepath}/filename
+		ldx	#str_load
 		bra	str_output
 
-do_reset	; RESET
+do_exec		; EXEC				ARG1 = none
+		ldx	#str_exec
+		bra	str_output
+
+do_reset	; RESET				ARG1 = none
 		lda	#FC_RESET
 		sta	FIO_COMMAND
 		rts
 
-do_dir		ldx	#str_dir
-		bra	str_output
-do_cd		ldx	#str_cd
-		bra	str_output
-do_chdir	ldx	#str_chdir
+do_dir		; DIR				ARG1 = {filepath}
+		ldx	#str_dir
 		bra	str_output
 
-do_exit		; EXIT and QUIT
-do_quit		lda	#FC_SHUTDOWN
+do_cd		; CHDIR				ARG1 = {filepath}
+		ldx	#str_cd
+		bra	str_output
+
+do_chdir	; CHDIR				ARG1 = {filepath}
+		ldx	#str_chdir
+		bra	str_output
+
+do_exit		; EXIT and QUIT			ARG1 = none
+do_quit		; EXIT and QUIT			ARG1 = none
+		lda	#FC_SHUTDOWN
 		sta	FIO_COMMAND
 		rts
 
-do_mode		ldx	#str_mode
-		bra	str_output		
+do_mode		; MODE				ARG1 = Graphics Mode
+		tst	,x
+		beq	do_mode_0
+		jsr 	KRNL_ARG_TO_A
+		sta	GFX_MODE
+		lda	#' '
+		jsr	KRNL_CLS
+do_mode_0	rts
+
+		* ldx	#str_mode
+		* bra	str_output		
 
 str_output	jsr	KRNL_LINEOUT
 		rts
@@ -308,12 +316,20 @@ str_output	jsr	KRNL_LINEOUT
 ; 	KRNL_TBLSEARCH	; Table Search (find the string and return its index)
 ;
 ;	KRNL_CPY_DWORD	; Copy 32-bits from where X points to where Y points
-; 	KRNL_D_TO_ACA	; Write the D register to the ACA floating point register
-; 	KRNL_D_TO_ACB	; Write the D register to the ACB floating point register
-; 	KRNL_D_TO_ACR	; Write the D register to the ACR floating point register
-; 	KRNL_ACA_TO_D	; Read the ACA floating point register into the D register
-; 	KRNL_ACB_TO_D	; Read the ACB floating point register into the D register
-; 	KRNL_ACR_TO_D	; Read the ACR floating point register into the D register
+; 	KRNL_D_TO_RAWA	; Write the D register to the ACA raw float register
+; 	KRNL_D_TO_RAWB	; Write the D register to the ACB raw float register
+; 	KRNL_D_TO_RAWR	; Write the D register to the ACR raw float register
+; 	KRNL_D_TO_INTA	; Write the D register to the ACA integer register
+; 	KRNL_D_TO_INTB	; Write the D register to the ACB integer register
+; 	KRNL_D_TO_INTR	; Write the D register to the ACR integer register
+;
+; 	KRNL_RAWA_TO_D	; Read the ACA raw float register into the D register
+; 	KRNL_RAWB_TO_D	; Read the ACB raw float register into the D register
+; 	KRNL_RAWR_TO_D	; Read the ACR raw float register into the D register
+; 	KRNL_INTA_TO_D	; Read the ACA integer register into the D register
+; 	KRNL_INTB_TO_D	; Read the ACB integer register into the D register
+; 	KRNL_INTR_TO_D	; Read the ACR integer register into the D register
+;
 ;	KRNL_8BIT_MATH	; 8-bit integer math: D = A (U:mop) B
 ;	KRNL_DSP_ACA	; Displays the floating point number in the ACA register. 
 ;	KRNL_DSP_ACB	; Displays the floating point number in the ACB register. 
@@ -321,6 +337,8 @@ str_output	jsr	KRNL_LINEOUT
 ;	KRNL_WRITE_ACA	; Convert a string (pointed to by X) and write to ACA
 ;	KRNL_WRITE_ACB	; Convert a string (pointed to by X) and write to ACB
 ;	KRNL_WRITE_ACR	; Convert a string (pointed to by X) and write to ACR
+;
+;	KRNL_ARG_TO_A	; convert a numeric string (at X) and return it in A
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -730,34 +748,60 @@ KRNL_CPY_DWORD	pshs 	D,CC		; save the used registers onto the stack
 		puls	D,CC,PC		; cleanup saved registers and return
 
 ; *****************************************************************************
-; * KRNL_D_TO_AC(A, B, or R)                                                  *
-; * 	Write the D register to one of the floating point registers           *
+; * KRNL_D_TO_RAW(A, B, or R)                                                  *
+; * 	Write the D register to one of the raw float registers                *
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: D = 16-bit value to be written                        *
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-KRNL_D_TO_ACA	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_RAWA	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACA_RAW+0	; clear unneeded byte
+		clr	MATH_ACA_RAW+1	; clear unneeded byte
+		std	MATH_ACA_RAW+2	; store D in the ACA raw float register
+		puls	CC,PC		; cleanup saved registers and return
+		
+KRNL_D_TO_RAWB	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACB_RAW+0	; clear unneeded byte
+		clr	MATH_ACB_RAW+1	; clear unneeded byte
+		std	MATH_ACB_RAW+2	; store D in the ACB raw float register
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_D_TO_RAWR	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACR_RAW+0	; clear unneeded byte
+		clr	MATH_ACR_RAW+1	; clear unneeded byte
+		std	MATH_ACR_RAW+2	; store D in the ACR raw float register
+		puls	CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_D_TO_INT(A, B, or R)                                                 *
+; * 	Write the D register to one of the FP integer registers               *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: D = 16-bit value to be written                        *
+; *                                                                           *
+; * EXIT CONDITIONS:	    All registers preserved                           *
+; *****************************************************************************
+KRNL_D_TO_INTA	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACA_INT+0	; clear unneeded byte
 		clr	MATH_ACA_INT+1	; clear unneeded byte
 		std	MATH_ACA_INT+2	; store D in the ACA integer register
 		puls	CC,PC		; cleanup saved registers and return
 		
-KRNL_D_TO_ACB	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_INTB	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACB_INT+0	; clear unneeded byte
 		clr	MATH_ACB_INT+1	; clear unneeded byte
 		std	MATH_ACB_INT+2	; store D in the ACB integer register
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_D_TO_ACR	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_INTR	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACR_INT+0	; clear unneeded byte
 		clr	MATH_ACR_INT+1	; clear unneeded byte
 		std	MATH_ACR_INT+2	; store D in the ACR integer register
 		puls	CC,PC		; cleanup saved registers and return
 
 ; *****************************************************************************
-; * KRNL_AC(A, B, or R)_TO_D                                                  *
-; * 	Read one of the floating point registers into the D register          *
+; * KRNL_RAW(A, B, or R)_TO_D                                                  *
+; * 	Read one of the raw float registers into the D register          *
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: none                                                  *
 ; *                                                                           *
@@ -765,15 +809,37 @@ KRNL_D_TO_ACR	pshs	CC		; save the used registers onto the stack
 ; *                         All other registers preserved                     *
 ; *                                                                           *
 ; *****************************************************************************
-KRNL_ACA_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_RAWA_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACA_RAW+2	; load the ACA raw float value
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_RAWB_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACB_RAW+2	; load the ACB raw float value
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_RAWR_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACR_RAW+2	; load the ACR raw float value
+		puls	CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_INT(A, B, or R)_TO_D                                                  *
+; * 	Read one of the integer registers into the D register          *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: none                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS: D = the integer value of the chosen FP register          *
+; *                         All other registers preserved                     *
+; *                                                                           *
+; *****************************************************************************
+KRNL_INTA_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACA_INT+2	; load the ACA integer value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_ACB_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_INTB_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACB_INT+2	; load the ACB integer value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_ACR_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_INTR_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACR_INT+2	; load the ACR integer value
 		puls	CC,PC		; cleanup saved registers and return
 
@@ -873,6 +939,54 @@ KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 
 
 
+
+
+; *****************************************************************************
+; * KRNL_ARG_TO_A                                                             *
+; * 	convert a numeric string (pointed to by X) to 0-25 and return it in A *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: X = points to the string to be converted              *
+; *                         Note: hex values must be preceeded                *
+; *                               with a '$' character                        *
+; *                                                                           *
+; * EXIT CONDITIONS:	A = binary value represented by the input string      *
+; *                     All other registers preserved                         *
+; *****************************************************************************
+KRNL_ARG_TO_A	pshs	B,X,CC
+		ldb	,x+
+		cmpb	#'$'
+		beq	KARG_0
+		jsr	KRNL_WRITE_ACA
+		lda	MATH_ACA_INT+3
+		bra	KARG_DONE
+KARG_0		ldb	,x+
+		bsr	KARG_HEX
+		lslb
+		lslb
+		lslb
+		lslb
+		pshs	b
+		ldb	,x+
+		bsr	KARG_HEX
+		ora	,s+
+KARG_DONE	puls	B,X,CC,PC	; clean up and return
+KARG_HEX	pshs	b		; save it
+		subb	#'0'		; convert to binary
+		bmi	2f		; go if not numeric
+		cmpb	#$09		; is greater than 9?
+		bls	1f		; branch if not
+		orb	#$20
+		subb	#$27
+1		cmpb	#$0f		; greater than 15?
+		bls	3f		; go if not
+2		ldb	#$ff
+3		cmpb	,s+
+		tfr	b,a
+		rts
+
+
+
+
 ; *****************************************************************************
 ; * SUBROUTINE_TEMPLATE                                                       *
 ; * 	xxxxxxxxxxxxxxxxxx                                                    *
@@ -903,34 +1017,4 @@ KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 		fdb	KRNL_SWI    	; HARD_SWI         SWI / SYS Hardware Interrupt Vector
 		fdb	KRNL_NMI    	; HARD_NMI         NMI Hardware Interrupt Vector
 		fdb	KRNL_RESET 	; HARD_RESET       RESET Hardware Interrupt Vector
-
-
-
-
-
-
-
-
-* ; TESTING: KRNL_CMPSTR
-* 		bra	test_1
-* str_1		fcn	"str_1"
-* str_2		fcn	"str_2"
-* str_equal	fcn	"EQUAL\n"
-* str_less	fcn	"LESS\n"
-* str_greater	fcn	"GREATER\n"
-* str_error	fcn	"ERROR\n"
-* test_1		ldx	#str_1
-* 		ldy	#str_2
-* 		jsr	KRNL_CMPSTR
-* 		beq	test_equal
-* 		blt	test_less
-* 		bgt	test_greater
-* 		ldx	#str_error
-* 		bra	test_done
-* test_equal	ldx	#str_equal
-* 		bra	test_done
-* test_less	ldx	#str_less
-* 		bra	test_done
-* test_greater	ldx	#str_greater
-* test_done	jsr	KRNL_LINEOUT
 
