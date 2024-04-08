@@ -60,7 +60,7 @@ class Math : public IDevice
         Byte _write_acc(Word offset, Byte data, Word reg, Byte& _pos, 
                 float& _float, std::string& _string, DWord& _raw, DWord& _int);
         void _update_regs_from_float(float f_data, float& _float,
-                Byte& _pos, std::string& _string, DWord _raw, DWord _int);
+                Byte& _pos, std::string& _string, DWord& _raw, DWord& _int);
 };
 
 

@@ -81,6 +81,7 @@ void Math::write(Word offset, Byte data, bool debug)
                 acb_int = rand() << 16 | rand();
                 _update_regs_from_float(((float)rand() / (RAND_MAX)),
                     acr_float, acr_pos, acr_string, acr_raw, acr_int);
+
                 acr_int = rand() << 16 | rand();
                 break;
             }
@@ -233,7 +234,11 @@ void Math::write(Word offset, Byte data, bool debug)
                 _update_regs_from_float(std::copysign(aca_float, acb_float),
                     acr_float, acr_pos, acr_string, acr_raw, acr_int); break; }
         }
-    }
+// // WORK AROUND
+// aca_raw = *reinterpret_cast<DWord*>(&aca_float);
+// acb_raw = *reinterpret_cast<DWord*>(&acb_float);
+// acr_raw = *reinterpret_cast<DWord*>(&acr_float);
+    } // END if (offset == MATH_OPERATION)
     IDevice::write(offset,data);   // update any internal changes too
 }
 
@@ -244,8 +249,6 @@ Byte Math::_read_acc(Word offset, Word reg, Byte& _pos,
     Byte data = 0xCC;
     // bounds checking
     if (offset < reg || offset > reg + 9)   return data;
-
-
 
     if (offset == reg)              // MATH_ACx_POS
     {
@@ -340,11 +343,6 @@ Byte Math::_write_acc(Word offset, Byte data, Word reg, Byte& _pos,
         // update the string
         if (data != 'e' && data != 'E' && data != '-')
             _string = std::to_string(_float);
-
-// std::cout << _string << std::endl;
-
-
-        //printf("_write_acc(): _float: %f   _raw: $%08X   _int: $%08X\n", _float, _raw, _int);
     }
     // MATH_ACx_RAW
     if (offset >= reg + 2 && offset <= reg + 5)
@@ -363,8 +361,6 @@ Byte Math::_write_acc(Word offset, Byte data, Word reg, Byte& _pos,
         _int = (DWord)_float;
         // update the string
         _string = std::to_string(_float);
-
-        //printf("MATH_ACx_RAW ---> _float:%f    _raw: $%08X    _int: $%08X    _string:%s\n", _float, _raw, _int, _string.c_str());
     }
     // MATH_ACx_INT
     if (offset >= reg + 6 && offset <= reg + 9)
@@ -383,15 +379,15 @@ Byte Math::_write_acc(Word offset, Byte data, Word reg, Byte& _pos,
         _raw = *reinterpret_cast<DWord*>(&_float);
         // update the string
         _string = std::to_string(_float);
-
-        //printf("MATH_ACx_INT ---> _float:%f    _raw: $%08X    _int: $%08X    _string:%s\n", _float, _raw, _int, _string.c_str());
     }
+    // printf("MATH_ACx_RAW ---> _float:%f    _raw: $%08X    _int: $%08X    _string:%s\n", _float, _raw, _int, _string.c_str());            
+
     return data;
 }
 
 
 void Math::_update_regs_from_float(float f_data, float& _float,
-    Byte& _pos, std::string& _string, DWord _raw, DWord _int)
+    Byte& _pos, std::string& _string, DWord& _raw, DWord& _int)
 {
     _pos = 0;
     _float = f_data;

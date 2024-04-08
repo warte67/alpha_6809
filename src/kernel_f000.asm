@@ -46,6 +46,9 @@ KRNL_LOCAL_1	fcb	0		; (Byte) used locally for some KRNL calls
 KRNL_LOCAL_2	fcb	0		; (Byte) used locally for some KRNL calls
 KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 
+
+* f_vers_test	fcn	" -23.356"	; TESTING 
+
 ; *****************************************************************************
 ; * KERNEL ROM                                                                *
 ; *****************************************************************************
@@ -161,6 +164,49 @@ k_init_4	lda	#$0a		; line feed character
 		ldx	#KRNL_PROMPT3	; point to the fourth prompt line
 		jsr	KRNL_LINEOUT	; output it to the console
 
+
+
+
+
+k_test
+		clr	MATH_ACR_POS
+		ldx	#f_vers_test
+k_test_0	lda	,x+
+		sta	MATH_ACR_DATA
+		bne	k_test_0
+
+		* lda	#MOP_RANDOM
+		* sta	MATH_OPERATION
+
+		ldd	MATH_ACR_RAW
+		std	MATH_ACA_RAW
+		ldd	MATH_ACR_RAW+2
+		std	MATH_ACA_RAW+2
+		ldd	#0
+		std	MATH_ACB_INT
+		ldd	#1000
+		std	MATH_ACB_INT+2
+		lda	#MOP_MULTIPLY
+		sta	MATH_OPERATION
+
+		* ldd	#0
+		* std	MATH_ACR_INT
+		* ldd	#1001
+		* std	MATH_ACR_INT+2
+
+		nop
+
+		clr	MATH_ACR_POS
+k_test_1	lda	MATH_ACR_DATA
+		jsr	KRNL_CHROUT
+		bne	k_test_1
+
+		lda	#$0A
+		jsr	KRNL_CHROUT
+
+
+
+
 ; *****************************************************************************
 ; * THE MAIN COMMAND LOOP                                                     *
 ; *****************************************************************************
@@ -170,7 +216,8 @@ k_init_4	lda	#$0a		; line feed character
 ; *     3) Dispatches the Operating System Commands                           *
 ; *                                                                           *
 ; *****************************************************************************
-MAIN_LOOP	ldx	#READY_PROMPT	; the ready prompt
+MAIN_LOOP	ldb	KRNL_ATTRIB	; fetch the current color attribute
+		ldx	#READY_PROMPT	; the ready prompt
 		jsr	KRNL_LINEOUT	; output to the console
 		lda	#$ff		; Initialize the line editor
 		sta	EDT_BFR_LEN	; allow for the full sized buffer
@@ -195,9 +242,6 @@ k_main_cont	tst	EDT_BUFFER	; nothing entered in the command line?
 k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
 		jsr	KRNL_LINEOUT	; send it to the console
 		bra	k_main_cont	; continue within the main loop
-
-
-
 
 ; *****************************************************************************
 ; * MAIN KERNEL COMMAND SUBROUTINES (Prototypes)                              *
@@ -311,14 +355,11 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 ; *     position and handles text scrolling as needed.                        *
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: A = Character to be displayed                         *
-; *                     B = (if non-zero) Color Attribute                     *
 ; *                                                                           *
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
 KRNL_CHROUT	jmp	[VECT_CHROUT]	; proceed through the software vector
 STUB_CHROUT	pshs	d,x,cc		; save the used registers onto the stack
-		tstb			; is B a null?
-		bne	K_CHROUT_1	; nope, continue
 		ldb	KRNL_ATTRIB	; load the current color attribute
 K_CHROUT_1	tsta			; is A a null?
 		beq	K_CHROUT_DONE	;    A is null, just return and do nothing		
@@ -424,7 +465,6 @@ K_SCROLL_0	ldd	,u++		; load a character from where U points
 K_SCROLL_1	sta	,x++		; and store it to where X points
 		cmpx	GFX_VID_END	; continue looping until the bottom ...
 		blt	K_SCROLL_1	; ... line has been cleared
-
 		tst	EDT_ENABLE	; are we using the line editor?
 		beq	K_SCROLL_DONE	; nope, just clean up and return
 		dec	KRNL_ANCHOR_ROW	; yup, decrease the anchor row by one
@@ -450,7 +490,6 @@ KRNL_LEDIT_0	; display the line up to the cursor
 		ldu	#EDT_BUFFER	; point to the start of the edit buffer
 		ldb	EDT_BFR_CSR	; the buffer csr position
 		stb	KRNL_LOCAL_0	; store the edit csr position locally
-		ldb	KRNL_ATTRIB	; load the cursor attribute
 KRNL_LEDIT_1	tst	KRNL_LOCAL_0	; test the edit csr position
 		beq	KRNL_LEDIT_2	; if we're there, go display the cursor
 		dec	KRNL_LOCAL_0	; decrement the edit csr position
@@ -473,14 +512,13 @@ KRNL_LEDIT_3	; finish the line
 		jsr	KRNL_CSRPOS	; load X with the current cursor positino 
 		std	,x		; store the character where X points to
 		inc	KRNL_CURSOR_COL	; ipdate the cursor column number
-		ldb	KRNL_ATTRIB	; load the default color attribute
+		; ldb	KRNL_ATTRIB	; load the default color attribute
 KRNL_LEDIT_4	lda	,u+		; fetch the next character from the buffer
 		beq	KRNL_DONE	; if it's null, we're done
 		jsr	KRNL_CHROUT	; output it to the console
 		bra	KRNL_LEDIT_4	; continue looping until we find the null
 KRNL_DONE	; space at the end	
 		lda	#' '		; load the SPACE character
-		ldb	KRNL_ATTRIB	; load the default color attribute	
 		jsr	KRNL_CSRPOS	; fetch the cursor position into X
 		lda	#' '		; load the SPACE character
 		ldb	KRNL_ATTRIB	; load the current color attribute
@@ -493,11 +531,9 @@ KRNL_DONE	; space at the end
 		clr	EDT_ENABLE	; disable the line editor		
 		jsr	KRNL_CSRPOS	; load the cursor position into X
 		lda	#' '		; load a SPACE character
-		ldb	KRNL_ATTRIB	; load the current attribute
 		std	-2,x		; store the character, clean up artifacts
 		ldd 	KRNL_ANCHOR_COL	; restore the line editor anchor
 		std	KRNL_CURSOR_COL ; into the console cursor position
-		ldb	KRNL_ATTRIB	; load the color attribute
 		ldx	#EDT_BUFFER	; point to the edit buffer
 		jsr	KRNL_LINEOUT	; send the edit buffer to the console
 		puls	D,X,U,CC,PC	; cleanup saved registers and return

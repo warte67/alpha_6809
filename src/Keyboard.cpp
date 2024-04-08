@@ -373,8 +373,7 @@ void Keyboard::OnEvent(SDL_Event* evnt)
     // printf("%s::OnEvent()\n", Name().c_str());  
 
     // if this is a debug event, just return now
-    if (SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS)
-        return;	
+    if (SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS) { return; }
 
 	SDL_Keymod km = SDL_GetModState();
 	switch (evnt->type)
