@@ -46,9 +46,6 @@ KRNL_LOCAL_1	fcb	0		; (Byte) used locally for some KRNL calls
 KRNL_LOCAL_2	fcb	0		; (Byte) used locally for some KRNL calls
 KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 
-
-* f_vers_test	fcn	" -23.356"	; TESTING 
-
 ; *****************************************************************************
 ; * KERNEL ROM                                                                *
 ; *****************************************************************************
@@ -58,7 +55,7 @@ KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 ;	fcs	character string with its terminators high bit set
 ;	fcn	character string with null termination
 
-KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.2\n"
+KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.3\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
 KRNL_PROMPT2	fcn	"Under GPL V3 Liscense\n"
 KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"  
@@ -165,44 +162,28 @@ k_init_4	lda	#$0a		; line feed character
 		jsr	KRNL_LINEOUT	; output it to the console
 
 
+		bra	k_tests
 
+num_1		fcn	"18000"
+num_2		fcn	"100"
 
-
-k_test
-		clr	MATH_ACR_POS
-		ldx	#f_vers_test
-k_test_0	lda	,x+
-		sta	MATH_ACR_DATA
-		bne	k_test_0
-
-		* lda	#MOP_RANDOM
-		* sta	MATH_OPERATION
-
-		ldd	MATH_ACR_RAW
-		std	MATH_ACA_RAW
-		ldd	MATH_ACR_RAW+2
-		std	MATH_ACA_RAW+2
-		ldd	#0
-		std	MATH_ACB_INT
-		ldd	#1000
-		std	MATH_ACB_INT+2
-		lda	#MOP_MULTIPLY
+k_tests	
+		ldx	#num_1
+		jsr	KRNL_WRITE_ACA		
+		ldx	#num_2
+		jsr	KRNL_WRITE_ACB
+		lda	#MOP_SQRT
 		sta	MATH_OPERATION
 
-		* ldd	#0
-		* std	MATH_ACR_INT
-		* ldd	#1001
-		* std	MATH_ACR_INT+2
+		jsr	KRNL_DSP_ACA
+		jsr	KRNL_NEWLINE
 
-		nop
+		jsr	KRNL_DSP_ACB
+		jsr	KRNL_NEWLINE
 
-		clr	MATH_ACR_POS
-k_test_1	lda	MATH_ACR_DATA
-		jsr	KRNL_CHROUT
-		bne	k_test_1
+		jsr	KRNL_DSP_ACR
+		jsr	KRNL_NEWLINE
 
-		lda	#$0A
-		jsr	KRNL_CHROUT
 
 
 
@@ -325,6 +306,21 @@ str_output	jsr	KRNL_LINEOUT
 ; 	KRNL_GETNUM	; Input a numeric digit from the console
 ; 	KRNL_CMPSTR	; Compare two strings of arbitrary lengths
 ; 	KRNL_TBLSEARCH	; Table Search (find the string and return its index)
+;
+;	KRNL_CPY_DWORD	; Copy 32-bits from where X points to where Y points
+; 	KRNL_D_TO_ACA	; Write the D register to the ACA floating point register
+; 	KRNL_D_TO_ACB	; Write the D register to the ACB floating point register
+; 	KRNL_D_TO_ACR	; Write the D register to the ACR floating point register
+; 	KRNL_ACA_TO_D	; Read the ACA floating point register into the D register
+; 	KRNL_ACB_TO_D	; Read the ACB floating point register into the D register
+; 	KRNL_ACR_TO_D	; Read the ACR floating point register into the D register
+;	KRNL_8BIT_MATH	; 8-bit integer math: D = A (U:mop) B
+;	KRNL_DSP_ACA	; Displays the floating point number in the ACA register. 
+;	KRNL_DSP_ACB	; Displays the floating point number in the ACB register. 
+;	KRNL_DSP_ACR	; Displays the floating point number in the ACR register. 
+;	KRNL_WRITE_ACA	; Convert a string (pointed to by X) and write to ACA
+;	KRNL_WRITE_ACB	; Convert a string (pointed to by X) and write to ACB
+;	KRNL_WRITE_ACR	; Convert a string (pointed to by X) and write to ACR
 
 ; *****************************************************************************
 ; * KRNL_CLS                                                                  *
@@ -716,6 +712,183 @@ K_TBLS_1	ldb	,y+		; look at the next character in table
 		bra	K_TBLS_0	; look at the next entry
 K_TBLS_NOTFOUND	lda	#$ff		; not found error code
 K_TBLS_DONE	puls	B,Y,U,CC,PC	; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_CPY_DWORD                                                            *
+; * 	Copy 32-bits from where X points to where Y points                    *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: X points to a DWORD to be copied from                 *
+; *                     Y points to a DWORD to be copied to                   *
+; *                                                                           *
+; * EXIT CONDITIONS:	    All registers preserved                           *
+; *****************************************************************************
+KRNL_CPY_DWORD	pshs 	D,CC		; save the used registers onto the stack
+		ldd	,x		; load the most-significant 16-bit word
+		std	,y		; save the most-significant 16-bit word
+		ldd	2,x		; load the least-significant 16-bit word
+		std	2,y		; save the least-significant 16-bit word
+		puls	D,CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_D_TO_AC(A, B, or R)                                                  *
+; * 	Write the D register to one of the floating point registers           *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: D = 16-bit value to be written                        *
+; *                                                                           *
+; * EXIT CONDITIONS:	    All registers preserved                           *
+; *****************************************************************************
+KRNL_D_TO_ACA	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACA_INT+0	; clear unneeded byte
+		clr	MATH_ACA_INT+1	; clear unneeded byte
+		std	MATH_ACA_INT+2	; store D in the ACA integer register
+		puls	CC,PC		; cleanup saved registers and return
+		
+KRNL_D_TO_ACB	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACB_INT+0	; clear unneeded byte
+		clr	MATH_ACB_INT+1	; clear unneeded byte
+		std	MATH_ACB_INT+2	; store D in the ACB integer register
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_D_TO_ACR	pshs	CC		; save the used registers onto the stack
+		clr	MATH_ACR_INT+0	; clear unneeded byte
+		clr	MATH_ACR_INT+1	; clear unneeded byte
+		std	MATH_ACR_INT+2	; store D in the ACR integer register
+		puls	CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_AC(A, B, or R)_TO_D                                                  *
+; * 	Read one of the floating point registers into the D register          *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: none                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS: D = the integer value of the chosen FP register          *
+; *                         All other registers preserved                     *
+; *                                                                           *
+; *****************************************************************************
+KRNL_ACA_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACA_INT+2	; load the ACA integer value
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_ACB_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACB_INT+2	; load the ACB integer value
+		puls	CC,PC		; cleanup saved registers and return
+
+KRNL_ACR_TO_D	pshs	CC		; save the used registers onto the stack
+		ldd	MATH_ACR_INT+2	; load the ACR integer value
+		puls	CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_8BIT_MATH                                                            *
+; * 	8-bit integer math                                                    *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: A = ACA Integer                                       *
+; *                     B = ACB Integer                                       *
+; *                     U = Math Operation (MOP)                              *
+; *                         (only least significant byte is relevant)         *
+; *                                                                           *
+; * EXIT CONDITIONS:	D = Result                                            *
+; *                     All other registers preserved                         *
+; *****************************************************************************
+KRNL_8BIT_MATH	pshs	U,CC		; save the used registers onto the stack
+		; A to ACA
+		clr	MATH_ACA_INT+0	; clear unneeded byte
+		clr	MATH_ACA_INT+1	; clear unneeded byte
+		clr	MATH_ACA_INT+2	; clear unneeded byte
+		sta	MATH_ACA_INT+3	; store A in the ACA integer register
+		; B to ACB
+		clr	MATH_ACB_INT+0	; clear unneeded byte
+		clr	MATH_ACB_INT+1	; clear unneeded byte
+		clr	MATH_ACB_INT+2	; clear unneeded byte
+		stb	MATH_ACB_INT+3	; store B in the ACB integer register
+		; U to MATH_OPERATION
+		tfr	U,D		; transfer the MOP instruction to D
+		stb	MATH_OPERATION	; send the MOP command (in B)
+		; ACR to D
+		ldd	MATH_ACR_INT+2	; load the result into the D register
+		puls	U,CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_DSP_AC(A, B, or R)                                                   *
+; * 	Displays the floating point number in one of the FP registers.        *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: none                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:    All registers preserved                               *
+; *****************************************************************************
+KRNL_DSP_ACA	pshs	X,CC		; save the used registers onto the stack
+		ldx	#MATH_ACA_POS
+		bsr	KRNL_DSP_HELPER
+		puls	X,CC,PC		; cleanup saved registers and return
+
+KRNL_DSP_ACB	pshs	X,CC		; save the used registers onto the stack
+		ldx	#MATH_ACB_POS
+		bsr	KRNL_DSP_HELPER
+		puls	X,CC,PC		; cleanup saved registers and return
+
+KRNL_DSP_ACR	pshs	X,CC		; save the used registers onto the stack
+		ldx	#MATH_ACR_POS
+		bsr	KRNL_DSP_HELPER
+		puls	X,CC,PC		; cleanup saved registers and return
+
+;HELPER:  X=address of a FP_POS register pointed to by X
+KRNL_DSP_HELPER	pshs  	A,CC		; save the used registers onto the stack
+		clr	,x
+K_DSP_FP_0	lda	1,x
+		jsr	KRNL_CHROUT
+		bne	K_DSP_FP_0
+		puls	A,CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_WRITE_AC(A, B, or R)                                                 *
+; * 	Sets one of the floating point registers to a FP value contained      *
+; *     within a null-terminated string pointed to by X.                      *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: X = points to a null-terminated string of numbers     *
+; *                                                                           *
+; * EXIT CONDITIONS:    All registers preserved                               *
+; *****************************************************************************
+KRNL_WRITE_ACA	pshs	X,Y,CC		; save the used registers onto the stack
+		ldy	#MATH_ACA_POS	; point to the ACA chr pos register
+		bsr	KRNL_WRITE_HLP	; display the number to the console
+		puls	X,Y,CC,PC	; cleanup saved registers and return
+
+KRNL_WRITE_ACB	pshs	X,Y,CC		; save the used registers onto the stack
+		ldy	#MATH_ACB_POS	; point to the ACB chr pos register
+		bsr	KRNL_WRITE_HLP	; display the number to the console
+		puls	X,Y,CC,PC	; cleanup saved registers and return
+
+KRNL_WRITE_ACR	pshs	X,Y,CC		; save the used registers onto the stack
+		ldy	#MATH_ACR_POS	; point to the ACR chr pos register
+		bsr	KRNL_WRITE_HLP	; display the number to the console
+		puls	X,Y,CC,PC	; cleanup saved registers and return	
+
+; X string to write, Y = ACn_POS
+KRNL_WRITE_HLP	pshs	X,Y,CC		; save the used registers onto the stack
+		clr	,y+		; set the chr pos to the start
+KRNL_WRITE_0	lda	,x+		; load the next char from the string
+		beq	KRNL_WRITE_DONE	; were done if it's a null-terminator
+		sta	,y		; store the char into the FP port
+		bra	KRNL_WRITE_0	; continue looping
+KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
+
+
+
+; *****************************************************************************
+; * SUBROUTINE_TEMPLATE                                                       *
+; * 	xxxxxxxxxxxxxxxxxx                                                    *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: A = xxxxxxxxxxx                                       *
+; *                     B = xxxxxxxxxxx                                       *
+; *                                                                           *
+; * EXIT CONDITIONS:	D = Result                                            *
+; * EXIT CONDITIONS:    All registers preserved                               *
+; *                     All other registers preserved                         *
+; *****************************************************************************
+
+
+
+
+
 
 ; *****************************************************************************
 ; * ROM BASED HARDWARE VECTORS                                                *
