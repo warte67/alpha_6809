@@ -316,7 +316,7 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 ; * EXIT CONDITIONS:	All registers preserved                               *
 ; *****************************************************************************
 KRNL_CHROUT	jmp	[VECT_CHROUT]	; proceed through the software vector
-STUB_CHROUT	pshs	d,x		; save the used registers onto the stack
+STUB_CHROUT	pshs	d,x,cc		; save the used registers onto the stack
 		tstb			; is B a null?
 		bne	K_CHROUT_1	; nope, continue
 		ldb	KRNL_ATTRIB	; load the current color attribute
@@ -333,7 +333,7 @@ K_CHROUT_0	jsr	KRNL_CSRPOS	; position X at the cursor position
 		cmpa	GFX_HRES+1	; compare with the current screen columns
 		blt	K_CHROUT_DONE	; cleanup and return if the csr column is okay
 		jsr	KRNL_NEWLINE	; perform a new line
-K_CHROUT_DONE	puls	d,x,pc		; cleanup and return
+K_CHROUT_DONE	puls	d,x,cc,pc		; cleanup and return
 
 ; *****************************************************************************
 ; * KRNL_NEWLINE                                                              *

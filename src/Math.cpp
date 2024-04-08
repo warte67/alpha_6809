@@ -16,19 +16,19 @@ Byte Math::read(Word offset, bool debug)
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
 
     // read ACA
-    if (offset >= MATH_ACA_POS && offset <= MATH_ACA_INT)
+    if (offset >= MATH_ACA_POS && offset <= MATH_ACA_INT+4)
     {
         data = _read_acc(offset, MATH_ACA_POS,
             aca_pos, aca_float, aca_string, aca_raw, aca_int);
     }
     // read ACB
-    if (offset >= MATH_ACB_POS && offset <= MATH_ACB_INT)
+    if (offset >= MATH_ACB_POS && offset <= MATH_ACB_INT+4)
     {
         data = _read_acc(offset, MATH_ACB_POS,
             acb_pos, acb_float, acb_string, acb_raw, acb_int);
     }
     // read ACR
-    if (offset >= MATH_ACR_POS && offset <= MATH_ACR_INT)
+    if (offset >= MATH_ACR_POS && offset <= MATH_ACR_INT+4)
     {
         data = _read_acc(offset, MATH_ACR_POS,
             acr_pos, acr_float, acr_string, acr_raw, acr_int);
@@ -45,19 +45,19 @@ void Math::write(Word offset, Byte data, bool debug)
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
 
     // write ACB
-    if (offset >= MATH_ACA_POS && offset <= MATH_ACA_INT)
+    if (offset >= MATH_ACA_POS && offset <= MATH_ACA_INT+4)
     {
         data = _write_acc(offset, data, MATH_ACA_POS, 
             aca_pos, aca_float, aca_string, aca_raw, aca_int);
     }
     // write ACB
-    if (offset >= MATH_ACB_POS && offset <= MATH_ACB_INT)
+    if (offset >= MATH_ACB_POS && offset <= MATH_ACB_INT+4)
     {
         data = _write_acc(offset, data, MATH_ACB_POS,
             acb_pos, acb_float, acb_string, acb_raw, acb_int);
     }
     // write ACR
-    if (offset >= MATH_ACR_POS && offset <= MATH_ACR_INT)
+    if (offset >= MATH_ACR_POS && offset <= MATH_ACR_INT+4)
     {
         data = _write_acc(offset, data, MATH_ACR_POS,
             acr_pos, acr_float, acr_string, acr_raw, acr_int);
@@ -245,6 +245,8 @@ Byte Math::_read_acc(Word offset, Word reg, Byte& _pos,
     // bounds checking
     if (offset < reg || offset > reg + 9)   return data;
 
+
+
     if (offset == reg)              // MATH_ACx_POS
     {
         data = _pos;
@@ -299,13 +301,29 @@ Byte Math::_write_acc(Word offset, Byte data, Word reg, Byte& _pos,
     // update the string itself
     if (offset == reg + 1)              // MATH_ACx_DATA
     {
+        std::string valid_chars = ".-+0123456789eE";
+        int found = valid_chars.find((char)data);
+        if (found < 0)
+            return IDevice::read(offset);
+
         // at the beginning of the string?
         if (_pos == 0)  
         {
+            if (data == 'e' || data == 'E' || data == '+')
+                return IDevice::read(offset);
             _string = "";
             _pos = 0;
-            _string += data;
-            _pos++;
+            if (data == '-')
+            {
+                _string += data;
+                _string += "0";
+                _pos++;
+            }
+            else
+            {
+                _string += data;
+                _pos++;
+            }
         }
         else // within the string
         {
@@ -320,7 +338,11 @@ Byte Math::_write_acc(Word offset, Byte data, Word reg, Byte& _pos,
         // update MATH_ACx_INT
         _int = (DWord)_float;
         // update the string
-        _string = std::to_string(_float);
+        if (data != 'e' && data != 'E' && data != '-')
+            _string = std::to_string(_float);
+
+// std::cout << _string << std::endl;
+
 
         //printf("_write_acc(): _float: %f   _raw: $%08X   _int: $%08X\n", _float, _raw, _int);
     }
