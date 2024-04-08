@@ -15,6 +15,7 @@
 #include "Keyboard.hpp"
 #include "Gamepad.hpp"
 #include "FileIO.hpp"
+#include "Math.hpp"
 
 Bus::Bus()
 {
@@ -167,9 +168,9 @@ Bus::Bus()
     s_fileio = new FileIO();
     addr += Attach(s_fileio);
 
-
-
-
+    // attach the math device
+    s_math = new Math();
+    addr += Attach(s_math);
 
 
 

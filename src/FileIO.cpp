@@ -561,7 +561,6 @@ Word FileIO::OnAttach(Word nextAddr)
 
     Word old_addr = nextAddr; 
 
-	DisplayEnum("", 0, "");
 	DisplayEnum("FIO_BEGIN", nextAddr, "Start of the FileIO register space");
 	nextAddr += 0;
 

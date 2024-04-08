@@ -17,6 +17,7 @@ class Mouse;
 class Keyboard;
 class Gamepad;
 class FileIO;
+class Math;
 
 class Bus : public IDevice
 {
@@ -48,6 +49,7 @@ class Bus : public IDevice
         inline static Keyboard* s_keyboard = nullptr;
         inline static Gamepad* s_gamepad = nullptr;
         inline static FileIO* s_fileio = nullptr;
+        inline static Math* s_math = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -99,6 +101,7 @@ class Bus : public IDevice
         inline static Keyboard* GetKeyboard() { return s_keyboard; }
         inline static Gamepad* GetGamepad() { return s_gamepad; }
         inline static FileIO* GetFileIO() { return s_fileio; }
+        inline static Math* GetMath() { return s_math; }
 
         void load_hex(const char* filename);
 
