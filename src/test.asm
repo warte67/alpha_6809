@@ -35,7 +35,7 @@ skip_data
 		jsr	KRNL_LINEOUT
 		bra	done
 1		
-		jsr	KRNL_DPS_INTR	; KRNL_DSP_ACR
+		jsr	KRNL_DSP_INTR	; KRNL_DSP_ACR
 		jsr	KRNL_NEWLINE
 
 		

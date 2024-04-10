@@ -32,6 +32,34 @@ VECT_LINEEDIT	fdb	STUB_LINEEDIT	; Console Line Editor Software Vector
 VECT_GETKEY	fdb	STUB_GETKEY	; Wait for Key Press Software Vector
 VECT_GETHEX	fdb	STUB_GETHEX	; Wait for Hex Character Software Vector
 VECT_GETNUM	fdb	STUB_GETNUM	; Wait for Numeric Character Vector
+VECT_CMPSTR	fdb	STUB_CMPSTR	; Compare two strings of arbitrary lengths
+VECT_CMD_PROC	fdb	STUB_CMD_PROC	; Parse the command entered by the user
+VECT_TBLSEARCH	fdb	STUB_TBLSEARCH	; Table Search and Return index
+VECT_CPY_DWORD	fdb	STUB_CPY_DWORD	; Copy 32-bits from addr X addr Y
+VECT_D_TO_RAWA	fdb	STUB_D_TO_RAWA	; Write the D register to RAWA 
+VECT_D_TO_RAWB	fdb	STUB_D_TO_RAWB	; Write the D register to RAWB
+VECT_D_TO_RAWR	fdb	STUB_D_TO_RAWR	; Write the D register to RAWR 
+VECT_D_TO_INTA	fdb	STUB_D_TO_INTA	; Write the D register to INTA
+VECT_D_TO_INTB	fdb	STUB_D_TO_INTB	; Write the D register to INTB
+VECT_D_TO_INTR	fdb	STUB_D_TO_INTR	; Write the D register to INTR
+VECT_RAWA_TO_D	fdb	STUB_RAWA_TO_D	; Read the RAWA float into D
+VECT_RAWB_TO_D	fdb	STUB_RAWB_TO_D	; Read the RAWB float into D
+VECT_RAWR_TO_D	fdb	STUB_RAWR_TO_D	; Read the RAWD float into D
+VECT_INTA_TO_D	fdb	STUB_INTA_TO_D	; Read the INTA integer into D
+VECT_INTB_TO_D	fdb	STUB_INTB_TO_D	; Read the INTB integer into D
+VECT_INTR_TO_D	fdb	STUB_INTR_TO_D	; Read the INTR integer into D
+VECT_8BIT_MATH	fdb	STUB_8BIT_MATH	; 8-bit integer math
+VECT_DSP_ACA	fdb	STUB_DSP_ACA	; Send to console the float in ACA
+VECT_DSP_ACB	fdb	STUB_DSP_ACB	; Send to console the float in ACB
+VECT_DSP_ACR	fdb	STUB_DSP_ACR	; Send to console the float in ACA
+VECT_DSP_INTA	fdb	STUB_DSP_INTA	; Send to console the integer in ACA
+VECT_DSP_INTB	fdb	STUB_DSP_INTB	; Send to console the integer in ACB
+VECT_DSP_INTR	fdb	STUB_DSP_INTR	; Send to console the integer in ACR
+VECT_WRITE_ACA	fdb	STUB_WRITE_ACA	; Write RAW float X points to into ACA
+VECT_WRITE_ACB	fdb	STUB_WRITE_ACB	; Write RAW float X points to into ACB
+VECT_WRITE_ACR	fdb	STUB_WRITE_ACR	; Write RAW float X points to into ACR
+VECT_ARG_TO_A	fdb	STUB_ARG_TO_A	; Convert numeric string to binary in A
+
 
 ; *****************************************************************************
 ; * RESERVED ZERO PAGE KERNAL VARIABLES                                       *
@@ -57,8 +85,8 @@ KRNL_LOCAL_3	fcb	0		; (Byte) used locally for some KRNL calls
 
 KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.3\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
-KRNL_PROMPT2	fcn	"Under GPL V3 Liscense\n"
-KRNL_PROMPT3	fcn	"Copyright 2024 By Jay Faries\n\n"  
+KRNL_PROMPT2	fcn	"Under General Public Liscense (GPL V3)\n"
+KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
 READY_PROMPT	fcn	"Ready\n"
 
 KRNL_CMD_TABLE	fcn	"cls"		; #0
@@ -670,7 +698,8 @@ K_GETNUM_DONE	puls	CC,PC		; cleanup saved registers and return
 ; *                     X = address last checked in string 1                  *
 ; *                     Y = address last checked in string 2                  *
 ; *****************************************************************************
-KRNL_CMPSTR	pshs	D		; save the used registers onto the stack		
+KRNL_CMPSTR	jmp	[VECT_CMPSTR]	; proceed through the software vector
+STUB_CMPSTR	pshs	D		; save the used registers onto the stack		
 K_CMP_LOOP	tst	,x		; test the current character in string 1
 		bne	K_CMP_1		; if its non-null, go test in string 2
 		tst	,y		; test if character in both are null
@@ -706,7 +735,8 @@ K_CMP_DONE	puls	D,PC		; cleanup saved registers and return
 ' *                     X & Y Modified                                        *
 ; *                     FIO_BUFFER will be modified                           *
 ; *****************************************************************************
-KRNL_CMD_PROC	pshs	B,CC		; save the used registers onto the stack
+KRNL_CMD_PROC	jmp	[VECT_CMD_PROC]	; proceed through the software vector
+STUB_CMD_PROC	pshs	B,CC		; save the used registers onto the stack
 	; copy EDT_BUFFER to FIO_BUFFER
 		ldx	#EDT_BUFFER	; the start of the input buffer
 		ldy	#FIO_BUFFER	; use the I/O buffer temporarily
@@ -764,7 +794,8 @@ K_CPROC_DONE	puls	B,CC,PC	; cleanup saved registers and return
 ; *                     X = the end of the search string(next argument)       *
 ; *                         All other registers preserved                     *
 ; *****************************************************************************
-KRNL_TBLSEARCH	pshs	B,Y,U,CC	; save the used registers onto the stack
+KRNL_TBLSEARCH	jmp	[VECT_TBLSEARCH]; proceed through the software vector
+STUB_TBLSEARCH	pshs	B,Y,U,CC	; save the used registers onto the stack
 		tfr	X,U		; save X in U
 		clra			; set the return index to 0
 K_TBLS_0	tfr	U,X		; restore X
@@ -789,7 +820,8 @@ K_TBLS_DONE	puls	B,Y,U,CC,PC	; cleanup saved registers and return
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-KRNL_CPY_DWORD	pshs 	D,CC		; save the used registers onto the stack
+KRNL_CPY_DWORD	jmp	[VECT_CPY_DWORD]; proceed through the software vector
+STUB_CPY_DWORD	pshs 	D,CC		; save the used registers onto the stack
 		ldd	,x		; load the most-significant 16-bit word
 		std	,y		; save the most-significant 16-bit word
 		ldd	2,x		; load the least-significant 16-bit word
@@ -804,19 +836,22 @@ KRNL_CPY_DWORD	pshs 	D,CC		; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-KRNL_D_TO_RAWA	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_RAWA	jmp	[VECT_D_TO_RAWA]; proceed through the software vector
+STUB_D_TO_RAWA	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACA_RAW+0	; clear unneeded byte
 		clr	MATH_ACA_RAW+1	; clear unneeded byte
 		std	MATH_ACA_RAW+2	; store D in the ACA raw float register
 		puls	CC,PC		; cleanup saved registers and return
 		
-KRNL_D_TO_RAWB	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_RAWB	jmp	[VECT_D_TO_RAWB]; proceed through the software vector
+STUB_D_TO_RAWB	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACB_RAW+0	; clear unneeded byte
 		clr	MATH_ACB_RAW+1	; clear unneeded byte
 		std	MATH_ACB_RAW+2	; store D in the ACB raw float register
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_D_TO_RAWR	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_RAWR	jmp	[VECT_D_TO_RAWR]; proceed through the software vector
+STUB_D_TO_RAWR	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACR_RAW+0	; clear unneeded byte
 		clr	MATH_ACR_RAW+1	; clear unneeded byte
 		std	MATH_ACR_RAW+2	; store D in the ACR raw float register
@@ -830,19 +865,22 @@ KRNL_D_TO_RAWR	pshs	CC		; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:	    All registers preserved                           *
 ; *****************************************************************************
-KRNL_D_TO_INTA	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_INTA	jmp	[VECT_D_TO_INTA]; proceed through the software vector
+STUB_D_TO_INTA	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACA_INT+0	; clear unneeded byte
 		clr	MATH_ACA_INT+1	; clear unneeded byte
 		std	MATH_ACA_INT+2	; store D in the ACA integer register
 		puls	CC,PC		; cleanup saved registers and return
 		
-KRNL_D_TO_INTB	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_INTB	jmp	[VECT_D_TO_INTB]; proceed through the software vector
+STUB_D_TO_INTB	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACB_INT+0	; clear unneeded byte
 		clr	MATH_ACB_INT+1	; clear unneeded byte
 		std	MATH_ACB_INT+2	; store D in the ACB integer register
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_D_TO_INTR	pshs	CC		; save the used registers onto the stack
+KRNL_D_TO_INTR	jmp	[VECT_D_TO_INTR]; proceed through the software vector
+STUB_D_TO_INTR	pshs	CC		; save the used registers onto the stack
 		clr	MATH_ACR_INT+0	; clear unneeded byte
 		clr	MATH_ACR_INT+1	; clear unneeded byte
 		std	MATH_ACR_INT+2	; store D in the ACR integer register
@@ -858,15 +896,18 @@ KRNL_D_TO_INTR	pshs	CC		; save the used registers onto the stack
 ; *                         All other registers preserved                     *
 ; *                                                                           *
 ; *****************************************************************************
-KRNL_RAWA_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_RAWA_TO_D	jmp	[VECT_RAWA_TO_D]; proceed through the software vector
+STUB_RAWA_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACA_RAW+2	; load the ACA raw float value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_RAWB_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_RAWB_TO_D	jmp	[VECT_RAWB_TO_D]; proceed through the software vector
+STUB_RAWB_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACB_RAW+2	; load the ACB raw float value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_RAWR_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_RAWR_TO_D	jmp	[VECT_RAWR_TO_D]; proceed through the software vector
+STUB_RAWR_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACR_RAW+2	; load the ACR raw float value
 		puls	CC,PC		; cleanup saved registers and return
 
@@ -880,15 +921,18 @@ KRNL_RAWR_TO_D	pshs	CC		; save the used registers onto the stack
 ; *                         All other registers preserved                     *
 ; *                                                                           *
 ; *****************************************************************************
-KRNL_INTA_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_INTA_TO_D	jmp	[VECT_INTA_TO_D]; proceed through the software vector
+STUB_INTA_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACA_INT+2	; load the ACA integer value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_INTB_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_INTB_TO_D	jmp	[VECT_INTB_TO_D]; proceed through the software vector
+STUB_INTB_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACB_INT+2	; load the ACB integer value
 		puls	CC,PC		; cleanup saved registers and return
 
-KRNL_INTR_TO_D	pshs	CC		; save the used registers onto the stack
+KRNL_INTR_TO_D	jmp	[VECT_INTR_TO_D]; proceed through the software vector
+STUB_INTR_TO_D	pshs	CC		; save the used registers onto the stack
 		ldd	MATH_ACR_INT+2	; load the ACR integer value
 		puls	CC,PC		; cleanup saved registers and return
 
@@ -904,7 +948,8 @@ KRNL_INTR_TO_D	pshs	CC		; save the used registers onto the stack
 ; * EXIT CONDITIONS:	D = Result                                            *
 ; *                     All other registers preserved                         *
 ; *****************************************************************************
-KRNL_8BIT_MATH	pshs	U,CC		; save the used registers onto the stack
+KRNL_8BIT_MATH	jmp	[VECT_8BIT_MATH]; proceed through the software vector
+STUB_8BIT_MATH	pshs	U,CC		; save the used registers onto the stack
 		; A to ACA
 		clr	MATH_ACA_INT+0	; clear unneeded byte
 		clr	MATH_ACA_INT+1	; clear unneeded byte
@@ -930,17 +975,20 @@ KRNL_8BIT_MATH	pshs	U,CC		; save the used registers onto the stack
 ; *                                                                           *
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************
-KRNL_DSP_ACA	pshs	X,CC		; save the used registers onto the stack
+KRNL_DSP_ACA	jmp	[VECT_DSP_ACA]	; proceed through the software vector
+STUB_DSP_ACA	pshs	X,CC		; save the used registers onto the stack
 		ldx	#MATH_ACA_POS	; index the ACA data
 		bsr	KRNL_DSP_HELPER	; display the floating point of ACA
 		puls	X,CC,PC		; cleanup saved registers and return
 
-KRNL_DSP_ACB	pshs	X,CC		; save the used registers onto the stack
+KRNL_DSP_ACB	jmp	[VECT_DSP_ACB]	; proceed through the software vector
+STUB_DSP_ACB	pshs	X,CC		; save the used registers onto the stack
 		ldx	#MATH_ACB_POS	; index the ACB data
 		bsr	KRNL_DSP_HELPER	; display the floating point of ACB
 		puls	X,CC,PC		; cleanup saved registers and return
 
-KRNL_DSP_ACR	pshs	X,CC		; save the used registers onto the stack
+KRNL_DSP_ACR	jmp	[VECT_DSP_ACR]	; proceed through the software vector
+STUB_DSP_ACR	pshs	X,CC		; save the used registers onto the stack
 		ldx	#MATH_ACR_POS	; index the ACR data
 		bsr	KRNL_DSP_HELPER	; display the floating point of ACR
 		puls	X,CC,PC		; cleanup saved registers and return
@@ -961,17 +1009,20 @@ K_DSP_FP_0	lda	1,x		; pop a character from the port
 ; *                                                                           *
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************		
-KRNL_DPS_INTA	pshs	X,CC		; save the used register onto the stack
+KRNL_DSP_INTA	jmp	[VECT_DSP_INTA]	; proceed through the software vector
+STUB_DSP_INTA	pshs	X,CC		; save the used register onto the stack
 		ldx	#MATH_ACA_POS	; index the ACA data
 		bsr	KRNL_DSP_IHELP	; display the integer portion of ACA
 		puls	X,CC,PC		; cleanup and return
 
-KRNL_DPS_INTB	pshs	X,CC		; save the used register onto the stack
+KRNL_DSP_INTB	jmp	[VECT_DSP_INTB]	; proceed through the software vector
+STUB_DSP_INTB	pshs	X,CC		; save the used register onto the stack
 		ldx	#MATH_ACA_POS	; index the ACB data
 		bsr	KRNL_DSP_IHELP	; display the integer portion of ACB
 		puls	X,CC,PC		; cleanup and return
 
-KRNL_DPS_INTR	pshs	X,CC		; save the used register onto the stack
+KRNL_DSP_INTR	jmp	[VECT_DSP_INTR]	; proceed through the software vector
+STUB_DSP_INTR	pshs	X,CC		; save the used register onto the stack
 		ldx	#MATH_ACR_POS	; index the ACR data
 		bsr	KRNL_DSP_IHELP	; display the integer portion of ACR
 		puls	X,CC,PC		; cleanup and return
@@ -997,17 +1048,20 @@ K_DSP_INT_RET	puls	A,CC,PC		; cleanup saved registers and return
 ; *                                                                           *
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************
-KRNL_WRITE_ACA	pshs	X,Y,CC		; save the used registers onto the stack
+KRNL_WRITE_ACA	jmp	[VECT_WRITE_ACA]; proceed through the software vector
+STUB_WRITE_ACA	pshs	X,Y,CC		; save the used registers onto the stack
 		ldy	#MATH_ACA_POS	; point to the ACA chr pos register
 		bsr	KRNL_WRITE_HLP	; display the number to the console
 		puls	X,Y,CC,PC	; cleanup saved registers and return
 
-KRNL_WRITE_ACB	pshs	X,Y,CC		; save the used registers onto the stack
+KRNL_WRITE_ACB	jmp	[VECT_WRITE_ACB]; proceed through the software vector
+STUB_WRITE_ACB	pshs	X,Y,CC		; save the used registers onto the stack
 		ldy	#MATH_ACB_POS	; point to the ACB chr pos register
 		bsr	KRNL_WRITE_HLP	; display the number to the console
 		puls	X,Y,CC,PC	; cleanup saved registers and return
 
-KRNL_WRITE_ACR	pshs	X,Y,CC		; save the used registers onto the stack
+KRNL_WRITE_ACR	jmp	[VECT_WRITE_ACR]; proceed through the software vector
+STUB_WRITE_ACR	pshs	X,Y,CC		; save the used registers onto the stack
 		ldy	#MATH_ACR_POS	; point to the ACR chr pos register
 		bsr	KRNL_WRITE_HLP	; display the number to the console
 		puls	X,Y,CC,PC	; cleanup saved registers and return	
@@ -1032,7 +1086,8 @@ KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 ; * EXIT CONDITIONS:	A = binary value represented by the input string      *
 ; *                     All other registers preserved                         *
 ; *****************************************************************************
-KRNL_ARG_TO_A	pshs	B,X,CC		; save the used registers onto the stack
+KRNL_ARG_TO_A	jmp	[VECT_ARG_TO_A]; proceed through the software vector
+STUB_ARG_TO_A	pshs	B,X,CC		; save the used registers onto the stack
 		ldb	,x		; load character to be converted
 		cmpb	#'$'		; is it the leading '$'?
 		beq	KARG_0		;   yeah, go convert from hexidecimal
