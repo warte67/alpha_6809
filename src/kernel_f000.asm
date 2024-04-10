@@ -369,9 +369,12 @@ do_mode_0	rts			; return from subroutine
 ; 	KRNL_INTR_TO_D	; Read the ACR integer register into the D register
 ;
 ;	KRNL_8BIT_MATH	; 8-bit integer math: D = A (U:mop) B
-;	KRNL_DSP_ACA	; Displays the floating point number in the ACA register. 
-;	KRNL_DSP_ACB	; Displays the floating point number in the ACB register. 
-;	KRNL_DSP_ACR	; Displays the floating point number in the ACR register. 
+;	KRNL_DSP_ACA	; Displays the floating point number in the ACA register
+;	KRNL_DSP_ACB	; Displays the floating point number in the ACB register 
+;	KRNL_DSP_ACR	; Displays the floating point number in the ACR register 
+;	KRNL_DPS_INTA	; Displays the integer number value of the ACA register
+;	KRNL_DPS_INTB	; Displays the integer number value of the ACB register
+;	KRNL_DPS_INTR	; Displays the integer number value of the ACR register
 ;	KRNL_WRITE_ACA	; Convert a string (pointed to by X) and write to ACA
 ;	KRNL_WRITE_ACB	; Convert a string (pointed to by X) and write to ACB
 ;	KRNL_WRITE_ACR	; Convert a string (pointed to by X) and write to ACR
@@ -928,27 +931,62 @@ KRNL_8BIT_MATH	pshs	U,CC		; save the used registers onto the stack
 ; * EXIT CONDITIONS:    All registers preserved                               *
 ; *****************************************************************************
 KRNL_DSP_ACA	pshs	X,CC		; save the used registers onto the stack
-		ldx	#MATH_ACA_POS
-		bsr	KRNL_DSP_HELPER
+		ldx	#MATH_ACA_POS	; index the ACA data
+		bsr	KRNL_DSP_HELPER	; display the floating point of ACA
 		puls	X,CC,PC		; cleanup saved registers and return
 
 KRNL_DSP_ACB	pshs	X,CC		; save the used registers onto the stack
-		ldx	#MATH_ACB_POS
-		bsr	KRNL_DSP_HELPER
+		ldx	#MATH_ACB_POS	; index the ACB data
+		bsr	KRNL_DSP_HELPER	; display the floating point of ACB
 		puls	X,CC,PC		; cleanup saved registers and return
 
 KRNL_DSP_ACR	pshs	X,CC		; save the used registers onto the stack
-		ldx	#MATH_ACR_POS
-		bsr	KRNL_DSP_HELPER
+		ldx	#MATH_ACR_POS	; index the ACR data
+		bsr	KRNL_DSP_HELPER	; display the floating point of ACR
 		puls	X,CC,PC		; cleanup saved registers and return
 
 ;HELPER:  X=address of a FP_POS register pointed to by X
 KRNL_DSP_HELPER	pshs  	A,CC		; save the used registers onto the stack
-		clr	,x
-K_DSP_FP_0	lda	1,x
-		jsr	KRNL_CHROUT
-		bne	K_DSP_FP_0
+		clr	,x		; reset this math data port
+K_DSP_FP_0	lda	1,x		; pop a character from the port
+		jsr	KRNL_CHROUT	; send it to the console
+		bne	K_DSP_FP_0	; continue if not at the null-terminator
 		puls	A,CC,PC		; cleanup saved registers and return
+
+; *****************************************************************************
+; * KRNL_DSP_INT(A, B, or R)                                                  *
+; * 	Displays the integer number in one of the FP registers.               *
+; *                                                                           *
+; * ENTRY REQUIREMENTS: none                                                  *
+; *                                                                           *
+; * EXIT CONDITIONS:    All registers preserved                               *
+; *****************************************************************************		
+KRNL_DPS_INTA	pshs	X,CC		; save the used register onto the stack
+		ldx	#MATH_ACA_POS	; index the ACA data
+		bsr	KRNL_DSP_IHELP	; display the integer portion of ACA
+		puls	X,CC,PC		; cleanup and return
+
+KRNL_DPS_INTB	pshs	X,CC		; save the used register onto the stack
+		ldx	#MATH_ACA_POS	; index the ACB data
+		bsr	KRNL_DSP_IHELP	; display the integer portion of ACB
+		puls	X,CC,PC		; cleanup and return
+
+KRNL_DPS_INTR	pshs	X,CC		; save the used register onto the stack
+		ldx	#MATH_ACR_POS	; index the ACR data
+		bsr	KRNL_DSP_IHELP	; display the integer portion of ACR
+		puls	X,CC,PC		; cleanup and return
+
+;HELPER:  X=address of a FP_POS register pointed to by X. Display Integer
+KRNL_DSP_IHELP	pshs  	A,CC		; save the used registers onto the stack
+		clr	,x		; reset this math data port
+K_DSP_INT_0	lda	1,x		; pop a character from the port
+		cmpa	#'.'		; is it the decimal point?
+		beq	K_DSP_INT_RET	;   yeah, we're done
+		jsr	KRNL_CHROUT	; no, output to the console
+		tsta			; are we at the null-terminator?
+		bne	K_DSP_INT_0	;   no, continue looping
+K_DSP_INT_RET	puls	A,CC,PC		; cleanup saved registers and return
+
 
 ; *****************************************************************************
 ; * KRNL_WRITE_AC(A, B, or R)                                                 *

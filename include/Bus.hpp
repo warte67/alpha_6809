@@ -87,6 +87,9 @@ class Bus : public IDevice
 		static Word Read_Word(Word offset, bool debug = false);
 		static void Write_Word(Word offset, Word data, bool debug = false);       
 
+		static DWord Read_DWord(Word offset, bool debug = false);
+        static void Write_DWord(Word offset, DWord data, bool debug = false);
+
         // inline static GfxCore* gfx_core() { return s_gfx_core; }    // to non-enforced singleton
         // inline static Gfx* gfx() { return s_gfx; }                  // to non-enforced singleton
         inline static bool IsDirty() { return s_bIsDirty; }

@@ -601,6 +601,21 @@ void Bus::Write_Word(Word offset, Word data, bool debug)
     Bus::Write(offset, msb);
     Bus::Write(offset + 1, lsb);
 }
+DWord Bus::Read_DWord(Word offset, bool debug)
+{
+    DWord ret = (Bus::Read(offset+0)<<24) |
+                (Bus::Read(offset+1)<<16) | 
+                (Bus::Read(offset+2)<< 8) | 
+                (Bus::Read(offset+3)<< 0);
+    return ret;
+}
+void Bus::Write_DWord(Word offset, DWord data, bool debug)
+{
+    Bus::Write(offset+0, (data>>24) & 0xFF);
+    Bus::Write(offset+1, (data>>16) & 0xFF);
+    Bus::Write(offset+2, (data>> 8) & 0xFF);
+    Bus::Write(offset+3, (data>> 0) & 0xFF);
+}
 
 
 

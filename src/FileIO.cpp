@@ -327,6 +327,22 @@ void FileIO::_cmd_load_hex_file()
 
 void FileIO::_cmd_get_file_length()
 {
+    printf("%s::_cmd_get_file_length()\n", Name().c_str());
+
+    std::filesystem::path arg1 = filePath;
+    printf("file: %s\n", arg1.generic_string().c_str());
+
+    if (!std::filesystem::exists(arg1))
+    {
+        printf("ERROR: File does not exist!\n");
+
+        Bus::Write(FIO_ERR_FLAGS, 0x80);  
+        Bus::Write(MATH_ACR_INT, 0);
+        return;
+    }
+
+    Uint32 file_size = std::filesystem::file_size(arg1);
+    Bus::Write_DWord(MATH_ACR_INT, file_size);
 }
 
 
