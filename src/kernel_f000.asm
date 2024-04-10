@@ -203,143 +203,139 @@ k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
 ; *****************************************************************************
 ; * MAIN KERNEL COMMAND SUBROUTINES (Prototypes)                              *
 ; *****************************************************************************
-;	do_cls		; #0
-;	do_color	; #1
-;	do_load		; #2
-;	do_exec		; #3
-;	do_reset	; #4
-;	do_dir		; #5
-;	do_cd		; #6
-;	do_chdir	; #7
-;	do_exit		; #8
-;	do_quit		; #9
-;	do_mode		; #10
+;	do_cls		; #0		; Clear Screen (0-255) or ($00-$FF)
+;	do_color	; #1		; Change Color (0-255) or ($00-$FF)
+;	do_load		; #2		; Load an Intel Hex Formatted File
+;	do_exec		; #3		; Execute a Loaded Program
+;	do_reset	; #4		; Reset the System
+;	do_dir		; #5		; Display Files and Folders in a Folder
+;	do_cd		; #6		; Change the Current Directory
+;	do_chdir	; #7		; Alias of CD
+;	do_exit		; #8		; Exit the Emulator
+;	do_quit		; #9		; Also Exits the Emulator
+;	do_mode		; #10		; Display Mode (0-31) or ($00-$1F)
 
-str_cls		fcn	"CLS\n"
-str_color	fcn	"COLOR\n"
-str_load	fcn	"LOAD\n"
-str_exec	fcn	"EXEC\n"
-str_reset	fcn	"RESET\n"
-str_dir		fcn	"DIR\n"
-str_cd		fcn	"CD\n"
-str_chdir	fcn	"CHDIR\n"
-str_exit	fcn	"EXIT\n"
-str_quit	fcn	"QUIT\n"
-str_mode	fcn	"MODE\n"
+; *****************************************************************************
+; * Command: CLS "Clear Screen"			      ARG1 = Color Attribute  *
+; *****************************************************************************
+do_cls		tst	,x		; test for an argument
+		beq	do_cls_0	; no argument, just go clear the screen
+		lda	,x		; first character in the argument
+		cmpa	#$ff		; $FF is also a terminator
+		beq	do_cls_0	; no argument, go clear the screen
+		jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A
+		tsta			; is the numeric value 0?
+		beq	do_cls_0	; yeah, go clear the screen
+		sta	KRNL_ATTRIB	; store the argument as the default color
+do_cls_0	lda	#' '		; load the SPACE character to clear with
+		ldb	KRNL_ATTRIB	; load the color attribute
+		jsr	KRNL_CLS	; clear the screen
+		rts			; return from subroutine
 
+; *****************************************************************************
+; * Command: COLOR "Change the Color Attribute"	      ARG1 = Color Attribute  *
+; *****************************************************************************
+do_color	tst	,x		; test for an argument
+		beq	do_color_0	; if its zero, do nothing; just return
+		jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A
+		tsta			; is it a zero?
+		beq	do_color_0	;   yeah, return
+		cmpa	#$ff		; is it the other terminator?
+		beq	do_color_0	;   yeah, return
+		sta	KRNL_ATTRIB	; save the new default color attribute
+do_color_0	rts			; return from subroutine
 
-do_cls		; CLEAR SCREEN			ARG1 = Color Attribute
-
-		tst	,x
-		beq	do_cls_0
-		lda	,x
-		cmpa	#$ff
-		beq	do_cls_0
-		jsr 	KRNL_ARG_TO_A
-		tsta
-		beq	do_cls_0
-		sta	KRNL_ATTRIB
-do_cls_0	lda	#' '
-		ldb	KRNL_ATTRIB
-		jsr	KRNL_CLS		
-		rts
-do_color	; COLOR				ARG1 = Color Attribute
-		tst	,x
-		beq	do_color_0
-		jsr 	KRNL_ARG_TO_A
-		tsta
-		beq	do_color_0
-		cmpa	#$ff
-		beq	do_color_0
-		sta	KRNL_ATTRIB
-do_color_0	rts	
-
-
+; *****************************************************************************
+; * Command: LOAD "Load a (Intel) Hex File        ARG1 = {filepath}/filename  *
+; *****************************************************************************
 err_file_nf		fcn	"ERROR: File Not Found\n";
 err_file_no		fcn	"ERROR: File Not Open\n";
-err_wrong_file_type	fcn	"ERROR: Wrong File Type\n"
+err_wrong_file		fcn	"ERROR: Wrong File Type\n"
+do_load		jsr	do_arg1_helper	; fetch path data from argument 1
+		lda	#FC_LOADHEX	; FIO Command
+		sta	FIO_COMMAND	; Send the Load Hex Command
+		lda	FIO_ERR_FLAGS	; Examine the Error Flags
+		cmpa	#$80		; is the File Not Found bit set?
+		beq	do_ld_notfound	; ERROR: File Not Found
+		cmpa	#$20		; is the File Not Open bit set?
+		beq	do_ld_notopen	; ERROR: File Not Open
+		cmpa	#$04		; is the Wrong File Type bit set?
+		beq	do_ld_wrong	; ERROR: Wrong File Type
+		bra	do_ld_done	; All done, return
+do_ld_wrong	ldx	#err_wrong_file	; point to the error message
+		jsr	KRNL_LINEOUT	; send the text to the console
+		bra	do_ld_done	; done, return
+do_ld_notopen	ldx	#err_file_no	; point to the error message
+		jsr	KRNL_LINEOUT	; send it to the console
+		bra	do_ld_done	; done, return
+do_ld_notfound	ldx	#err_file_nf	; point to the error message
+		jsr	KRNL_LINEOUT	; send it to the console
+do_ld_done	rts			; done, return
+do_arg1_helper	clr	FIO_PATH_POS	; reset the path cursor position
+do_argh_0	lda	,x+		; load the next character
+		sta	FIO_PATH_DATA	; push it into the FIO Path Data Port
+		bne	do_argh_0	; Continue until Null-Terminator
+		rts			; return from subroutine
 
-do_load		; LOAD 				ARG1 = {filepath}/filename
-		jsr	do_arg1_helper
-		lda	#FC_LOADHEX
-		sta	FIO_COMMAND	
-		lda	FIO_ERR_FLAGS
-		cmpa	#$80
-		beq	2f		; file not found	
-		cmpa	#$20
-		beq	4f		; file not open
-		cmpa	#$04		
-		beq	5f		; wrong file type
-		bra	3f
-5	; wrong file type
-		ldx	#err_wrong_file_type
-		jsr	KRNL_LINEOUT
-		bra	3f
-4	; file not open
-		ldx	#err_file_no
-		jsr	KRNL_LINEOUT
-		bra	3f
-2	; file not found
-		ldx	#err_file_nf
-		jsr	KRNL_LINEOUT
-3		rts
+; *****************************************************************************
+; * Command: EXEC "Execute a Program"                            ARG1 = none  *
+; *****************************************************************************
+do_exec		jsr	[VECT_EXEC]	; call the users program
+		rts			; return from this subroutine
 
-do_exec		; EXEC				ARG1 = none
-		* pshs	D,X,U,CC
-		jsr	[VECT_EXEC]
-		* puls	D,X,U,CC
-		rts
+; *****************************************************************************
+; * Command: RESET "Perform a System Reset"                      ARG1 = none  *
+; *****************************************************************************
+do_reset	lda	#FC_RESET	; load the FIO Command: RESET
+		sta	FIO_COMMAND	; issue the Command
+		rts			; return from subroutine
 
-do_reset	; RESET				ARG1 = none
-		lda	#FC_RESET
-		sta	FIO_COMMAND
-		rts
+; *****************************************************************************
+; * Command: DIR "List a Directorys Files and Folders"     ARG1 = {filepath}  *
+; *****************************************************************************
+do_dir		bsr	do_arg1_helper	; fetch path data from argument 1
+		lda	#FC_LISTDIR	; load the FIO command: LISTDIR
+		sta	FIO_COMMAND	; issue the Command
+do_dir_1	lda	FIO_DIR_DATA	; load a character from the Data Port
+		beq	do_dir_2	; quit when we find the Null-Terminator
+		jsr	KRNL_CHROUT	; output the character to the console
+		bra	do_dir_1	; continue looping until done
+do_dir_2	rts			; return from subroutine
 
-do_dir		; DIR				ARG1 = {filepath}
-		bsr	do_arg1_helper
-		lda	#FC_LISTDIR
-		sta	FIO_COMMAND
-do_dir_1	lda	FIO_DIR_DATA
-		beq	do_dir_2
-		jsr	KRNL_CHROUT
-		bra	do_dir_1
-do_dir_2	rts
-do_cd		; CHDIR				ARG1 = {filepath}
-do_chdir	; CHDIR				ARG1 = {filepath}
-		bsr	do_arg1_helper
-		lda	#FC_CHANGEDIR
-		sta	FIO_COMMAND
-		lda	#FC_GETPATH
-		sta	FIO_COMMAND
-		clr	FIO_PATH_POS
-do_cd_0		lda	FIO_PATH_DATA
-		beq	do_cd_1
-		jsr	KRNL_CHROUT
-		bra	do_cd_0
-do_cd_1		rts
-do_exit		; EXIT and QUIT			ARG1 = none
-do_quit		; EXIT and QUIT			ARG1 = none
-		lda	#FC_SHUTDOWN
-		sta	FIO_COMMAND
-		rts
-do_mode		; MODE				ARG1 = Graphics Mode
-		tst	,x
-		beq	do_mode_0
-		jsr 	KRNL_ARG_TO_A
-		sta	GFX_MODE
-		lda	#' '
-		jsr	KRNL_CLS
-do_mode_0	rts
-; local helpers
-str_output	jsr	KRNL_LINEOUT
-		rts
-do_arg1_helper	clr	FIO_PATH_POS
-do_argh_0	lda	,x+
-		sta	FIO_PATH_DATA
-		bne	do_argh_0
-		rts
+; *****************************************************************************
+; * Command: CD / CHDIR "Change Current Folder"            ARG1 = {filepath}  *
+; *****************************************************************************
+do_cd					; CD is an alias for CHDIR
+do_chdir	bsr	do_arg1_helper	; fetch path data from argument 1
+		lda	#FC_CHANGEDIR	; load the FIO command: CHANGEDIR
+		sta	FIO_COMMAND	; send the command to the FIO Device
+		lda	#FC_GETPATH	; load the FIO command: GETPATH	
+		sta	FIO_COMMAND	; send it; fetch the current path
+		clr	FIO_PATH_POS	; reset the path cursor position
+do_cd_0		lda	FIO_PATH_DATA	; pull a character from the path data port
+		beq	do_cd_1		; if it's a null, we're done
+		jsr	KRNL_CHROUT	; output the character to the console
+		bra	do_cd_0		; continue looping until done
+do_cd_1		rts			; return from subroutine
 
+; *****************************************************************************
+; * Command: EXIT / QUIT "Terminate the Emulator Program"        ARG1 = none  *
+; *****************************************************************************
+do_exit		nop			; EXIT is an alias for QUIT
+do_quit		lda	#FC_SHUTDOWN	; load the FIO command: SHUTDOWN
+		sta	FIO_COMMAND	; issue the shutdown command
+		rts			; return from subroutine
 
+; *****************************************************************************
+; * Command: MODE "Change Display Mode" (sets GMODE)    ARG1 = Graphics Mode  *
+; *****************************************************************************
+do_mode		tst	,x		; test for an argument
+		beq	do_mode_0	; just return if argument == zero
+		jsr 	KRNL_ARG_TO_A	; fetch the numeric argument into A 
+		sta	GFX_MODE	; set the GMODE 
+		lda	#' '		; load a SPACE character
+		jsr	KRNL_CLS	; clear the screen
+do_mode_0	rts			; return from subroutine
 
 ; *****************************************************************************
 ; * KERNEL SUBROUTINES (Prototypes)                                           *
