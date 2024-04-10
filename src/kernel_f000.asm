@@ -488,9 +488,9 @@ STUB_CSRPOS	pshs	d		; save the used registers onto the stack
 		mul			; row * columns
 		ldx	#VIDEO_START	; the buffer starting address
 		leax	d, x		; add the video base address
-		clra			; don't let B become negative, use D
 		ldb	KRNL_CURSOR_COL	; load the current cursor column
 		lslb			; times two (account for the attribute)
+		clra			; don't let B become negative, use D
 		leax	d, x		; add the column to the return address
 		puls	d,pc		; restore the saved registers and return
 
