@@ -401,10 +401,10 @@ K_CLS_0		std	,x++		; store the attrib/character or pixel data
 		puls	x,pc		; restore the registers and return
 
 ; *****************************************************************************
-; * KRNL_CHROUT                                                              *
-; * 	Outputs a character to the console at the current                     *
-; *     cursor position. This routine should the cursors                      *
-; *     position and handles text scrolling as needed.                        *
+; * KRNL_CHROUT                                                               *
+; * 	Outputs a character to the console at the current cursor              *
+; *     position. This routine should update the cursors postion              *
+; *     and handle text scrolling as needed.                                  *
 ; *                                                                           *
 ; * ENTRY REQUIREMENTS: A = Character to be displayed                         *
 ; *                                                                           *
@@ -426,7 +426,7 @@ K_CHROUT_0	jsr	KRNL_CSRPOS	; position X at the cursor position
 		cmpa	GFX_HRES+1	; compare with the current screen columns
 		blt	K_CHROUT_DONE	; cleanup and return if the csr column is okay
 		jsr	KRNL_NEWLINE	; perform a new line
-K_CHROUT_DONE	puls	d,x,cc,pc		; cleanup and return
+K_CHROUT_DONE	puls	d,x,cc,pc	; cleanup and return
 
 ; *****************************************************************************
 ; * KRNL_NEWLINE                                                              *
@@ -446,7 +446,7 @@ STUB_NEWLINE	pshs	D,X		; save the used registers onto the stack
 		blt	K_NEWLINE_DONE	; clean up and return if less than
 		dec	KRNL_CURSOR_ROW	; move the cursor the the bottom row
 		jsr	KRNL_SCROLL	; scroll the text screen up one line
-K_NEWLINE_DONE	puls	D,X,pc		; restore the saved registers and return
+K_NEWLINE_DONE	puls	D,X,PC		; restore the saved registers and return
 
 
 ; *****************************************************************************
@@ -488,9 +488,10 @@ STUB_CSRPOS	pshs	d		; save the used registers onto the stack
 		mul			; row * columns
 		ldx	#VIDEO_START	; the buffer starting address
 		leax	d, x		; add the video base address
+		clra			; don't let B become negative, use D
 		ldb	KRNL_CURSOR_COL	; load the current cursor column
 		lslb			; times two (account for the attribute)
-		leax	b, x		; add the column to the return address
+		leax	d, x		; add the column to the return address
 		puls	d,pc		; restore the saved registers and return
 
 ; *****************************************************************************
@@ -561,7 +562,7 @@ KRNL_LEDIT_2	; display the cursor at the end of the line
 		beq	KRNL_LEDIT_3	; use the SPACE if we're at a null
 		lda	,u+		; load the next character from buffer
 KRNL_LEDIT_3	; finish the line
-		jsr	KRNL_CSRPOS	; load X with the current cursor positino 
+		jsr	KRNL_CSRPOS	; load X with the current cursor position 
 		std	,x		; store the character where X points to
 		inc	KRNL_CURSOR_COL	; ipdate the cursor column number
 		; ldb	KRNL_ATTRIB	; load the default color attribute
