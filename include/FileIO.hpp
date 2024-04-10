@@ -50,6 +50,7 @@ class FileIO : public IDevice
         void _cmd_reset();
         void _cmd_system_shutdown();
         void _cmd_system_load_comilation_date();
+        bool _cmd_does_file_exist();
         void _cmd_open_read();
         void _cmd_open_write();
         void _cmd_open_append();

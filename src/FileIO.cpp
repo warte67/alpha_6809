@@ -127,6 +127,7 @@ void FileIO::write(Word offset, Byte data, bool debug)
                 case FC_RESET:      _cmd_reset();                         break;
                 case FC_SHUTDOWN:   _cmd_system_shutdown();               break;
                 case FC_COMPDATE:   _cmd_system_load_comilation_date();   break;
+                case FC_FILEEXISTS: _cmd_does_file_exist();               break;
                 case FC_OPENREAD:   _cmd_open_read();                     break;
                 case FC_OPENWRITE:  _cmd_open_write();                    break;
                 case FC_OPENAPPEND: _cmd_open_append();                   break;
@@ -187,7 +188,7 @@ bool FileIO::_bFileExists(const char* file)
 {
     if (file)
     {
-        FILE* fp = fopen(file, "rn");
+        FILE* fp = fopen(file, "rb");
         if (!fp)
         {
             Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
@@ -232,7 +233,7 @@ void FileIO::_cmd_close_file()
 {
     // printf("%s::_cmd_close_file()\n", Name().c_str());
     Byte handle = Bus::Read(FIO_HANDLE);
-    if (handle==0)
+    if (handle==0 || _vecFileStreams[handle] == nullptr)
     {
         Bus::Write(FIO_ERROR, FE_NOTOPEN);
         return;
@@ -273,6 +274,17 @@ void FileIO::_cmd_write_byte()
     Bus::Write(FIO_IODATA, data);
 }
 
+bool FileIO::_cmd_does_file_exist()
+{
+    bool exists = _bFileExists(filePath.c_str());
+    Bus::Write(FIO_IODATA, (Byte)exists);
+    if (!exists)
+    {
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
+        return false;
+    }
+    return true;
+}
 
 
 // load_hex helpers
@@ -624,6 +636,7 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("FC_RESET",     enumID++, "       Reset");
     DisplayEnum("FC_SHUTDOWN",  enumID++, "       SYSTEM: Shutdown");
     DisplayEnum("FC_COMPDATE",  enumID++, "       SYSTEM: Load Compilation Date");
+    DisplayEnum("FC_FILEEXISTS",enumID++, "       Does File Exist (return in FIO_IODATA)");
     DisplayEnum("FC_OPENREAD",  enumID++, "     * Open Binary File For Reading");
     DisplayEnum("FC_OPENWRITE", enumID++, "     * Open Binary File For Writing");
     DisplayEnum("FC_OPENAPPEND",enumID++, "     * Open Binary File For Appending");

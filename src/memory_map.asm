@@ -209,27 +209,28 @@ FIO_COMMAND         equ   $FF53    ; (Byte) OnWrite, execute a file command (FC_
 FC_RESET            equ   $0000    ;        Reset
 FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
 FC_COMPDATE         equ   $0002    ;        SYSTEM: Load Compilation Date
-FC_OPENREAD         equ   $0003    ;      * Open Binary File For Reading
-FC_OPENWRITE        equ   $0004    ;      * Open Binary File For Writing
-FC_OPENAPPEND       equ   $0005    ;      * Open Binary File For Appending
-FC_CLOSEFILE        equ   $0006    ;      * Close File
-FC_READBYTE         equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
-FC_WRITEBYTE        equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
-FC_LOADHEX          equ   $0009    ;        Load Hex Format File
-FC_GETLENGTH        equ   $000A    ;        Get File Length (into FIO_IOWORD)
-FC_LISTDIR          equ   $000B    ;        List Directory
-FC_MAKEDIR          equ   $000C    ;      * Make Directory
-FC_CHANGEDIR        equ   $000D    ;        Change Directory
-FC_GETPATH          equ   $000E    ;        Fetch Current Path
-FC_REN_DIR          equ   $000F    ;      * Rename Directory
-FC_DEL_DIR          equ   $0010    ;      * Delete Directory
-FC_DEL_FILE         equ   $0011    ;      * Delete File
-FC_REN_FILE         equ   $0012    ;      * Rename file
-FC_COPYFILE         equ   $0013    ;      * Copy File
-FC_SEEKSTART        equ   $0014    ;      * Seek Start
-FC_SEEKEND          equ   $0015    ;      * Seek End
-FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
-FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
+FC_FILEEXISTS       equ   $0003    ;        Does File Exist (return in FIO_IODATA)
+FC_OPENREAD         equ   $0004    ;      * Open Binary File For Reading
+FC_OPENWRITE        equ   $0005    ;      * Open Binary File For Writing
+FC_OPENAPPEND       equ   $0006    ;      * Open Binary File For Appending
+FC_CLOSEFILE        equ   $0007    ;      * Close File
+FC_READBYTE         equ   $0008    ;      * Read Byte (into FIO_IOBYTE)
+FC_WRITEBYTE        equ   $0009    ;      * Write Byte (from FIO_IOBYTE)
+FC_LOADHEX          equ   $000A    ;        Load Hex Format File
+FC_GETLENGTH        equ   $000B    ;        Get File Length (into FIO_IOWORD)
+FC_LISTDIR          equ   $000C    ;        List Directory
+FC_MAKEDIR          equ   $000D    ;      * Make Directory
+FC_CHANGEDIR        equ   $000E    ;        Change Directory
+FC_GETPATH          equ   $000F    ;        Fetch Current Path
+FC_REN_DIR          equ   $0010    ;      * Rename Directory
+FC_DEL_DIR          equ   $0011    ;      * Delete Directory
+FC_DEL_FILE         equ   $0012    ;      * Delete File
+FC_REN_FILE         equ   $0013    ;      * Rename file
+FC_COPYFILE         equ   $0014    ;      * Copy File
+FC_SEEKSTART        equ   $0015    ;      * Seek Start
+FC_SEEKEND          equ   $0016    ;      * Seek End
+FC_SET_SEEK         equ   $0017    ;      * Set Seek Position (from FIO_IOWORD)
+FC_GET_SEEK         equ   $0018    ;      * Get Seek Position (into FIO_IOWORD)
           ; End FIO_COMMANDS
         
 FIO_HANDLE          equ   $FF54    ; (Byte) current file stream HANDLE 0=NONE
@@ -336,7 +337,6 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
 
 
 
