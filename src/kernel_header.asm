@@ -4,7 +4,7 @@
 
 
 ; *****************************************************************************
-; * SOFTWARE VECTORS                                                          *
+; * SYSTEM SOFTWARE VECTORS                                                   *
 ; *****************************************************************************
 VEC_EXEC	equ	$0000	; User defined EXEC vector
 VEC_SWI3 	equ	$0002	; SWI3 Software Interrupt Vector
@@ -18,9 +18,6 @@ VEC_RESET	equ	$000E	; RESET Software Interrupt Vector
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
 ; *****************************************************************************
-		* org	$0010	
-_VARS_START	equ	$0010	; START of zero-page system data
-
 VEC_CLS		equ	$0010	; CLS function Software Vector
 VEC_CHROUT	equ	$0012	; Character Out Software Vector
 VEC_NEWLINE	equ	$0014	; Kernel Newline Software Vector
@@ -67,9 +64,7 @@ _CURSOR_ROW	equ	$005B	; (Byte) current cursor vertical position
 _ATTRIB		equ	$005C	; (Byte) current character display attribute
 _ANCHOR_COL	equ	$005D	; (Byte) line edit anchor column
 _ANCHOR_ROW	equ	$005E	; (Byte) line edit anchor row
-_LOCAL_0	equ	$005F	; (Byte) used locally for some KRNL calls
-_LOCAL_1	equ	$0060	; (Byte) used locally for some KRNL calls
-_LOCAL_2	equ	$0061	; (Byte) used locally for some KRNL calls
-_LOCAL_3	equ	$0062	; (Byte) used locally for some KRNL calls
-
-_VARS_END	; END of zero-page system data
+_LOCAL_0	equ	$005F	; (Byte) used locally for some kernel calls
+_LOCAL_1	equ	$0060	; (Byte) used locally for some kernel calls
+_LOCAL_2	equ	$0061	; (Byte) used locally for some kernel calls
+_LOCAL_3	equ	$0062	; (Byte) used locally for some kernel calls

@@ -144,7 +144,6 @@ void FileIO::write(Word offset, Byte data, bool debug)
                 case 0x16: _cmd_set_seek_position();             break;    
                 case 0x17: _cmd_get_seek_position();             break;    
                 default:
-                    // data = fio_err_flags | 0x02;    // invalid command  DEPRECATED
                     data = fio_error_code = FILE_ERROR::FE_BAD_CMD;    // invalid command
                     break;
             }
@@ -166,16 +165,12 @@ void FileIO::_cmd_reset()
 void FileIO::_cmd_system_shutdown()
 {
     Bus::IsRunning(false);
-    // printf("FileIO: SHUTDOWN Command Received\n");
-    // printf("\tShutting Down...\n");
 }
 
 void FileIO::_cmd_system_load_comilation_date()
 {
     filePath = __DATE__;
     path_char_pos = 0;
-    // printf("FileIO: COMPILE DATE Command Received\n");
-    // printf("filePath: %s\n", filePath.c_str());
 }
 
 void FileIO::_cmd_new_file_stream()
@@ -249,10 +244,7 @@ void FileIO::_cmd_load_hex_file()
     std::filesystem::path f{ filePath.c_str()};
     if (!std::filesystem::exists(f))
     {
-        printf("File '%s' Not Found\n", f.filename().string().c_str());
-        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        // errData |= 0x80;     // file was not found
-        // Bus::Write(FIO_ERR_FLAGS, errData);
+        // printf("File '%s' Not Found\n", f.filename().string().c_str());
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
         ifs.close();
         return;
@@ -262,11 +254,7 @@ void FileIO::_cmd_load_hex_file()
     std::string strExt = f.filename().extension().string();
     if (strExt != ".hex" && strExt != ".hex ")
     {
-        printf("EXTENSION: %s\n", strExt.c_str());
-
-        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        // errData |= 0x04;     // (wrong file type)
-        // Bus::Write(FIO_ERR_FLAGS, errData);
+        // printf("EXTENSION: %s\n", strExt.c_str());
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_WRONGTYPE);
         ifs.close();
         return;
@@ -274,10 +262,7 @@ void FileIO::_cmd_load_hex_file()
  
     if (!ifs.is_open())
     {
-        printf("UNABLE TO OPEN FILE '%s'\n", f.filename().string().c_str());
-        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        // errData |= 0x20;     // file not open
-        // Bus::Write(FIO_ERR_FLAGS, errData);
+        // printf("UNABLE TO OPEN FILE '%s'\n", f.filename().string().c_str());
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
         ifs.close();
         return;
@@ -285,23 +270,15 @@ void FileIO::_cmd_load_hex_file()
     bool done = false;
     char c;
 
-
-    // return;
-
-
     while (!done)
     {
         Byte n, t;
         Word addr;
         Byte b;
-        ifs.get(c);	// test the leading ":"
+        ifs.get(c);	
         if (c != ':')
         {
-            //printf(": not found\n");
             ifs.close();
-            // Byte errData = Bus::Read(FIO_ERR_FLAGS);
-            // errData |= 0x04;     // (wrong file type)
-            // Bus::Write(FIO_ERR_FLAGS, errData);
             Bus::Write(FIO_ERROR, FILE_ERROR::FE_WRONGTYPE);
             return;
         }
@@ -313,8 +290,6 @@ void FileIO::_cmd_load_hex_file()
             while (n--)
             {
                 b = _fread_hex_byte(ifs);
-                // std::cout << "0x" << hex(addr,4) << ":";
-                // std::cout << "0x" << hex(b, 2) << std::endl;
                 Bus::Write(addr, b, true);
                 ++addr;
             }
@@ -334,14 +309,9 @@ void FileIO::_cmd_load_hex_file()
 void FileIO::_cmd_get_file_length()
 {
     // printf("%s::_cmd_get_file_length()\n", Name().c_str());
-
     std::filesystem::path arg1 = filePath;
-    // printf("file: %s\n", arg1.generic_string().c_str());
-
     if (!std::filesystem::exists(arg1))
     {
-        // printf("ERROR: File does not exist!\n");
-        // Bus::Write(FIO_ERR_FLAGS, 0x80);  
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);  
         Bus::Write(MATH_ACR_INT, 0);
         return;
@@ -371,7 +341,6 @@ void FileIO::_cmd_list_directory()
     if (arg1=="") 
     {
         arg1=std::filesystem::current_path().generic_string();
-        // app_str = current_path + "/" + arg1.generic_string().c_str();   
         app_str = current_path;   
     }
     else
@@ -382,15 +351,13 @@ void FileIO::_cmd_list_directory()
 
 
     if (std::filesystem::is_directory(app_str))
-        arg1 = app_str; //printf("IS DIRECTORY\n");
+        arg1 = app_str;
 
     try
     {    
         // is folder
         if (std::filesystem::is_directory(arg1))
         {
-            // dir_data += arg1;       
-            // dir_data += "=->\n";  
             seach_folder = arg1.generic_string().c_str();          
             for (const auto& entry : std::filesystem::directory_iterator(arg1.generic_string().c_str()))
             {
@@ -412,7 +379,7 @@ void FileIO::_cmd_list_directory()
         else
         {            
             std::string parent = std::filesystem::path(arg1).parent_path().generic_string().c_str();
-            app_str = current_path + "/" + parent;  //arg1.generic_string().c_str();
+            app_str = current_path + "/" + parent;
             seach_folder = app_str.c_str();      
             for (const auto& entry : std::filesystem::directory_iterator(app_str.c_str()))
             {
@@ -448,7 +415,6 @@ void FileIO::_cmd_list_directory()
     }
     catch (const std::exception& e)
     {
-        // printf("EXCEPTION: %s\n",e.what());
         dir_data = "Error: No such folder!\n";
         dir_data_pos = 0; 
         return;
@@ -477,22 +443,9 @@ void FileIO::_cmd_change_directory()
 
     std::string chdir = filePath;    
     if (std::filesystem::exists(chdir))
-    {
-        // printf("Directory Found\n");
-        // Byte data = Bus::Read(FIO_ERR_FLAGS);
-        // data &= ~0x40;
-        // Bus::Write(FIO_ERR_FLAGS, data);
         std::filesystem::current_path(chdir);
-    }
     else
-    {
-        // printf("ERROR: Directory Not Found!\n");
-        // Byte data = Bus::Read(FIO_ERR_FLAGS);
-        // data |= 0x40;
-        // Bus::Write(FIO_ERR_FLAGS, data);
-        // fio_err_flags = data;
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
-    }
 }
 
 void FileIO::_cmd_get_current_path()
@@ -547,19 +500,6 @@ Word FileIO::OnAttach(Word nextAddr)
 
 	DisplayEnum("FIO_BEGIN", nextAddr, "Start of the FileIO register space");
 	nextAddr += 0;
-
-    // //DisplayEnum("", 0, "");
-    // DisplayEnum("FIO_ERR_FLAGS", nextAddr, "(Byte) File IO error flags");
-    // DisplayEnum("", 0, "FIO_ERR_FLAGS: ABCD.EFGH");
-    // DisplayEnum("", 0, "     A:  file was not found");
-    // DisplayEnum("", 0, "     B:  directory was not found");
-    // DisplayEnum("", 0, "     C:  file not open");
-    // DisplayEnum("", 0, "     D:  end of file");
-    // DisplayEnum("", 0, "     E:  buffer overrun");
-    // DisplayEnum("", 0, "     F:  wrong file type");
-    // DisplayEnum("", 0, "     G:  invalid command");
-    // DisplayEnum("", 0, "     H:  incorrect file stream");
-    // nextAddr += 1;
 
     Byte er_idx = 0;
     DisplayEnum("FIO_ERROR",    nextAddr, "(Byte) FILE_ERROR enumeration result");

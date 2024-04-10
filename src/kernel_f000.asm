@@ -62,12 +62,10 @@ KRNL_CMD_VECTS  fdb	do_cls		; #0
 		; ...
 KRNL_ERR_NFND 	fcn	"ERROR: Command Not Found\n"
 
-SYSTEM_DATA_START
-
-
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
 ; *****************************************************************************
+SYSTEM_DATA_START
 		fdb	STUB_CLS	; VECT_CLS	
 		fdb	STUB_CHROUT	; VECT_CHROUT	
 		fdb	STUB_NEWLINE	; VECT_NEWLINE	
@@ -151,7 +149,7 @@ RESET_start	bra	RESET_start	; RESET Implementation
 ; *****************************************************************************
 KRNL_START	; initialize the system	
 		ldx	#SYSTEM_DATA_START
-		ldy	#_VARS_START
+		ldy	#$0010
 k_init_2	lda	,x+
 		sta	,y+
 		cmpx	#SYSTEM_DATA_END
