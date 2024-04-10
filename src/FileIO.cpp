@@ -321,161 +321,107 @@ void FileIO::_cmd_get_file_length()
 
 void FileIO::_cmd_list_directory()
 {
-    // int FILENAME_LENGTH = 24;
-    // int FILENAME_LENGTH = Bus::Read(GFX_HRES+1)/2;
-    const int SIZE_LENGTH = 8;
-
-    std::string path = std::filesystem::current_path().generic_string();
-    std::string arg1 = "";
-    for (int i = FIO_BUFFER; i <= FIO_BFR_END; i++)
-        if ((char)Bus::Read(i) != ' ' && (char)Bus::Read(i) != 0)
-            arg1 += (char)Bus::Read(i);
+    std::string current_path = std::filesystem::current_path().generic_string();
     std::vector<std::string> _files;
 
-    std::string fp = path;
-    std::string file = "";
-    std::string ext = "";
-    int dot = arg1.find('.');
-    if (dot)
+    // initial error checking
+    if (current_path[0] == -1)   current_path = "";
+    if (filePath[0] == -1)    
     {
-        file = arg1.substr(0, dot);
-        ext = arg1.substr(dot + 1);
+        filePath="";
+        path_char_pos = 0;
     }
-    // all files
-    if (arg1.size() == 0 || (file == "*" && ext == "*"))   // no arg1 or arg1 = "*.*"
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(path))
-        {
-            std::stringstream dir;
-            std::stringstream ssFile;
-            std::string size = "";
-            if (entry.is_directory())
-            {
-                dir << "[" << entry.path().filename().generic_string() << "]";
-                size = "[DIR]";
-            }
-            else
-            {
-                dir << entry.path().filename().generic_string();
-                size += std::to_string(entry.file_size());
-            }
-            while (size.size() < SIZE_LENGTH)
-                size = " " + size;
-            ssFile << size << " " << dir.str() << std::endl;
-            _files.push_back(ssFile.str());
-        }
-    }
-    else if (ext == "*" || file == "*")
-    {
-        if (file == "*")
-        {
-            for (const auto& entry : std::filesystem::directory_iterator(path))
-            {
-                std::stringstream dir;
-                std::stringstream ssFile;
-                std::string size = "";
-                std::string strExt = entry.path().extension().filename().string();
-                if (strExt.find('.') == 0)
-                    strExt = strExt.substr(1);
-                if (entry.is_regular_file() && ext == strExt)
-                {
-                    dir << entry.path().filename().generic_string();
-                    size += std::to_string(entry.file_size());
-                    while (size.size() < SIZE_LENGTH)
-                        size = " " + size;
-                    ssFile << size << " " << dir.str() << std::endl;
-                    _files.push_back(ssFile.str());
-                }
-            }
-        }        
-        else if (ext == "*")
-        {
-            for (const auto& entry : std::filesystem::directory_iterator(path))
-            {
-                std::stringstream dir;
-                std::stringstream ssFile;
-                std::string size = "";
-                std::string strFile = entry.path().filename().string();
-                strFile = strFile.substr(0, strFile.find('.'));
-                if (entry.is_regular_file() && file == strFile)
-                {
-                    dir << entry.path().filename().generic_string();
-                    size += std::to_string(entry.file_size());
-                    while (size.size() < SIZE_LENGTH)
-                        size = " " + size;
-                    ssFile << size << " " << dir.str() << std::endl;
-                    _files.push_back(ssFile.str());
-                }
-            }
-        }
-    }
-    else if (arg1 == "[]")  // all directories
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(path))
-        {
-            std::stringstream dir;
-            std::stringstream ssFile;
-            std::string size = "";
-            std::string strFile = entry.path().filename().string();
-            strFile = strFile.substr(0, strFile.find('.'));
-            std::string strExt = entry.path().extension().filename().string();
-            if (strExt.find('.') == 0)
-                strExt = strExt.substr(1);
-            if (entry.is_directory())// && file == strFile)// && ext == strExt)
-            {
-                dir << "[" << entry.path().filename().generic_string() << "]";
-                size = "[DIR]";
-                while (size.size() < SIZE_LENGTH)
-                    size = " " + size;
-                ssFile << size << " " << dir.str() << std::endl;
-                _files.push_back(ssFile.str());
-            }
-        }
-    }
-    else // directories and exact matches
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(path))
-        {
-            std::stringstream dir;
-            std::stringstream ssFile;
-            std::string size = "";
-            std::string strFile = entry.path().filename().string();
-            strFile = strFile.substr(0, strFile.find('.'));
-            std::string strExt = entry.path().extension().filename().string();
-            if (strExt.find('.') == 0)
-                strExt = strExt.substr(1);
-            if (entry.is_directory() && file == strFile)
-            {
-                dir << "[" << entry.path().filename().generic_string() << "]";
-                size = "[DIR]";
-                while (size.size() < SIZE_LENGTH)
-                    size = " " + size;
-                ssFile << size << " " << dir.str() << std::endl;
-                _files.push_back(ssFile.str());
-            }
-            else if (file == strFile && ext == strExt)
-            {
-                dir << entry.path().filename().generic_string();
-                size += std::to_string(entry.file_size());
-                while (size.size() < SIZE_LENGTH)
-                    size = " " + size;
-                ssFile << size << " " << dir.str() << std::endl;
-                _files.push_back(ssFile.str());
-            }
-        }
-    }
+    std::string seach_folder = "";
+    std::filesystem::path arg1 = filePath;    
+    if (arg1=="") arg1=std::filesystem::current_path().generic_string();
+    std::string filename = arg1.filename().generic_string().c_str();
+    std::string stem = arg1.stem().generic_string().c_str();
+    std::string extension = arg1.extension().generic_string().c_str();
+    std::string app_str = current_path + "/" + arg1.generic_string().c_str();
 
+    if (std::filesystem::is_directory(app_str))
+        arg1 = app_str; //printf("IS DIRECTORY\n");
+
+    try
+    {    
+        // is folder
+        if (std::filesystem::is_directory(arg1))
+        {
+            // dir_data += arg1;       
+            // dir_data += "=->\n";  
+            seach_folder = arg1.generic_string().c_str();          
+            for (const auto& entry : std::filesystem::directory_iterator(arg1.generic_string().c_str()))
+            {
+                std::stringstream ssFile;
+                std::string entry_filename = entry.path().filename().generic_string().c_str();
+                if (entry.is_directory())
+                {
+                    ssFile << "  [" << entry_filename << "]";
+                    _files.push_back(ssFile.str());
+                }
+                else
+                {
+                    ssFile << "    " << entry_filename;
+                    _files.push_back(ssFile.str());
+                }                
+            }
+        }
+        // is file and/or wildcards
+        else
+        {            
+            std::string parent = std::filesystem::path(arg1).parent_path().generic_string().c_str();
+            app_str = current_path + "/" + parent;  //arg1.generic_string().c_str();
+            seach_folder = app_str.c_str();      
+            for (const auto& entry : std::filesystem::directory_iterator(app_str.c_str()))
+            {
+                if (entry.is_regular_file())
+                {
+                    std::stringstream ssFile;
+                    std::string file_stem = entry.path().stem().generic_string().c_str();
+                    std::string file_ext = entry.path().extension().generic_string().c_str();
+                    std::string entry_filename = entry.path().filename().generic_string().c_str();
+
+                    bool bAllWild = false;
+                    if (stem == "*" && extension == ".*")
+                        bAllWild = true;
+                        
+                    if (entry_filename == arg1.filename().generic_string().c_str() || bAllWild)
+                    {
+                        ssFile << "    " << entry_filename;
+                        _files.push_back(ssFile.str());
+                    }
+                    else if (file_stem == stem && extension == ".*")
+                    {
+                        ssFile << "    " << entry_filename;
+                        _files.push_back(ssFile.str());
+                    }                    
+                    else if (file_ext == extension && stem == "*")
+                    {
+                        ssFile << "    " << entry_filename;
+                        _files.push_back(ssFile.str());
+                    }
+                }
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        // printf("EXCEPTION: %s\n",e.what());
+        dir_data = "Error: No such folder!\n";
+        dir_data_pos = 0; 
+        return;
+    }
     // clear the FIO_BUFFER
     for (int i = FIO_BUFFER; i <= FIO_BFR_END; i++)
         Bus::Write(i, 0);
-    // build the directory list string
-    dir_data = "";
-    for (auto& f : _files)
-        dir_data += f;
-    // add the path at the end
+
+    // build the result
+    dir_data = seach_folder;
     dir_data += "\n";
-    dir_data += path;
-    dir_data_pos = 0;        
+    std::sort(_files.begin(), _files.end());
+    for (auto& f : _files)
+        dir_data += (f+"\n");
+    dir_data_pos = 0;      
 }
 
 void FileIO::_cmd_make_directory()

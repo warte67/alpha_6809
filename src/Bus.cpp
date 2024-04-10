@@ -230,7 +230,7 @@ Bus::Bus()
 	// Install the CPU and start its thread
 	s_c6809 = new C6809(this);
 	s_cpuThread = std::thread(&C6809::ThreadProc);
-	C6809::IsCpuEnabled(true);       
+	// C6809::IsCpuEnabled(true);       
 }
 
 Bus::~Bus()
@@ -277,10 +277,8 @@ void Bus::Run()
                 // create a new environment
                 OnActivate();
 
-
-                // **************************************************
-                // * FOR NOW WE JUST LEAVE THE CPU SITTING IDLE!!!! *
-                // **************************************************
+                // wait a bit to re-enable the CPU
+                SDL_Delay(25);
                 C6809::IsCpuEnabled(true);
 
 

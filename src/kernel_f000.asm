@@ -116,7 +116,7 @@ RESET_start	bra	RESET_start	; RESET Implementation
 ; *****************************************************************************
 ; * KERNEL INITIALIZATION                                                     *
 ; *****************************************************************************
-KRNL_START	; initialize the system
+KRNL_START	; initialize the system		
 		ldx	#SYSTEM_STACK	; point to the start of stack space
 k_init_0	clr	,x+		; clear the next byte
 		cmpx	#SSTACK_TOP	; at the end of the stack space?
@@ -126,7 +126,7 @@ k_init_0	clr	,x+		; clear the next byte
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
 		; default graphics mode
-		lda	#$03		; default: 0x03 = 40x25 text
+		lda	#$00		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
 		; default text color attribute
@@ -135,7 +135,6 @@ k_init_0	clr	,x+		; clear the next byte
 		; clear the default text screen buffer
 		ldd	#$20B4		; lt-green on dk-green SPACE character
 		jsr	KRNL_CLS	; clear the screen
-
 		; Initialize the line editor
 		clr	EDT_BFR_CSR	; set the buffer cursor to the start
 		ldx	#EDT_BUFFER	; point to the edit buffer
@@ -230,6 +229,9 @@ do_cls		; CLEAR SCREEN			ARG1 = Color Attribute
 
 		tst	,x
 		beq	do_cls_0
+		lda	,x
+		cmpa	#$ff
+		beq	do_cls_0
 		jsr 	KRNL_ARG_TO_A
 		tsta
 		beq	do_cls_0
@@ -264,10 +266,27 @@ do_reset	; RESET				ARG1 = none
 		rts
 
 do_dir		; DIR				ARG1 = {filepath}
-		ldx	#str_dir
-		bra	str_output
+		clr	FIO_PATH_POS
+
+do_dir_0	lda	,x+
+		sta	FIO_PATH_DATA
+		bne	do_dir_0
+		lda	#FC_LISTDIR
+		sta	FIO_COMMAND
+do_dir_1	lda	FIO_DIR_DATA
+		beq	do_dir_2
+		jsr	KRNL_CHROUT
+		bra	do_dir_1
+do_dir_2	; send a new line character
+		* lda	#$0a
+		* jsr	KRNL_CHROUT		
+		rts
+
+		* ldx	#str_dir
+		* bra	str_output
 
 do_cd		; CHDIR				ARG1 = {filepath}
+
 		ldx	#str_cd
 		bra	str_output
 
@@ -637,6 +656,9 @@ K_CMP_LOOP	tst	,x		; test the current character in string 1
 K_CMP_1		tst	,y		; char in str1 is not null, but str2 is
 		beq	K_CMP_GREATER	; return GREATER
 		lda	,x+		; compare character from string 1
+		;
+		ora	#$20		; convert all letters to lower case
+		;
 		cmpa	,y+		;    with character from string 2
 		blt	K_CMP_LESS	; return LESS
 		bgt	K_CMP_GREATER	; return GREATER
@@ -670,7 +692,7 @@ K_CMDP_0	lda	,x+		; load a character from the input
 		blt	K_CMDP_3	;   valid character if < 'A'
 		cmpa	#'Z'		; all other characters are good to go
 		bgt	K_CMDP_3	;   valid charcters above 'Z'
-		ora	#$20		; convert all letters to lower case
+		* ora	#$20		; convert all letters to lower case (DONT DO THIS HERE!!!!)
 K_CMDP_3	sta	,y+		; copy it to the output
 		bne	K_CMDP_0	; branch until done copying
 	; replace the null-terminator with $FF
@@ -953,13 +975,14 @@ KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 ; *                     All other registers preserved                         *
 ; *****************************************************************************
 KRNL_ARG_TO_A	pshs	B,X,CC
-		ldb	,x+
+		ldb	,x
 		cmpb	#'$'
 		beq	KARG_0
 		jsr	KRNL_WRITE_ACA
 		lda	MATH_ACA_INT+3
 		bra	KARG_DONE
-KARG_0		ldb	,x+
+KARG_0		leax	1,x
+		ldb	,x+
 		bsr	KARG_HEX
 		lslb
 		lslb

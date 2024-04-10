@@ -8,6 +8,7 @@
 #include "Gfx.hpp"
 #include "Debug.hpp"
 #include "Bus.hpp"
+#include "C6809.hpp"
 #include "font8x8_system.hpp"
 
 Byte Gfx::read(Word offset, bool debug)
@@ -368,6 +369,7 @@ void Gfx::OnActivate()
         if (!sdl_target_texture)
             Bus::Error("Error Creating _render_target");    
     }
+    // C6809::IsCpuEnabled(true); 
 }
 
 void Gfx::OnDeactivate()
