@@ -34,6 +34,17 @@ class FileIO : public IDevice
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
 
+        enum FILE_ERROR {
+            FE_NOERROR=0,   //  $00: no error, condition normal
+            FE_NOTFOUND,    //  $01: file or folder not found
+            FE_NOTOPEN,     //  $02: file not open
+            FE_EOF,         //  $03: end of file
+            FE_OVERRUN,     //  $04: buffer overrun
+            FE_WRONGTYPE,   //  $05: wrong file type
+            FE_BAD_CMD,     //  $06: invalid command
+            FE_BADSTREAM    //  $07: invalid file stream
+        };
+
     private:
         // File IO System Commands
         void _cmd_reset();
@@ -84,7 +95,8 @@ class FileIO : public IDevice
         Byte _fileStreamIndex = 0;      // file stream index
         std::vector<std::fstream*> _vecFileStreams; // vector of file streams
 
-        Byte fio_err_flags = 0;     // error flags
+        // Byte fio_err_flags = 0;     // error flags (deprecated)
+        FILE_ERROR fio_error_code = FILE_ERROR::FE_NOERROR;    // current error code
 
         Byte path_char_pos = 0;   // active character position within the file path string
         std::string filePath = "";  // the current file path

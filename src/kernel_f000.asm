@@ -254,12 +254,12 @@ err_wrong_file		fcn	"ERROR: Wrong File Type\n"
 do_load		jsr	do_arg1_helper	; fetch path data from argument 1
 		lda	#FC_LOADHEX	; FIO Command
 		sta	FIO_COMMAND	; Send the Load Hex Command
-		lda	FIO_ERR_FLAGS	; Examine the Error Flags
-		cmpa	#$80		; is the File Not Found bit set?
+		lda	FIO_ERROR	; Examine the Error Code
+		cmpa	#FE_NOTFOUND	; is the File Not Found bit set?
 		beq	do_ld_notfound	; ERROR: File Not Found
-		cmpa	#$20		; is the File Not Open bit set?
+		cmpa	#FE_NOTOPEN	; is the File Not Open bit set?
 		beq	do_ld_notopen	; ERROR: File Not Open
-		cmpa	#$04		; is the Wrong File Type bit set?
+		cmpa	#FE_WRONGTYPE	; is the Wrong File Type bit set?
 		beq	do_ld_wrong	; ERROR: Wrong File Type
 		bra	do_ld_done	; All done, return
 do_ld_wrong	ldx	#err_wrong_file	; point to the error message

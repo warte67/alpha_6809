@@ -25,10 +25,13 @@ Byte FileIO::read(Word offset, bool debug)
 
     switch (offset)
     {
-        case FIO_ERR_FLAGS: 
+        // case FIO_ERR_FLAGS:      // DEPRECATED
+        case FIO_ERROR: 
         {
-            data = fio_err_flags;  
-            fio_err_flags = 0;
+            // data = fio_err_flags;  // DEPRECATED
+            data = fio_error_code;
+            fio_error_code = FILE_ERROR::FE_NOERROR;
+            // fio_err_flags = 0;     // DEPRECATED
             break;
         }
         case FIO_PATH_LEN:  data = dir_data.size(); break;
@@ -87,7 +90,8 @@ void FileIO::write(Word offset, Byte data, bool debug)
 
     switch (offset)
     {
-        case FIO_ERR_FLAGS: fio_err_flags = data; break;
+        //  case FIO_ERR_FLAGS: fio_err_flags = data; break;        // DEPRECATED
+        case FIO_ERROR: fio_error_code = (FILE_ERROR)data; break;
         case FIO_PATH_POS:  
             if (data > filePath.size())
                 data = filePath.size() - 1;
@@ -140,7 +144,8 @@ void FileIO::write(Word offset, Byte data, bool debug)
                 case 0x16: _cmd_set_seek_position();             break;    
                 case 0x17: _cmd_get_seek_position();             break;    
                 default:
-                    data = fio_err_flags | 0x02;    // invalid command
+                    // data = fio_err_flags | 0x02;    // invalid command  DEPRECATED
+                    data = fio_error_code = FILE_ERROR::FE_BAD_CMD;    // invalid command
                     break;
             }
             break;
@@ -245,9 +250,10 @@ void FileIO::_cmd_load_hex_file()
     if (!std::filesystem::exists(f))
     {
         printf("File '%s' Not Found\n", f.filename().string().c_str());
-        Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        errData |= 0x80;     // file was not found
-        Bus::Write(FIO_ERR_FLAGS, errData);
+        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        // errData |= 0x80;     // file was not found
+        // Bus::Write(FIO_ERR_FLAGS, errData);
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
         ifs.close();
         return;
     }
@@ -258,9 +264,10 @@ void FileIO::_cmd_load_hex_file()
     {
         printf("EXTENSION: %s\n", strExt.c_str());
 
-        Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        errData |= 0x04;     // (wrong file type)
-        Bus::Write(FIO_ERR_FLAGS, errData);
+        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        // errData |= 0x04;     // (wrong file type)
+        // Bus::Write(FIO_ERR_FLAGS, errData);
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_WRONGTYPE);
         ifs.close();
         return;
     }
@@ -268,9 +275,10 @@ void FileIO::_cmd_load_hex_file()
     if (!ifs.is_open())
     {
         printf("UNABLE TO OPEN FILE '%s'\n", f.filename().string().c_str());
-        Byte errData = Bus::Read(FIO_ERR_FLAGS);
-        errData |= 0x20;     // file not open
-        Bus::Write(FIO_ERR_FLAGS, errData);
+        // Byte errData = Bus::Read(FIO_ERR_FLAGS);
+        // errData |= 0x20;     // file not open
+        // Bus::Write(FIO_ERR_FLAGS, errData);
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
         ifs.close();
         return;
     }
@@ -286,9 +294,10 @@ void FileIO::_cmd_load_hex_file()
         {
             //printf(": not found\n");
             ifs.close();
-            Byte errData = Bus::Read(FIO_ERR_FLAGS);
-            errData |= 0x04;     // (wrong file type)
-            Bus::Write(FIO_ERR_FLAGS, errData);
+            // Byte errData = Bus::Read(FIO_ERR_FLAGS);
+            // errData |= 0x04;     // (wrong file type)
+            // Bus::Write(FIO_ERR_FLAGS, errData);
+            Bus::Write(FIO_ERROR, FILE_ERROR::FE_WRONGTYPE);
             return;
         }
         n = _fread_hex_byte(ifs);		// byte count for this line
@@ -327,7 +336,8 @@ void FileIO::_cmd_get_file_length()
     if (!std::filesystem::exists(arg1))
     {
         // printf("ERROR: File does not exist!\n");
-        Bus::Write(FIO_ERR_FLAGS, 0x80);  
+        // Bus::Write(FIO_ERR_FLAGS, 0x80);  
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);  
         Bus::Write(MATH_ACR_INT, 0);
         return;
     }
@@ -338,6 +348,8 @@ void FileIO::_cmd_get_file_length()
 
 void FileIO::_cmd_list_directory()
 {
+    printf("%s::_cmd_list_directory()\n", Name().c_str());
+
     std::string current_path = std::filesystem::current_path().generic_string();
     std::vector<std::string> _files;
 
@@ -350,11 +362,19 @@ void FileIO::_cmd_list_directory()
     }
     std::string seach_folder = "";
     std::filesystem::path arg1 = filePath;    
-    if (arg1=="") arg1=std::filesystem::current_path().generic_string();
+    std::string app_str = arg1.generic_string().c_str();   
+    if (arg1=="") 
+    {
+        arg1=std::filesystem::current_path().generic_string();
+        // app_str = current_path + "/" + arg1.generic_string().c_str();   
+        app_str = current_path;   
+    }
+    else
+        app_str = current_path + "/" + arg1.generic_string().c_str();   
     std::string filename = arg1.filename().generic_string().c_str();
     std::string stem = arg1.stem().generic_string().c_str();
     std::string extension = arg1.extension().generic_string().c_str();
-    std::string app_str = current_path + "/" + arg1.generic_string().c_str();
+
 
     if (std::filesystem::is_directory(app_str))
         arg1 = app_str; //printf("IS DIRECTORY\n");
@@ -454,19 +474,19 @@ void FileIO::_cmd_change_directory()
     if (std::filesystem::exists(chdir))
     {
         // printf("Directory Found\n");
-        Byte data = Bus::Read(FIO_ERR_FLAGS);
-        data &= ~0x40;
-        Bus::Write(FIO_ERR_FLAGS, data);
-        fio_err_flags = data;
+        // Byte data = Bus::Read(FIO_ERR_FLAGS);
+        // data &= ~0x40;
+        // Bus::Write(FIO_ERR_FLAGS, data);
         std::filesystem::current_path(chdir);
     }
     else
     {
         // printf("ERROR: Directory Not Found!\n");
-        Byte data = Bus::Read(FIO_ERR_FLAGS);
-        data |= 0x40;
-        Bus::Write(FIO_ERR_FLAGS, data);
-        fio_err_flags = data;
+        // Byte data = Bus::Read(FIO_ERR_FLAGS);
+        // data |= 0x40;
+        // Bus::Write(FIO_ERR_FLAGS, data);
+        // fio_err_flags = data;
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
     }
 }
 
@@ -523,17 +543,31 @@ Word FileIO::OnAttach(Word nextAddr)
 	DisplayEnum("FIO_BEGIN", nextAddr, "Start of the FileIO register space");
 	nextAddr += 0;
 
-    //DisplayEnum("", 0, "");
-    DisplayEnum("FIO_ERR_FLAGS", nextAddr, "(Byte) File IO error flags");
-    DisplayEnum("", 0, "FIO_ERR_FLAGS: ABCD.EFGH");
-    DisplayEnum("", 0, "     A:  file was not found");
-    DisplayEnum("", 0, "     B:  directory was not found");
-    DisplayEnum("", 0, "     C:  file not open");
-    DisplayEnum("", 0, "     D:  end of file");
-    DisplayEnum("", 0, "     E:  buffer overrun");
-    DisplayEnum("", 0, "     F:  wrong file type");
-    DisplayEnum("", 0, "     G:  invalid command");
-    DisplayEnum("", 0, "     H:  incorrect file stream");
+    // //DisplayEnum("", 0, "");
+    // DisplayEnum("FIO_ERR_FLAGS", nextAddr, "(Byte) File IO error flags");
+    // DisplayEnum("", 0, "FIO_ERR_FLAGS: ABCD.EFGH");
+    // DisplayEnum("", 0, "     A:  file was not found");
+    // DisplayEnum("", 0, "     B:  directory was not found");
+    // DisplayEnum("", 0, "     C:  file not open");
+    // DisplayEnum("", 0, "     D:  end of file");
+    // DisplayEnum("", 0, "     E:  buffer overrun");
+    // DisplayEnum("", 0, "     F:  wrong file type");
+    // DisplayEnum("", 0, "     G:  invalid command");
+    // DisplayEnum("", 0, "     H:  incorrect file stream");
+    // nextAddr += 1;
+
+    Byte er_idx = 0;
+    DisplayEnum("FIO_ERROR",    nextAddr, "(Byte) FILE_ERROR enumeration result");
+    DisplayEnum("", 0, "Begin FILE_ERROR enumeration");
+    DisplayEnum("FE_NOERROR",   er_idx++, "     $00: no error, condition normal");
+    DisplayEnum("FE_NOTFOUND",  er_idx++, "     $01: file or folder not found");
+    DisplayEnum("FE_NOTOPEN",   er_idx++, "     $02: file not open");
+    DisplayEnum("FE_EOF",       er_idx++, "     $03: end of file");
+    DisplayEnum("FE_OVERRUN",   er_idx++, "     $04: buffer overrun");
+    DisplayEnum("FE_WRONGTYPE", er_idx++, "     $05: wrong file type");
+    DisplayEnum("FE_BAD_CMD",   er_idx++, "     $06: invalid command");
+    DisplayEnum("FE_BADSTREAM", er_idx++, "     $07: invalid file stream");
+    DisplayEnum("", 0, "End FILE_ERROR enumeration");
     nextAddr += 1;
 
     DisplayEnum("", 0, "");

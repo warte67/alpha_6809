@@ -196,16 +196,17 @@ enum MEMMAP
     JOYS_END         = 0xFF52, // End of the Game Controller Register space
         
     FIO_BEGIN        = 0xFF52, // Start of the FileIO register space
-    FIO_ERR_FLAGS    = 0xFF52, // (Byte) File IO error flags
-        // FIO_ERR_FLAGS: ABCD.EFGH
-        //      A:  file was not found
-        //      B:  directory was not found
-        //      C:  file not open
-        //      D:  end of file
-        //      E:  buffer overrun
-        //      F:  wrong file type
-        //      G:  invalid command
-        //      H:  incorrect file stream
+    FIO_ERROR        = 0xFF52, // (Byte) FILE_ERROR enumeration result
+        // Begin FILE_ERROR enumeration
+    FE_NOERROR       = 0x0000, //      $00: no error, condition normal
+    FE_NOTFOUND      = 0x0001, //      $01: file or folder not found
+    FE_NOTOPEN       = 0x0002, //      $02: file not open
+    FE_EOF           = 0x0003, //      $03: end of file
+    FE_OVERRUN       = 0x0004, //      $04: buffer overrun
+    FE_WRONGTYPE     = 0x0005, //      $05: wrong file type
+    FE_BAD_CMD       = 0x0006, //      $06: invalid command
+    FE_BADSTREAM     = 0x0007, //      $07: invalid file stream
+        // End FILE_ERROR enumeration
         
     FIO_COMMAND      = 0xFF53, // (Byte) OnWrite, execute a file command (FC_<cmd>)
         // Begin FIO_COMMANDS
@@ -218,7 +219,7 @@ enum MEMMAP
     FC_CLOSEFILE     = 0x0006, //      * Close File
     FC_READBYTE      = 0x0007, //      * Read Byte (into FIO_IOBYTE)
     FC_WRITEBYTE     = 0x0008, //      * Write Byte (from FIO_IOBYTE)
-    FC_LOADHEX       = 0x0009, //      * Load Hex Format File
+    FC_LOADHEX       = 0x0009, //        Load Hex Format File
     FC_GETLENGTH     = 0x000A, //        Get File Length (into FIO_IOWORD)
     FC_LISTDIR       = 0x000B, //        List Directory
     FC_MAKEDIR       = 0x000C, //      * Make Directory
@@ -351,4 +352,5 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
+
 

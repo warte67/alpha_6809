@@ -192,16 +192,17 @@ JOYS_2_Z2           equ   $FF51    ;   (char) PAD 2 right analog trigger (0 - 12
 JOYS_END            equ   $FF52    ; End of the Game Controller Register space
         
 FIO_BEGIN           equ   $FF52    ; Start of the FileIO register space
-FIO_ERR_FLAGS       equ   $FF52    ; (Byte) File IO error flags
-          ; FIO_ERR_FLAGS: ABCD.EFGH
-          ;      A:  file was not found
-          ;      B:  directory was not found
-          ;      C:  file not open
-          ;      D:  end of file
-          ;      E:  buffer overrun
-          ;      F:  wrong file type
-          ;      G:  invalid command
-          ;      H:  incorrect file stream
+FIO_ERROR           equ   $FF52    ; (Byte) FILE_ERROR enumeration result
+          ; Begin FILE_ERROR enumeration
+FE_NOERROR          equ   $0000    ;      $00: no error, condition normal
+FE_NOTFOUND         equ   $0001    ;      $01: file or folder not found
+FE_NOTOPEN          equ   $0002    ;      $02: file not open
+FE_EOF              equ   $0003    ;      $03: end of file
+FE_OVERRUN          equ   $0004    ;      $04: buffer overrun
+FE_WRONGTYPE        equ   $0005    ;      $05: wrong file type
+FE_BAD_CMD          equ   $0006    ;      $06: invalid command
+FE_BADSTREAM        equ   $0007    ;      $07: invalid file stream
+          ; End FILE_ERROR enumeration
         
 FIO_COMMAND         equ   $FF53    ; (Byte) OnWrite, execute a file command (FC_<cmd>)
           ; Begin FIO_COMMANDS
@@ -214,8 +215,8 @@ FC_ISOPEN           equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS
 FC_CLOSEFILE        equ   $0006    ;      * Close File
 FC_READBYTE         equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
 FC_WRITEBYTE        equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
-FC_LOADHEX          equ   $0009    ;      * Load Hex Format File
-FC_GETLENGTH        equ   $000A    ;      * Get File Length (into FIO_IOWORD)
+FC_LOADHEX          equ   $0009    ;        Load Hex Format File
+FC_GETLENGTH        equ   $000A    ;        Get File Length (into FIO_IOWORD)
 FC_LISTDIR          equ   $000B    ;        List Directory
 FC_MAKEDIR          equ   $000C    ;      * Make Directory
 FC_CHANGEDIR        equ   $000D    ;        Change Directory

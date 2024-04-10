@@ -28,8 +28,8 @@ skip_data
 		bne	0b
 		lda	#FC_GETLENGTH
 		sta	FIO_COMMAND
-		lda	FIO_ERR_FLAGS
-		cmpa	#$80		; file not found error flag
+		lda	FIO_ERROR
+		cmpa	#FE_NOTFOUND	; file not found error flag
 		bne	1f
 		ldx	#file_error
 		jsr	KRNL_LINEOUT
