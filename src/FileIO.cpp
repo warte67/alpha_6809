@@ -230,12 +230,23 @@ void FileIO::_cmd_load_hex_file()
     // 	return s;
     // };
 
-    //printf("Change Directory To: %s\n", filePath.c_str());
+    // sanity check
     if (filePath.size() == 0)   return;
 
-     // remove any trailing spaces
-     while (filePath.substr(filePath.size()-2,1) == " ")
-         filePath = filePath.substr(0, filePath.size()-2);
+    // // remove  quotes
+    // if (filePath[0]=='\"' && filePath[filePath.size()-2]=='\"')
+    // {
+    //     filePath = filePath.substr(1, filePath.size()-1);
+    //     // // remove any trailing quotes
+    //     if (filePath[filePath.size()-2]=='\"')
+    //         filePath = filePath.substr(0, filePath.size()-2);
+    // }   
+    if (filePath[0]=='\"')
+        filePath = filePath.substr(1, filePath.size()-3);
+
+    printf("'%s' size: %d\n",filePath.c_str(), (int)filePath.size());   
+    path_char_pos=0;
+
 
     std::ifstream ifs(filePath);
     std::filesystem::path f{ filePath.c_str()};
@@ -430,18 +441,13 @@ void FileIO::_cmd_make_directory()
 
 void FileIO::_cmd_change_directory()
 {
-    printf("Change Directory To: %s\n", filePath.c_str());
+    // printf("Change Directory To: %s\n", filePath.c_str());
     if (filePath.size() == 0)   return;
 
-    // // remove any trailing spaces
-    // while (filePath.substr(filePath.size() - 2, 1) == " ")
-    //     filePath = filePath.substr(0, filePath.size() - 2);
-
-    std::string chdir = filePath;
-    
+    std::string chdir = filePath;    
     if (std::filesystem::exists(chdir))
     {
-        printf("Directory Found\n");
+        // printf("Directory Found\n");
         Byte data = Bus::Read(FIO_ERR_FLAGS);
         data &= ~0x40;
         Bus::Write(FIO_ERR_FLAGS, data);
@@ -450,7 +456,7 @@ void FileIO::_cmd_change_directory()
     }
     else
     {
-        printf("ERROR: Directory Not Found!\n");
+        // printf("ERROR: Directory Not Found!\n");
         Byte data = Bus::Read(FIO_ERR_FLAGS);
         data |= 0x40;
         Bus::Write(FIO_ERR_FLAGS, data);

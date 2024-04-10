@@ -122,6 +122,9 @@ k_init_0	clr	,x+		; clear the next byte
 		cmpx	#SSTACK_TOP	; at the end of the stack space?
 		bne	k_init_0	; loop if not there yet	
 		lds	#SSTACK_TOP	; set the S to the top of the stack
+		; reset the EXEC vector
+		ldd	#EXEC_start
+		std	VECT_EXEC
 		; CPU clock speed
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
@@ -249,15 +252,43 @@ do_color	; COLOR				ARG1 = Color Attribute
 		cmpa	#$ff
 		beq	do_color_0
 		sta	KRNL_ATTRIB
-do_color_0	rts		
+do_color_0	rts	
+
+
+err_file_nf		fcn	"ERROR: File Not Found\n";
+err_file_no		fcn	"ERROR: File Not Open\n";
+err_wrong_file_type	fcn	"ERROR: Wrong File Type\n"
 
 do_load		; LOAD 				ARG1 = {filepath}/filename
-		ldx	#str_load
-		bra	str_output
+		jsr	do_arg1_helper
+		lda	#FC_LOADHEX
+		sta	FIO_COMMAND	
+		lda	FIO_ERR_FLAGS
+		cmpa	#$80
+		beq	2f		; file not found	
+		cmpa	#$20
+		beq	4f		; file not open
+		cmpa	#$04		
+		beq	5f		; wrong file type
+		bra	3f
+5	; wrong file type
+		ldx	#err_wrong_file_type
+		jsr	KRNL_LINEOUT
+		bra	3f
+4	; file not open
+		ldx	#err_file_no
+		jsr	KRNL_LINEOUT
+		bra	3f
+2	; file not found
+		ldx	#err_file_nf
+		jsr	KRNL_LINEOUT
+3		rts
 
 do_exec		; EXEC				ARG1 = none
-		ldx	#str_exec
-		bra	str_output
+		* pshs	D,X,U,CC
+		jsr	[VECT_EXEC]
+		* puls	D,X,U,CC
+		rts
 
 do_reset	; RESET				ARG1 = none
 		lda	#FC_RESET
@@ -693,6 +724,7 @@ K_CMDP_3	sta	,y+		; copy it to the output
 	; replace SPACES with NULL (unless within '' or "")
 		ldx	#FIO_BUFFER	; the start of the temp buffer
 K_CMDP_1	lda	,x+		; load the next character from buffer
+		beq	K_CMDP_2
 		cmpa	#$FF		; are we at the end of the buffer?
 		beq	K_CMDP_2	;   yes, go parse the buffer
 		cmpa	#"'"		; are we at a single-quote character?
@@ -703,11 +735,14 @@ K_CMDP_1	lda	,x+		; load the next character from buffer
 		bne	K_CMDP_1	; nope, continue scanning	
 		clr	-1,x		; convert the SPACE to a NULL
 		bra	K_CMDP_1	; continue scanning through the buffer
+
 K_CPROC_SKIP	cmpa	,x+		; is character a quote character?
 		beq	K_CMDP_1	;    yes, go back to scanning the buffer
-		cmpa	#$ff		; are we at the end of the buffer?
-		beq	K_CPROC_DONE	;    yes, cleanup and return
-		bra	K_CPROC_SKIP	; continue looking for a quote character
+		tst	,x		; are we at a NULL?
+		bne	K_CPROC_SKIP	;    nope, keep scanning for a quote		
+		jsr	KRNL_NEWLINE	; on error: send a linefeed cleanup
+		lda	#$FF		; error: end of line found but no quote
+		bra	K_CPROC_DONE	; continue looking for a quote character
 	; FIO_BUFFER should now be prepared for parsing
 K_CMDP_2	lda	#$0a		; line feed character
 		jsr	KRNL_CHROUT	; send the line feed
