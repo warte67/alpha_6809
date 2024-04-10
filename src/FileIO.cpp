@@ -8,6 +8,8 @@
  * Copyright (C) 2024 by Jay Faries (GPL V3)
  ************************************/
 #include <filesystem>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -25,13 +27,10 @@ Byte FileIO::read(Word offset, bool debug)
 
     switch (offset)
     {
-        // case FIO_ERR_FLAGS:      // DEPRECATED
         case FIO_ERROR: 
         {
-            // data = fio_err_flags;  // DEPRECATED
             data = fio_error_code;
             fio_error_code = FILE_ERROR::FE_NOERROR;
-            // fio_err_flags = 0;     // DEPRECATED
             break;
         }
         case FIO_PATH_LEN:  data = dir_data.size(); break;
@@ -79,6 +78,13 @@ Byte FileIO::read(Word offset, bool debug)
             }
             break;
         }
+        case FIO_COMMAND:   break;
+        case FIO_HANDLE:    data = _fileHandle; break;
+        case FIO_SEEKPOS+0:   break;
+        case FIO_SEEKPOS+1:   break;
+        case FIO_SEEKPOS+2:   break;
+        case FIO_SEEKPOS+3:   break;
+        case FIO_IODATA:    data = _io_data; break;
     }
     IDevice::write(offset,data);   // update any internal changes too
     return data;
@@ -90,7 +96,6 @@ void FileIO::write(Word offset, Byte data, bool debug)
 
     switch (offset)
     {
-        //  case FIO_ERR_FLAGS: fio_err_flags = data; break;        // DEPRECATED
         case FIO_ERROR: fio_error_code = (FILE_ERROR)data; break;
         case FIO_PATH_POS:  
             if (data > filePath.size())
@@ -119,38 +124,43 @@ void FileIO::write(Word offset, Byte data, bool debug)
         {
             switch (data)
             {                
-                case 0x00: _cmd_reset();                         break;
-                case 0x01: _cmd_system_shutdown();               break;
-                case 0x02: _cmd_system_load_comilation_date();   break;
-                case 0x03: _cmd_new_file_stream();               break;
-                case 0x04: _cmd_open_file();                     break;
-                case 0x05: _cmd_is_file_open();                  break;
-                case 0x06: _cmd_close_file();                    break;    
-                case 0x07: _cmd_read_byte();                     break;    
-                case 0x08: _cmd_write_byte();                    break;
-                case 0x09: _cmd_load_hex_file();                 break;    
-                case 0x0A: _cmd_get_file_length();               break;        
-                case 0x0B: _cmd_list_directory();                break;    
-                case 0x0C: _cmd_make_directory();                break;        
-                case 0x0D: _cmd_change_directory();              break;
-                case 0x0E: _cmd_get_current_path();              break;
-                case 0x0F: _cmd_rename_directory();              break;
-                case 0x10: _cmd_remove_directory();              break;    
-                case 0x11: _cmd_delete_file();                   break;
-                case 0x12: _cmd_rename_file();                   break;
-                case 0x13: _cmd_copy_file();                     break;
-                case 0x14: _cmd_seek_start();                    break;    
-                case 0x15: _cmd_seek_end();                      break;
-                case 0x16: _cmd_set_seek_position();             break;    
-                case 0x17: _cmd_get_seek_position();             break;    
+                case FC_RESET:      _cmd_reset();                         break;
+                case FC_SHUTDOWN:   _cmd_system_shutdown();               break;
+                case FC_COMPDATE:   _cmd_system_load_comilation_date();   break;
+                case FC_OPENREAD:   _cmd_open_read();                     break;
+                case FC_OPENWRITE:  _cmd_open_write();                    break;
+                case FC_OPENAPPEND: _cmd_open_append();                   break;
+                case FC_CLOSEFILE:  _cmd_close_file();                    break;    
+                case FC_READBYTE:   _cmd_read_byte();                     break;    
+                case FC_WRITEBYTE:  _cmd_write_byte();                    break;
+                case FC_LOADHEX:    _cmd_load_hex_file();                 break;    
+                case FC_GETLENGTH:  _cmd_get_file_length();               break;        
+                case FC_LISTDIR:    _cmd_list_directory();                break;    
+                case FC_MAKEDIR:    _cmd_make_directory();                break;        
+                case FC_CHANGEDIR:  _cmd_change_directory();              break;
+                case FC_GETPATH:    _cmd_get_current_path();              break;
+                case FC_REN_DIR:    _cmd_rename_directory();              break;
+                case FC_DEL_DIR:    _cmd_remove_directory();              break;    
+                case FC_DEL_FILE:   _cmd_delete_file();                   break;
+                case FC_REN_FILE:   _cmd_rename_file();                   break;
+                case FC_COPYFILE:   _cmd_copy_file();                     break;
+                case FC_SEEKSTART:  _cmd_seek_start();                    break;    
+                case FC_SEEKEND:    _cmd_seek_end();                      break;
+                case FC_SET_SEEK:   _cmd_set_seek_position();             break;    
+                case FC_GET_SEEK:   _cmd_get_seek_position();             break;    
                 default:
                     data = fio_error_code = FILE_ERROR::FE_BAD_CMD;    // invalid command
                     break;
             }
             break;
         }
+        case FIO_HANDLE:    _fileHandle = data; break;
+        case FIO_SEEKPOS+0:   break;
+        case FIO_SEEKPOS+1:   break;
+        case FIO_SEEKPOS+2:   break;
+        case FIO_SEEKPOS+3:   break;
+        case FIO_IODATA:    _io_data = data; break;
     }
-
     IDevice::write(offset,data);   // update any internal changes too
 }
 
@@ -173,28 +183,94 @@ void FileIO::_cmd_system_load_comilation_date()
     path_char_pos = 0;
 }
 
-void FileIO::_cmd_new_file_stream()
+bool FileIO::_bFileExists(const char* file)
 {
+    if (file)
+    {
+        FILE* fp = fopen(file, "rn");
+        if (!fp)
+        {
+            Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTFOUND);
+            return false;
+        }
+        fclose(fp);
+        return true;            
+    }    
+    return false;
 }
 
-void FileIO::_cmd_open_file()
+void FileIO::_openFile(const char* mode)
 {
+    if (!_bFileExists(filePath.c_str())) { return; }
+	_fileHandle = _FindOpenFileSlot();
+    _vecFileStreams[_fileHandle] = fopen(filePath.c_str(), mode);
+    if (!_vecFileStreams[_fileHandle])
+    {
+        Bus::Write(FIO_ERROR, FE_NOTOPEN);
+        return;
+    } 
 }
 
-void FileIO::_cmd_is_file_open()
+void FileIO::_cmd_open_read()
 {
+    // printf("%s::_cmd_open_read()\n", Name().c_str());
+    _openFile("rb");
+}
+
+void FileIO::_cmd_open_write()
+{
+    printf("%s::_cmd_open_write()\n", Name().c_str());
+    _openFile("wb");
+}
+void FileIO::_cmd_open_append()
+{
+    printf("%s::_cmd_open_append()\n", Name().c_str());
+    _openFile("ab");
 }
 
 void FileIO::_cmd_close_file()
 {
+    // printf("%s::_cmd_close_file()\n", Name().c_str());
+    Byte handle = Bus::Read(FIO_HANDLE);
+    if (handle==0)
+    {
+        Bus::Write(FIO_ERROR, FE_NOTOPEN);
+        return;
+    }
+    fclose(_vecFileStreams[handle]);
+    _vecFileStreams[handle] = nullptr;
 }
 
 void FileIO::_cmd_read_byte()
 {
+    // printf("%s::_cmd_read_byte()\n", Name().c_str());
+
+    if (_fileHandle == 0)
+    {   
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
+        return;
+    }
+    Byte data = (Byte)fgetc(_vecFileStreams[_fileHandle]);
+    if (feof(_vecFileStreams[_fileHandle]))
+    {
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_OVERRUN);
+        // _cmd_close_file();
+        return;
+    }
+    Bus::Write(FIO_IODATA, data);    
 }
 
 void FileIO::_cmd_write_byte()
 {
+    // printf("%s::_cmd_write_byte()\n", Name().c_str());
+
+    if (_fileHandle == 0)
+    {
+        Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
+        return;
+    }
+    Byte data = (Byte)fputc(_io_data, _vecFileStreams[_fileHandle]);
+    Bus::Write(FIO_IODATA, data);
 }
 
 
@@ -236,7 +312,7 @@ void FileIO::_cmd_load_hex_file()
     if (filePath[0]=='\"')
         filePath = filePath.substr(1, filePath.size()-3);
 
-    printf("'%s' size: %d\n",filePath.c_str(), (int)filePath.size());   
+    // printf("'%s' size: %d\n",filePath.c_str(), (int)filePath.size());   
     path_char_pos=0;
 
 
@@ -492,6 +568,31 @@ void FileIO::_cmd_get_seek_position()
 {
 }
 
+
+// helper: return a handle to an open file stream slot
+int FileIO::_FindOpenFileSlot()
+{
+	// find an empty slot
+	int found = 0;
+	for (int t = 1; t < FILEHANDLESMAX; t++)
+	{
+		if (_vecFileStreams[t] == nullptr)
+		{
+			found = t;
+			break;
+		}
+	}
+	// too many file handles?
+	if (found == 0)
+	{
+		Bus::Write(FIO_ERROR, FILE_ERROR::FE_BADSTREAM);
+		return 0;
+	}
+	Bus::Write(FIO_HANDLE, found);
+	return found;
+}
+
+
 Word FileIO::OnAttach(Word nextAddr) 
 {
     // printf("%s::OnAttach()\n", Name().c_str());  
@@ -523,9 +624,9 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("FC_RESET",     enumID++, "       Reset");
     DisplayEnum("FC_SHUTDOWN",  enumID++, "       SYSTEM: Shutdown");
     DisplayEnum("FC_COMPDATE",  enumID++, "       SYSTEM: Load Compilation Date");
-    DisplayEnum("FC_NEWFILE",   enumID++, "     * New File Stream");
-    DisplayEnum("FC_OPENFILE",  enumID++, "     * Open File");
-    DisplayEnum("FC_ISOPEN",    enumID++, "     *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)");
+    DisplayEnum("FC_OPENREAD",  enumID++, "     * Open Binary File For Reading");
+    DisplayEnum("FC_OPENWRITE", enumID++, "     * Open Binary File For Writing");
+    DisplayEnum("FC_OPENAPPEND",enumID++, "     * Open Binary File For Appending");
     DisplayEnum("FC_CLOSEFILE", enumID++, "     * Close File");
     DisplayEnum("FC_READBYTE",  enumID++, "     * Read Byte (into FIO_IOBYTE)");
     DisplayEnum("FC_WRITEBYTE", enumID++, "     * Write Byte (from FIO_IOBYTE)");
@@ -547,26 +648,13 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "End FIO_COMMANDS");
     DisplayEnum("", 0, "");
 
-    DisplayEnum("FIO_STREAM", nextAddr, "(Byte) current file stream index (0-15)");
-    nextAddr += 1;
-
-    DisplayEnum("FIO_MODE", nextAddr, "(Byte) Flags describing the I/O mode for the file");
-    DisplayEnum("", 0, "FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)");
-    DisplayEnum("", 0, "     A:  INPUT - File open for reading");
-    DisplayEnum("", 0, "     B:  OUTPUT - File open for writing");
-    DisplayEnum("", 0, "     C:  BINARY - 1: Binary Mode, 0: Text Mode");
-    DisplayEnum("", 0, "     D:  AT_END - Output starts at the end of the file");
-    DisplayEnum("", 0, "     E:  APPEND - All output happens at end of the file");
-    DisplayEnum("", 0, "     F:  TRUNC - discard all previous file data");
+    DisplayEnum("FIO_HANDLE", nextAddr, "(Byte) current file stream HANDLE 0=NONE");
     nextAddr += 1;
 
     DisplayEnum("FIO_SEEKPOS", nextAddr, "(DWord) file seek position");
     nextAddr += 4;
 
-    DisplayEnum("FIO_IOBYTE", nextAddr, "(Byte) input / output character");
-    nextAddr += 1;
-
-    DisplayEnum("FIO_IOWORD", nextAddr, "(Byte) input / output character");
+    DisplayEnum("FIO_IODATA", nextAddr, "(Byte) input / output character");
     nextAddr += 1;
 
     DisplayEnum("FIO_PATH_LEN", nextAddr, "(Byte) length of the filepath");
@@ -596,9 +684,9 @@ void FileIO::OnInit()
     // printf("%s::OnInit()\n", Name().c_str());    
 
     // create a block of null file stream devices
-    for (int i = 0; i < _FSTREAM_MAX; i++)
+    for (int i = 0; i < FILEHANDLESMAX; i++)
     {
-        std::fstream* ifs = nullptr;
+        FILE* ifs = nullptr;
         _vecFileStreams.push_back(ifs);
     }
 }
@@ -607,16 +695,13 @@ void FileIO::OnQuit()
 {
     // printf("%s::OnQuit()\n", Name().c_str());    
 
-    // close all open file streams
+    // close and and all open file streams
     for (auto* fs : _vecFileStreams)
     {
         if (fs != nullptr)
         {
-            if (fs->is_open())
-            {
-                fs->close();
-                fs = nullptr;
-            }
+            fclose(fs);
+            fs = nullptr;
         }
     }
 }

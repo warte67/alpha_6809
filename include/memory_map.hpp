@@ -213,9 +213,9 @@ enum MEMMAP
     FC_RESET         = 0x0000, //        Reset
     FC_SHUTDOWN      = 0x0001, //        SYSTEM: Shutdown
     FC_COMPDATE      = 0x0002, //        SYSTEM: Load Compilation Date
-    FC_NEWFILE       = 0x0003, //      * New File Stream
-    FC_OPENFILE      = 0x0004, //      * Open File
-    FC_ISOPEN        = 0x0005, //      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+    FC_OPENREAD      = 0x0003, //      * Open Binary File For Reading
+    FC_OPENWRITE     = 0x0004, //      * Open Binary File For Writing
+    FC_OPENAPPEND    = 0x0005, //      * Open Binary File For Appending
     FC_CLOSEFILE     = 0x0006, //      * Close File
     FC_READBYTE      = 0x0007, //      * Read Byte (into FIO_IOBYTE)
     FC_WRITEBYTE     = 0x0008, //      * Write Byte (from FIO_IOBYTE)
@@ -236,43 +236,34 @@ enum MEMMAP
     FC_GET_SEEK      = 0x0017, //      * Get Seek Position (into FIO_IOWORD)
         // End FIO_COMMANDS
         
-    FIO_STREAM       = 0xFF54, // (Byte) current file stream index (0-15)
-    FIO_MODE         = 0xFF55, // (Byte) Flags describing the I/O mode for the file
-        // FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
-        //      A:  INPUT - File open for reading
-        //      B:  OUTPUT - File open for writing
-        //      C:  BINARY - 1: Binary Mode, 0: Text Mode
-        //      D:  AT_END - Output starts at the end of the file
-        //      E:  APPEND - All output happens at end of the file
-        //      F:  TRUNC - discard all previous file data
-    FIO_SEEKPOS      = 0xFF56, // (DWord) file seek position
-    FIO_IOBYTE       = 0xFF5A, // (Byte) input / output character
-    FIO_IOWORD       = 0xFF5B, // (Byte) input / output character
-    FIO_PATH_LEN     = 0xFF5C, // (Byte) length of the filepath
-    FIO_PATH_POS     = 0xFF5D, // (Byte) character position within the filepath
-    FIO_PATH_DATA    = 0xFF5E, // (Byte) data at the character position of the path
-    FIO_DIR_DATA     = 0xFF5F, // (Byte) a series of null-terminated filenames
+    FIO_HANDLE       = 0xFF54, // (Byte) current file stream HANDLE 0=NONE
+    FIO_SEEKPOS      = 0xFF55, // (DWord) file seek position
+    FIO_IODATA       = 0xFF59, // (Byte) input / output character
+    FIO_PATH_LEN     = 0xFF5A, // (Byte) length of the filepath
+    FIO_PATH_POS     = 0xFF5B, // (Byte) character position within the filepath
+    FIO_PATH_DATA    = 0xFF5C, // (Byte) data at the character position of the path
+    FIO_DIR_DATA     = 0xFF5D, // (Byte) a series of null-terminated filenames
         //     NOTES: Current read-position is reset to the beginning following a 
         //             List Directory command. The read-position is automatically 
         //             advanced on read from this register. Each filename is 
         //             $0a-terminated. The list itself is null-terminated.
-    FIO_END          = 0xFF60, // End of the FileIO register space
+    FIO_END          = 0xFF5E, // End of the FileIO register space
         
         // Math Co-Processor Hardware Registers:
-    MATH_BEGIN       = 0xFF60, //  start of math co-processor  hardware registers
-    MATH_ACA_POS     = 0xFF60, //  (Byte) character position within the ACA float string
-    MATH_ACA_DATA    = 0xFF61, //  (Byte) ACA float string character port
-    MATH_ACA_RAW     = 0xFF62, //  (4-Bytes) ACA raw float data
-    MATH_ACA_INT     = 0xFF66, //  (4-Bytes) ACA integer data
-    MATH_ACB_POS     = 0xFF6A, //  (Byte) character position within the ACB float string
-    MATH_ACB_DATA    = 0xFF6B, //  (Byte) ACB float string character port
-    MATH_ACB_RAW     = 0xFF6C, //  (4-Bytes) ACB raw float data
-    MATH_ACB_INT     = 0xFF70, //  (4-Bytes) ACB integer data
-    MATH_ACR_POS     = 0xFF74, //  (Byte) character position within the ACR float string
-    MATH_ACR_DATA    = 0xFF75, //  (Byte) ACR float string character port
-    MATH_ACR_RAW     = 0xFF76, //  (4-Bytes) ACR raw float data
-    MATH_ACR_INT     = 0xFF7A, //  (4-Bytes) ACR integer data
-    MATH_OPERATION   = 0xFF7E, //  (Byte) Operation 'command' to be issued
+    MATH_BEGIN       = 0xFF5E, //  start of math co-processor  hardware registers
+    MATH_ACA_POS     = 0xFF5E, //  (Byte) character position within the ACA float string
+    MATH_ACA_DATA    = 0xFF5F, //  (Byte) ACA float string character port
+    MATH_ACA_RAW     = 0xFF60, //  (4-Bytes) ACA raw float data
+    MATH_ACA_INT     = 0xFF64, //  (4-Bytes) ACA integer data
+    MATH_ACB_POS     = 0xFF68, //  (Byte) character position within the ACB float string
+    MATH_ACB_DATA    = 0xFF69, //  (Byte) ACB float string character port
+    MATH_ACB_RAW     = 0xFF6A, //  (4-Bytes) ACB raw float data
+    MATH_ACB_INT     = 0xFF6E, //  (4-Bytes) ACB integer data
+    MATH_ACR_POS     = 0xFF72, //  (Byte) character position within the ACR float string
+    MATH_ACR_DATA    = 0xFF73, //  (Byte) ACR float string character port
+    MATH_ACR_RAW     = 0xFF74, //  (4-Bytes) ACR raw float data
+    MATH_ACR_INT     = 0xFF78, //  (4-Bytes) ACR integer data
+    MATH_OPERATION   = 0xFF7C, //  (Byte) Operation 'command' to be issued
         // Begin MATH_OPERATION's (MOPS)
     MOP_RANDOM       = 0x0000, //        ACA, ACB, and ACR are set to randomized values
     MOP_RND_SEED     = 0x0001, //        MATH_ACA_INT seeds the pseudo-random number generator
@@ -333,10 +324,10 @@ enum MEMMAP
     MOP_COPYSIGN     = 0x0038, //        ACR = std::copysign(ACA, ACB);
     MOP_LASTOP       = 0x0038, //        last implemented math operation 
         // End MATH_OPERATION's (MOPS)
-    MATH_END         = 0xFF7F, // end of math co-processor registers
+    MATH_END         = 0xFF7D, // end of math co-processor registers
         
-    RESERVED         = 0xFF7F, 
-        // 113 bytes in reserve
+    RESERVED         = 0xFF7D, 
+        // 115 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 

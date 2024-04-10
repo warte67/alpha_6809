@@ -11,50 +11,49 @@ start		jmp	skip_data
 
 
 
+file_handle	fcb	0
 txt1		fcn	"\n\nHello World!\n"
-
 test_file	fcn	"/home/jay/dev/alpha_6809/build/test.txt"
 file_error	fcn	"ERROR: File does not exist!\n"
+file_EOF	fcn	"ERROR: Input past end of file!\n"
 
 
 skip_data	
-		; FC_GETLENGTH
-
-		ldx	#test_file
+		; push the file path
 		clr	FIO_PATH_POS
-0		
-		lda	,x+
+		ldx	#test_file
+0		lda	,x+
 		sta	FIO_PATH_DATA
 		bne	0b
-		lda	#FC_GETLENGTH
+		; open the file for reading
+		lda	#FC_OPENREAD
 		sta	FIO_COMMAND
-		lda	FIO_ERROR
-		cmpa	#FE_NOTFOUND	; file not found error flag
-		bne	1f
-		ldx	#file_error
-		jsr	[VEC_LINEOUT]
-		bra	done
-1		
-		jsr	[VEC_DSP_INTR]	; KRNL_DSP_ACR
-		jsr	[VEC_NEWLINE]
+		; save the file handle
+		lda	FIO_HANDLE
+		sta	file_handle
 
+1
+		; read a byte
+		lda	#FC_READBYTE
+		sta	FIO_COMMAND
+		ldb	FIO_ERROR
+		bne	done
+		; output the character
+		lda	FIO_IODATA
+		jsr	[VEC_CHROUT] 
+		bra	1b
+
+
+
+
+done
+		; restore the handle
+		lda	file_handle
+		sta	FIO_HANDLE
+
+		; close the file
+		lda	#FC_CLOSEFILE
+		sta	FIO_COMMAND
 		
-
-		nop
-
-		; test text
-		* bsr	test_text
-done		rts
-
-test_text	pshs	X
-		lda	_ATTRIB
-		tfr	a,b
-		ora	#$f0
-		sta	_ATTRIB
-
-		ldx	#txt1
-		jsr	[VEC_LINEOUT]
-
-		stb	_ATTRIB
-		puls	X,PC
-
+		rts		
+		

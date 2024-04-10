@@ -50,9 +50,9 @@ class FileIO : public IDevice
         void _cmd_reset();
         void _cmd_system_shutdown();
         void _cmd_system_load_comilation_date();
-        void _cmd_new_file_stream();
-        void _cmd_open_file();
-        void _cmd_is_file_open();
+        void _cmd_open_read();
+        void _cmd_open_write();
+        void _cmd_open_append();
         void _cmd_close_file();
         void _cmd_read_byte();
         void _cmd_write_byte();
@@ -74,26 +74,13 @@ class FileIO : public IDevice
         Byte _fread_hex_byte(std::ifstream& ifs);
         Word _fread_hex_word(std::ifstream& ifs);
 
-        //enum FMODE
-        //{
-        //    NONE,
-        //    INPUT,
-        //    OUTPUT,
-        //    BINARY,
-        //    AT_END,
-        //    APPEND,
-        //    TRUNC,
-        //};
-        //struct FILE_NODE
-        //{
-        //    std::fstream* ptrStream = nullptr;
-        //    FMODE fmode = NONE;
-        //    std::string path = "";
-        //};
 
-        const int _FSTREAM_MAX = 16;    // max number of file streams
-        Byte _fileStreamIndex = 0;      // file stream index
-        std::vector<std::fstream*> _vecFileStreams; // vector of file streams
+        int _FindOpenFileSlot();    // return a handle to an open file stream slot
+        bool _bFileExists(const char* file);    // checks to see if a file exists
+        void _openFile(const char* mode);       // file open helper
+
+        Byte _fileHandle = 0;      // file stream index (HANDLE)
+        std::vector<FILE*> _vecFileStreams; // vector of file streams
 
         // Byte fio_err_flags = 0;     // error flags (deprecated)
         FILE_ERROR fio_error_code = FILE_ERROR::FE_NOERROR;    // current error code
@@ -103,4 +90,6 @@ class FileIO : public IDevice
 
         int dir_data_pos = 0;     // position within the dir_data string
         std::string dir_data;       // directory filename list container
+
+        Byte  _io_data = 0;     // data to read / write
 };

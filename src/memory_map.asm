@@ -209,9 +209,9 @@ FIO_COMMAND         equ   $FF53    ; (Byte) OnWrite, execute a file command (FC_
 FC_RESET            equ   $0000    ;        Reset
 FC_SHUTDOWN         equ   $0001    ;        SYSTEM: Shutdown
 FC_COMPDATE         equ   $0002    ;        SYSTEM: Load Compilation Date
-FC_NEWFILE          equ   $0003    ;      * New File Stream
-FC_OPENFILE         equ   $0004    ;      * Open File
-FC_ISOPEN           equ   $0005    ;      *Is File Open ? (returns FIO_ERR_FLAGS bit - 5)
+FC_OPENREAD         equ   $0003    ;      * Open Binary File For Reading
+FC_OPENWRITE        equ   $0004    ;      * Open Binary File For Writing
+FC_OPENAPPEND       equ   $0005    ;      * Open Binary File For Appending
 FC_CLOSEFILE        equ   $0006    ;      * Close File
 FC_READBYTE         equ   $0007    ;      * Read Byte (into FIO_IOBYTE)
 FC_WRITEBYTE        equ   $0008    ;      * Write Byte (from FIO_IOBYTE)
@@ -232,43 +232,34 @@ FC_SET_SEEK         equ   $0016    ;      * Set Seek Position (from FIO_IOWORD)
 FC_GET_SEEK         equ   $0017    ;      * Get Seek Position (into FIO_IOWORD)
           ; End FIO_COMMANDS
         
-FIO_STREAM          equ   $FF54    ; (Byte) current file stream index (0-15)
-FIO_MODE            equ   $FF55    ; (Byte) Flags describing the I/O mode for the file
-          ; FIO_MODE: 00AB.CDEF  (indexed by FIO_STREAM)
-          ;      A:  INPUT - File open for reading
-          ;      B:  OUTPUT - File open for writing
-          ;      C:  BINARY - 1: Binary Mode, 0: Text Mode
-          ;      D:  AT_END - Output starts at the end of the file
-          ;      E:  APPEND - All output happens at end of the file
-          ;      F:  TRUNC - discard all previous file data
-FIO_SEEKPOS         equ   $FF56    ; (DWord) file seek position
-FIO_IOBYTE          equ   $FF5A    ; (Byte) input / output character
-FIO_IOWORD          equ   $FF5B    ; (Byte) input / output character
-FIO_PATH_LEN        equ   $FF5C    ; (Byte) length of the filepath
-FIO_PATH_POS        equ   $FF5D    ; (Byte) character position within the filepath
-FIO_PATH_DATA       equ   $FF5E    ; (Byte) data at the character position of the path
-FIO_DIR_DATA        equ   $FF5F    ; (Byte) a series of null-terminated filenames
+FIO_HANDLE          equ   $FF54    ; (Byte) current file stream HANDLE 0=NONE
+FIO_SEEKPOS         equ   $FF55    ; (DWord) file seek position
+FIO_IODATA          equ   $FF59    ; (Byte) input / output character
+FIO_PATH_LEN        equ   $FF5A    ; (Byte) length of the filepath
+FIO_PATH_POS        equ   $FF5B    ; (Byte) character position within the filepath
+FIO_PATH_DATA       equ   $FF5C    ; (Byte) data at the character position of the path
+FIO_DIR_DATA        equ   $FF5D    ; (Byte) a series of null-terminated filenames
           ;     NOTES: Current read-position is reset to the beginning following a 
           ;             List Directory command. The read-position is automatically 
           ;             advanced on read from this register. Each filename is 
           ;             $0a-terminated. The list itself is null-terminated.
-FIO_END             equ   $FF60    ; End of the FileIO register space
+FIO_END             equ   $FF5E    ; End of the FileIO register space
         
           ; Math Co-Processor Hardware Registers:
-MATH_BEGIN          equ   $FF60    ;  start of math co-processor  hardware registers
-MATH_ACA_POS        equ   $FF60    ;  (Byte) character position within the ACA float string
-MATH_ACA_DATA       equ   $FF61    ;  (Byte) ACA float string character port
-MATH_ACA_RAW        equ   $FF62    ;  (4-Bytes) ACA raw float data
-MATH_ACA_INT        equ   $FF66    ;  (4-Bytes) ACA integer data
-MATH_ACB_POS        equ   $FF6A    ;  (Byte) character position within the ACB float string
-MATH_ACB_DATA       equ   $FF6B    ;  (Byte) ACB float string character port
-MATH_ACB_RAW        equ   $FF6C    ;  (4-Bytes) ACB raw float data
-MATH_ACB_INT        equ   $FF70    ;  (4-Bytes) ACB integer data
-MATH_ACR_POS        equ   $FF74    ;  (Byte) character position within the ACR float string
-MATH_ACR_DATA       equ   $FF75    ;  (Byte) ACR float string character port
-MATH_ACR_RAW        equ   $FF76    ;  (4-Bytes) ACR raw float data
-MATH_ACR_INT        equ   $FF7A    ;  (4-Bytes) ACR integer data
-MATH_OPERATION      equ   $FF7E    ;  (Byte) Operation 'command' to be issued
+MATH_BEGIN          equ   $FF5E    ;  start of math co-processor  hardware registers
+MATH_ACA_POS        equ   $FF5E    ;  (Byte) character position within the ACA float string
+MATH_ACA_DATA       equ   $FF5F    ;  (Byte) ACA float string character port
+MATH_ACA_RAW        equ   $FF60    ;  (4-Bytes) ACA raw float data
+MATH_ACA_INT        equ   $FF64    ;  (4-Bytes) ACA integer data
+MATH_ACB_POS        equ   $FF68    ;  (Byte) character position within the ACB float string
+MATH_ACB_DATA       equ   $FF69    ;  (Byte) ACB float string character port
+MATH_ACB_RAW        equ   $FF6A    ;  (4-Bytes) ACB raw float data
+MATH_ACB_INT        equ   $FF6E    ;  (4-Bytes) ACB integer data
+MATH_ACR_POS        equ   $FF72    ;  (Byte) character position within the ACR float string
+MATH_ACR_DATA       equ   $FF73    ;  (Byte) ACR float string character port
+MATH_ACR_RAW        equ   $FF74    ;  (4-Bytes) ACR raw float data
+MATH_ACR_INT        equ   $FF78    ;  (4-Bytes) ACR integer data
+MATH_OPERATION      equ   $FF7C    ;  (Byte) Operation 'command' to be issued
           ; Begin MATH_OPERATION's (MOPS)
 MOP_RANDOM          equ   $0000    ;        ACA, ACB, and ACR are set to randomized values
 MOP_RND_SEED        equ   $0001    ;        MATH_ACA_INT seeds the pseudo-random number generator
@@ -329,10 +320,10 @@ MOP_NEXTAFTER       equ   $0037    ;        ACR = std::nextafter(ACA, ACB);
 MOP_COPYSIGN        equ   $0038    ;        ACR = std::copysign(ACA, ACB);
 MOP_LASTOP          equ   $0038    ;        last implemented math operation 
           ; End MATH_OPERATION's (MOPS)
-MATH_END            equ   $FF7F    ; end of math co-processor registers
+MATH_END            equ   $FF7D    ; end of math co-processor registers
         
-RESERVED            equ   $FF7F  
-          ; 113 bytes in reserve
+RESERVED            equ   $FF7D  
+          ; 115 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -345,5 +336,7 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
+
+
 
 
