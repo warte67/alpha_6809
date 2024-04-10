@@ -1,7 +1,7 @@
 ; test.asm
 
-		include "../build/kernel_f000.sym"
-		* INCLUDE "memory_map.asm"
+		; include "../build/kernel_f000.sym"
+		INCLUDE "kernel_header.asm"
 
 		org	$0000
 		fdb	start
@@ -32,11 +32,11 @@ skip_data
 		cmpa	#FE_NOTFOUND	; file not found error flag
 		bne	1f
 		ldx	#file_error
-		jsr	KRNL_LINEOUT
+		jsr	[VEC_LINEOUT]
 		bra	done
 1		
-		jsr	KRNL_DSP_INTR	; KRNL_DSP_ACR
-		jsr	KRNL_NEWLINE
+		jsr	[VEC_DSP_INTR]	; KRNL_DSP_ACR
+		jsr	[VEC_NEWLINE]
 
 		
 
@@ -47,14 +47,14 @@ skip_data
 done		rts
 
 test_text	pshs	X
-		lda	KRNL_ATTRIB
+		lda	_ATTRIB
 		tfr	a,b
 		ora	#$f0
-		sta	KRNL_ATTRIB
+		sta	_ATTRIB
 
 		ldx	#txt1
-		jsr	KRNL_LINEOUT
+		jsr	[VEC_LINEOUT]
 
-		stb	KRNL_ATTRIB
+		stb	_ATTRIB
 		puls	X,PC
 

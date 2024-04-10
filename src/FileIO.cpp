@@ -284,6 +284,11 @@ void FileIO::_cmd_load_hex_file()
     }
     bool done = false;
     char c;
+
+
+    // return;
+
+
     while (!done)
     {
         Byte n, t;
