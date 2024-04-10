@@ -430,18 +430,18 @@ void FileIO::_cmd_make_directory()
 
 void FileIO::_cmd_change_directory()
 {
-    //printf("Change Directory To: %s\n", filePath.c_str());
+    printf("Change Directory To: %s\n", filePath.c_str());
     if (filePath.size() == 0)   return;
 
-    // remove any trailing spaces
-    while (filePath.substr(filePath.size() - 2, 1) == " ")
-        filePath = filePath.substr(0, filePath.size() - 2);
+    // // remove any trailing spaces
+    // while (filePath.substr(filePath.size() - 2, 1) == " ")
+    //     filePath = filePath.substr(0, filePath.size() - 2);
 
     std::string chdir = filePath;
     
     if (std::filesystem::exists(chdir))
     {
-        //printf("Directory Found\n");
+        printf("Directory Found\n");
         Byte data = Bus::Read(FIO_ERR_FLAGS);
         data &= ~0x40;
         Bus::Write(FIO_ERR_FLAGS, data);
@@ -450,7 +450,7 @@ void FileIO::_cmd_change_directory()
     }
     else
     {
-        //printf("ERROR: Directory Not Found!\n");
+        printf("ERROR: Directory Not Found!\n");
         Byte data = Bus::Read(FIO_ERR_FLAGS);
         data |= 0x40;
         Bus::Write(FIO_ERR_FLAGS, data);
@@ -460,9 +460,10 @@ void FileIO::_cmd_change_directory()
 
 void FileIO::_cmd_get_current_path()
 {
-    printf("FileIO::_cmd_get_current_path()\n");
+    // printf("FileIO::_cmd_get_current_path()\n");
     path_char_pos = 0;
     filePath = std::filesystem::current_path().string() + "\n";
+    printf("%s\n", filePath.c_str());
 }
 
 void FileIO::_cmd_rename_directory()

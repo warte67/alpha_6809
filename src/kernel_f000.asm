@@ -240,7 +240,6 @@ do_cls_0	lda	#' '
 		ldb	KRNL_ATTRIB
 		jsr	KRNL_CLS		
 		rts
-
 do_color	; COLOR				ARG1 = Color Attribute
 		tst	,x
 		beq	do_color_0
@@ -266,40 +265,32 @@ do_reset	; RESET				ARG1 = none
 		rts
 
 do_dir		; DIR				ARG1 = {filepath}
-		clr	FIO_PATH_POS
-
-do_dir_0	lda	,x+
-		sta	FIO_PATH_DATA
-		bne	do_dir_0
+		bsr	do_arg1_helper
 		lda	#FC_LISTDIR
 		sta	FIO_COMMAND
 do_dir_1	lda	FIO_DIR_DATA
 		beq	do_dir_2
 		jsr	KRNL_CHROUT
 		bra	do_dir_1
-do_dir_2	; send a new line character
-		* lda	#$0a
-		* jsr	KRNL_CHROUT		
-		rts
-
-		* ldx	#str_dir
-		* bra	str_output
-
+do_dir_2	rts
 do_cd		; CHDIR				ARG1 = {filepath}
-
-		ldx	#str_cd
-		bra	str_output
-
 do_chdir	; CHDIR				ARG1 = {filepath}
-		ldx	#str_chdir
-		bra	str_output
-
+		bsr	do_arg1_helper
+		lda	#FC_CHANGEDIR
+		sta	FIO_COMMAND
+		lda	#FC_GETPATH
+		sta	FIO_COMMAND
+		clr	FIO_PATH_POS
+do_cd_0		lda	FIO_PATH_DATA
+		beq	do_cd_1
+		jsr	KRNL_CHROUT
+		bra	do_cd_0
+do_cd_1		rts
 do_exit		; EXIT and QUIT			ARG1 = none
 do_quit		; EXIT and QUIT			ARG1 = none
 		lda	#FC_SHUTDOWN
 		sta	FIO_COMMAND
 		rts
-
 do_mode		; MODE				ARG1 = Graphics Mode
 		tst	,x
 		beq	do_mode_0
@@ -308,13 +299,14 @@ do_mode		; MODE				ARG1 = Graphics Mode
 		lda	#' '
 		jsr	KRNL_CLS
 do_mode_0	rts
-
-		* ldx	#str_mode
-		* bra	str_output		
-
+; local helpers
 str_output	jsr	KRNL_LINEOUT
 		rts
-
+do_arg1_helper	clr	FIO_PATH_POS
+do_argh_0	lda	,x+
+		sta	FIO_PATH_DATA
+		bne	do_argh_0
+		rts
 
 
 
