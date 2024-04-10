@@ -986,10 +986,6 @@ KRNL_WRITE_0	lda	,x+		; load the next char from the string
 		bra	KRNL_WRITE_0	; continue looping
 KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 
-
-
-
-
 ; *****************************************************************************
 ; * KRNL_ARG_TO_A                                                             *
 ; * 	convert a numeric string (pointed to by X) to 0-25 and return it in A *
@@ -1001,38 +997,39 @@ KRNL_WRITE_DONE	puls	X,Y,CC,PC	; cleanup saved registers and return
 ; * EXIT CONDITIONS:	A = binary value represented by the input string      *
 ; *                     All other registers preserved                         *
 ; *****************************************************************************
-KRNL_ARG_TO_A	pshs	B,X,CC
-		ldb	,x
-		cmpb	#'$'
-		beq	KARG_0
-		jsr	KRNL_WRITE_ACA
-		lda	MATH_ACA_INT+3
-		bra	KARG_DONE
-KARG_0		leax	1,x
-		ldb	,x+
-		bsr	KARG_HEX
-		lslb
-		lslb
-		lslb
-		lslb
-		pshs	b
-		ldb	,x+
-		bsr	KARG_HEX
-		ora	,s+
+KRNL_ARG_TO_A	pshs	B,X,CC		; save the used registers onto the stack
+		ldb	,x		; load character to be converted
+		cmpb	#'$'		; is it the leading '$'?
+		beq	KARG_0		;   yeah, go convert from hexidecimal
+		jsr	KRNL_WRITE_ACA	; use the FP to convert from decimal
+		lda	MATH_ACA_INT+3	; load the converted binary into A
+		bra	KARG_DONE	;   A now holds the binary, return
+KARG_0		leax	1,x		; skip passed the initial '$' character
+		ldb	,x+		; load character to convert into B
+		bsr	KARG_HEX	; convert hex character to 0-15 binary
+		lslb			; shift the 4-bit data ... 
+		lslb			; ... into the most significant ...
+		lslb			; ... four-bits
+		lslb			; $n0 n = useful value
+		pshs	b		; save our work so far
+		ldb	,x+		; load the next hex character
+		bsr	KARG_HEX	; decode it to 0-15
+		ora	,s+		; merge the two and fix the stack
 KARG_DONE	puls	B,X,CC,PC	; clean up and return
-KARG_HEX	pshs	b		; save it
+; helper sub
+KARG_HEX	pshs	b		; save it 
 		subb	#'0'		; convert to binary
 		bmi	2f		; go if not numeric
 		cmpb	#$09		; is greater than 9?
 		bls	1f		; branch if not
-		orb	#$20
-		subb	#$27
+		orb	#$20		; to lower case
+		subb	#$27		; reduce from 'a'
 1		cmpb	#$0f		; greater than 15?
 		bls	3f		; go if not
-2		ldb	#$ff
-3		cmpb	,s+
-		tfr	b,a
-		rts
+2		ldb	#$ff		; load an error state $FF = BAD
+3		cmpb	,s+		; fix the stack
+		tfr	b,a		; restore into A
+		rts			; return
 
 
 
