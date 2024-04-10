@@ -6,20 +6,20 @@
 ; *****************************************************************************
 ; * SOFTWARE VECTORS                                                          *
 ; *****************************************************************************
-VEC_EXEC		equ	$0000	; User defined EXEC vector
-VEC_SWI3 		equ	$0002	; SWI3 Software Interrupt Vector
-VEC_SWI2 		equ	$0004	; SWI2 Software Interrupt Vector
-VEC_FIRQ 		equ	$0006	; FIRQ Software Interrupt Vector
-VEC_IRQ  		equ	$0008	; IRQ Software Interrupt Vector
-VEC_SWI  		equ	$000A	; SWI / SYS Software Interrupt Vector
-VEC_NMI  		equ	$000C	; NMI Software Interrupt Vector	
-VEC_RESET		equ	$000E	; RESET Software Interrupt Vector	
+VEC_EXEC	equ	$0000	; User defined EXEC vector
+VEC_SWI3 	equ	$0002	; SWI3 Software Interrupt Vector
+VEC_SWI2 	equ	$0004	; SWI2 Software Interrupt Vector
+VEC_FIRQ 	equ	$0006	; FIRQ Software Interrupt Vector
+VEC_IRQ  	equ	$0008	; IRQ Software Interrupt Vector
+VEC_SWI  	equ	$000A	; SWI / SYS Software Interrupt Vector
+VEC_NMI  	equ	$000C	; NMI Software Interrupt Vector	
+VEC_RESET	equ	$000E	; RESET Software Interrupt Vector	
 
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
 ; *****************************************************************************
-			* org	$0010	
-_VARS_START	equ	$0010	; START of system vector data
+		* org	$0010	
+_VARS_START	equ	$0010	; START of zero-page system data
 
 VEC_CLS		equ	$0010	; CLS function Software Vector
 VEC_CHROUT	equ	$0012	; Character Out Software Vector
@@ -72,4 +72,4 @@ _LOCAL_1	equ	$0060	; (Byte) used locally for some KRNL calls
 _LOCAL_2	equ	$0061	; (Byte) used locally for some KRNL calls
 _LOCAL_3	equ	$0062	; (Byte) used locally for some KRNL calls
 
-_VARS_END	; END of system vector data
+_VARS_END	; END of zero-page system data
