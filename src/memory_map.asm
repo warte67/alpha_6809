@@ -42,6 +42,7 @@ KERNEL_ROM          equ   $F000
 GFX_BEGIN           equ   $FE00    ;  Start of Graphics Hardware Registers
 GFX_MODE            equ   $FE00    ; (Byte) Graphics Mode
           ;          - bit 0-4   = Resolution Modes 0-31
+          ;          - bit 5-6   = Bits-Per-Pixel (in bitmap mode)
           ;          - bit 7     = 0:text,  1:bitmap
         
 GFX_EMU             equ   $FE01    ; (Byte) Emulation Flags

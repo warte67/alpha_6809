@@ -142,6 +142,7 @@ Word Gfx::OnAttach(Word nextAddr)
     DisplayEnum("GFX_BEGIN", nextAddr, " Start of Graphics Hardware Registers");
     DisplayEnum("GFX_MODE", nextAddr, "(Byte) Graphics Mode");
 	DisplayEnum("", 0, "\t     - bit 0-4   = Resolution Modes 0-31");
+	DisplayEnum("", 0, "\t     - bit 5-6   = Bits-Per-Pixel (in bitmap mode)");
 	DisplayEnum("", 0, "\t     - bit 7     = 0:text,  1:bitmap");
     DisplayEnum("", 0, "");
     nextAddr++;

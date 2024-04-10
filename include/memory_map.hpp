@@ -46,6 +46,7 @@ enum MEMMAP
     GFX_BEGIN        = 0xFE00, //  Start of Graphics Hardware Registers
     GFX_MODE         = 0xFE00, // (Byte) Graphics Mode
         //           - bit 0-4   = Resolution Modes 0-31
+        //           - bit 5-6   = Bits-Per-Pixel (in bitmap mode)
         //           - bit 7     = 0:text,  1:bitmap
         
     GFX_EMU          = 0xFE01, // (Byte) Emulation Flags
@@ -218,7 +219,7 @@ enum MEMMAP
     FC_READBYTE      = 0x0007, //      * Read Byte (into FIO_IOBYTE)
     FC_WRITEBYTE     = 0x0008, //      * Write Byte (from FIO_IOBYTE)
     FC_LOADHEX       = 0x0009, //      * Load Hex Format File
-    FC_GETLENGTH     = 0x000A, //      * Get File Length (into FIO_IOWORD)
+    FC_GETLENGTH     = 0x000A, //        Get File Length (into FIO_IOWORD)
     FC_LISTDIR       = 0x000B, //        List Directory
     FC_MAKEDIR       = 0x000C, //      * Make Directory
     FC_CHANGEDIR     = 0x000D, //        Change Directory

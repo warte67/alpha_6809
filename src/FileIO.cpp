@@ -230,17 +230,9 @@ void FileIO::_cmd_load_hex_file()
     // 	return s;
     // };
 
-    // sanity check
+    // sanity check (insanity perhaps?)
     if (filePath.size() == 0)   return;
 
-    // // remove  quotes
-    // if (filePath[0]=='\"' && filePath[filePath.size()-2]=='\"')
-    // {
-    //     filePath = filePath.substr(1, filePath.size()-1);
-    //     // // remove any trailing quotes
-    //     if (filePath[filePath.size()-2]=='\"')
-    //         filePath = filePath.substr(0, filePath.size()-2);
-    // }   
     if (filePath[0]=='\"')
         filePath = filePath.substr(1, filePath.size()-3);
 
@@ -327,20 +319,18 @@ void FileIO::_cmd_load_hex_file()
 
 void FileIO::_cmd_get_file_length()
 {
-    printf("%s::_cmd_get_file_length()\n", Name().c_str());
+    // printf("%s::_cmd_get_file_length()\n", Name().c_str());
 
     std::filesystem::path arg1 = filePath;
-    printf("file: %s\n", arg1.generic_string().c_str());
+    // printf("file: %s\n", arg1.generic_string().c_str());
 
     if (!std::filesystem::exists(arg1))
     {
-        printf("ERROR: File does not exist!\n");
-
+        // printf("ERROR: File does not exist!\n");
         Bus::Write(FIO_ERR_FLAGS, 0x80);  
         Bus::Write(MATH_ACR_INT, 0);
         return;
     }
-
     Uint32 file_size = std::filesystem::file_size(arg1);
     Bus::Write_DWord(MATH_ACR_INT, file_size);
 }
@@ -560,8 +550,8 @@ Word FileIO::OnAttach(Word nextAddr)
     DisplayEnum("FC_CLOSEFILE", enumID++, "     * Close File");
     DisplayEnum("FC_READBYTE",  enumID++, "     * Read Byte (into FIO_IOBYTE)");
     DisplayEnum("FC_WRITEBYTE", enumID++, "     * Write Byte (from FIO_IOBYTE)");
-    DisplayEnum("FC_LOADHEX",   enumID++, "     * Load Hex Format File");
-    DisplayEnum("FC_GETLENGTH", enumID++, "     * Get File Length (into FIO_IOWORD)");
+    DisplayEnum("FC_LOADHEX",   enumID++, "       Load Hex Format File");
+    DisplayEnum("FC_GETLENGTH", enumID++, "       Get File Length (into FIO_IOWORD)");
     DisplayEnum("FC_LISTDIR",   enumID++, "       List Directory");
     DisplayEnum("FC_MAKEDIR",   enumID++, "     * Make Directory");
     DisplayEnum("FC_CHANGEDIR", enumID++, "       Change Directory");

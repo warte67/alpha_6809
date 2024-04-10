@@ -119,6 +119,7 @@ class Gfx : public IDevice
               
     GFX_MODE         = 0xFE00, // (Byte) Graphics Mode
         //           - bit 0-4   = Resolution Modes 0-31
+        //           - bit 5-6   = Bits-Per-Pixel (in bitmap mode)
         //           - bit 7     = 0:text,  1:bitmap
         
     GFX_EMU          = 0xFE01, // (Byte) Emulation Flags
