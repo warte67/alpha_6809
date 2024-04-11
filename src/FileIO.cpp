@@ -202,7 +202,7 @@ bool FileIO::_bFileExists(const char* file)
 
 void FileIO::_openFile(const char* mode)
 {
-    if (!_bFileExists(filePath.c_str())) { return; }
+    // if (!_bFileExists(filePath.c_str())) { return; }
 	_fileHandle = _FindOpenFileSlot();
     _vecFileStreams[_fileHandle] = fopen(filePath.c_str(), mode);
     if (!_vecFileStreams[_fileHandle])
@@ -214,7 +214,7 @@ void FileIO::_openFile(const char* mode)
 
 void FileIO::_cmd_open_read()
 {
-    // printf("%s::_cmd_open_read()\n", Name().c_str());
+    printf("%s::_cmd_open_read()\n", Name().c_str());
     _openFile("rb");
 }
 
@@ -231,7 +231,7 @@ void FileIO::_cmd_open_append()
 
 void FileIO::_cmd_close_file()
 {
-    // printf("%s::_cmd_close_file()\n", Name().c_str());
+    printf("%s::_cmd_close_file()\n", Name().c_str());
     Byte handle = Bus::Read(FIO_HANDLE);
     if (handle==0 || _vecFileStreams[handle] == nullptr)
     {
@@ -245,14 +245,14 @@ void FileIO::_cmd_close_file()
 void FileIO::_cmd_read_byte()
 {
     // printf("%s::_cmd_read_byte()\n", Name().c_str());
-
-    if (_fileHandle == 0)
+    Byte handle = Bus::Read(FIO_HANDLE);
+    if (handle == 0 || _vecFileStreams[handle] == nullptr)
     {   
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
         return;
     }
-    Byte data = (Byte)fgetc(_vecFileStreams[_fileHandle]);
-    if (feof(_vecFileStreams[_fileHandle]))
+    Byte data = (Byte)fgetc(_vecFileStreams[handle]);
+    if (feof(_vecFileStreams[handle]))
     {
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_OVERRUN);
         // _cmd_close_file();
@@ -264,13 +264,13 @@ void FileIO::_cmd_read_byte()
 void FileIO::_cmd_write_byte()
 {
     // printf("%s::_cmd_write_byte()\n", Name().c_str());
-
-    if (_fileHandle == 0)
+    Byte handle = Bus::Read(FIO_HANDLE);
+    if (handle == 0 || _vecFileStreams[handle] == nullptr)
     {
         Bus::Write(FIO_ERROR, FILE_ERROR::FE_NOTOPEN);
         return;
     }
-    Byte data = (Byte)fputc(_io_data, _vecFileStreams[_fileHandle]);
+    Byte data = (Byte)fputc(_io_data, _vecFileStreams[handle]);
     Bus::Write(FIO_IODATA, data);
 }
 
@@ -520,10 +520,6 @@ void FileIO::_cmd_list_directory()
     dir_data_pos = 0;      
 }
 
-void FileIO::_cmd_make_directory()
-{
-}
-
 void FileIO::_cmd_change_directory()
 {
     // printf("Change Directory To: %s\n", filePath.c_str());
@@ -544,40 +540,54 @@ void FileIO::_cmd_get_current_path()
     printf("%s\n", filePath.c_str());
 }
 
+void FileIO::_cmd_make_directory()
+{
+    printf("FileIO::_cmd_make_directory()\n");
+}
+
 void FileIO::_cmd_rename_directory()
 {
+    printf("FileIO::_cmd_rename_directory()\n");
 }
 
 void FileIO::_cmd_remove_directory()
 {
+    printf("FileIO::_cmd_remove_directory()\n");
 }
 
 void FileIO::_cmd_delete_file()
 {
+    printf("FileIO::_cmd_delete_file()\n");
 }
 
 void FileIO::_cmd_rename_file()
 {
+    printf("FileIO::_cmd_rename_file()\n");
 }
 
 void FileIO::_cmd_copy_file()
 {
+    printf("FileIO::_cmd_copy_file()\n");
 }
 
 void FileIO::_cmd_seek_start()
 {
+    printf("FileIO::_cmd_seek_start()\n");
 }
 
 void FileIO::_cmd_seek_end()
 {
+    printf("FileIO::_cmd_seek_end()\n");
 }
 
 void FileIO::_cmd_set_seek_position()
 {
+    printf("FileIO::_cmd_set_seek_position()\n");
 }
 
 void FileIO::_cmd_get_seek_position()
 {
+    printf("FileIO::_cmd_get_seek_position()\n");
 }
 
 

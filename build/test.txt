@@ -1,6 +1,10 @@
+
 This is a test file.
 And a second line to test!
 What about a third line?
 Apparently three isn't enough.
 
+This is another line, right here!
+Yup! Look! Up there!
 
+This line was appended to the back.

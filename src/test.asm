@@ -17,6 +17,17 @@ test_file	fcn	"/home/jay/dev/alpha_6809/build/test.txt"
 file_error	fcn	"ERROR: File does not exist!\n"
 file_EOF	fcn	"ERROR: Input past end of file!\n"
 
+file_contents 	fcc	"\n"
+		fcc	"This is a test file.\n"
+		fcc	"And a second line to test!\n"
+		fcc	"What about a third line?\n"
+		fcc	"Apparently three isn't enough.\n"
+		fcc	"\n"
+		fcc	"This is another line, right here!\n"
+		fcc	"Yup! Look! Up there!\n"
+		fcn	"\n"
+append_line	fcn	"This line was appended to the back.\n"
+
 
 skip_data	
 		; save the current color attribute
@@ -25,24 +36,78 @@ skip_data
 		lda	#$F4
 		sta	_ATTRIB
 
-		; push the file path
-		clr	FIO_PATH_POS
-		ldx	#test_file
-0		lda	,x+
-		sta	FIO_PATH_DATA
-		bne	0b
+		jsr	write_the_file
+		jsr	append_the_file
+		jsr	read_the_file
+		rts
+
+write_the_file
+		jsr	push_the_path
+
+		; open the file for writing
+		lda	#FC_OPENWRITE
+		sta	FIO_COMMAND
+		
+		; save the file handle
+		lda	FIO_HANDLE
+		sta	file_handle
+
+		; send the text
+		ldx	#file_contents
+1		
+		lda	,x+
+		beq	2f
+		sta	FIO_IODATA
+		lda	#FC_WRITEBYTE
+		sta	FIO_COMMAND
+		lda	FIO_ERROR
+		beq	1b
+
+2		; close the file
+
+		bra 	done
+
+
+append_the_file
+		jsr	push_the_path
+
 		; does it exist
 		lda	#FC_FILEEXISTS
 		sta	FIO_COMMAND
 		lda	FIO_ERROR
 		cmpa	#FE_NOTFOUND
 		bne	2f
-
 		ldx	#file_error
 		jsr	[VEC_LINEOUT]
-		bra	done
-2
-		; open the file for reading
+		bra	done	
+2		; open the file for appending
+		lda	#FC_OPENAPPEND
+		sta	FIO_COMMAND
+		; save the file handle
+		lda	FIO_HANDLE
+		sta	file_handle
+
+		; send the data
+		ldx	#append_line
+		bra	1b
+		
+		
+read_the_file
+		jsr	push_the_path
+		lda	#$F4
+		sta	_ATTRIB
+
+		; does it exist
+		lda	#FC_FILEEXISTS
+		sta	FIO_COMMAND
+		lda	FIO_ERROR
+		cmpa	#FE_NOTFOUND
+		bne	2f
+not_found	ldx	#file_error
+		jsr	[VEC_LINEOUT]
+		bra	done		
+
+2		; open the file for reading
 		lda	#FC_OPENREAD
 		sta	FIO_COMMAND
 		; save the file handle
@@ -59,10 +124,6 @@ skip_data
 		lda	FIO_IODATA
 		jsr	[VEC_CHROUT] 
 		bra	1b
-
-
-
-
 done
 		; restore the color attrib
 		lda 	color_attrib
@@ -78,3 +139,12 @@ done
 		
 		rts		
 		
+push_the_path
+		; push the file path
+		clr	FIO_PATH_POS
+		ldx	#test_file
+0		lda	,x+
+		sta	FIO_PATH_DATA
+		bne	0b
+
+		rts
