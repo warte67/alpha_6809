@@ -78,13 +78,13 @@ Byte FileIO::read(Word offset, bool debug)
             }
             break;
         }
-        case FIO_COMMAND:   break;
-        case FIO_HANDLE:    data = _fileHandle; break;
-        case FIO_SEEKPOS+0:   break;
-        case FIO_SEEKPOS+1:   break;
-        case FIO_SEEKPOS+2:   break;
-        case FIO_SEEKPOS+3:   break;
-        case FIO_IODATA:    data = _io_data; break;
+        case FIO_COMMAND:   data = IDevice::read(offset);   break;
+        case FIO_HANDLE:    data = _fileHandle;             break;
+        case FIO_SEEKPOS+0: data = (_seek_pos>> 0) & 0xFF;  break;
+        case FIO_SEEKPOS+1: data = (_seek_pos>> 8) & 0xFF;  break;
+        case FIO_SEEKPOS+2: data = (_seek_pos>>16) & 0xFF;  break;
+        case FIO_SEEKPOS+3: data = (_seek_pos>>24) & 0xFF;  break;
+        case FIO_IODATA:    data = _io_data;                break;
     }
     IDevice::write(offset,data);   // update any internal changes too
     return data;
@@ -156,10 +156,10 @@ void FileIO::write(Word offset, Byte data, bool debug)
             break;
         }
         case FIO_HANDLE:    _fileHandle = data; break;
-        case FIO_SEEKPOS+0:   break;
-        case FIO_SEEKPOS+1:   break;
-        case FIO_SEEKPOS+2:   break;
-        case FIO_SEEKPOS+3:   break;
+        case FIO_SEEKPOS+0: _seek_pos = (_seek_pos & 0xFFFFFF00) | (data<< 0);  break;
+        case FIO_SEEKPOS+1: _seek_pos = (_seek_pos & 0xFFFF00FF) | (data<< 8);  break;
+        case FIO_SEEKPOS+2: _seek_pos = (_seek_pos & 0xFF00FFFF) | (data<<16);  break;
+        case FIO_SEEKPOS+3: _seek_pos = (_seek_pos & 0x00FFFFFF) | (data<<24);  break;
         case FIO_IODATA:    _io_data = data; break;
     }
     IDevice::write(offset,data);   // update any internal changes too
@@ -537,57 +537,73 @@ void FileIO::_cmd_get_current_path()
     // printf("FileIO::_cmd_get_current_path()\n");
     path_char_pos = 0;
     filePath = std::filesystem::current_path().string() + "\n";
-    printf("%s\n", filePath.c_str());
+    // printf("%s\n", filePath.c_str());
 }
 
 void FileIO::_cmd_make_directory()
 {
-    printf("FileIO::_cmd_make_directory()\n");
-}
-
-void FileIO::_cmd_rename_directory()
-{
-    printf("FileIO::_cmd_rename_directory()\n");
+    std::string current_path = std::filesystem::current_path().generic_string();
+    std::filesystem::path arg1 = filePath;    
+    std::filesystem::create_directory(arg1);    
 }
 
 void FileIO::_cmd_remove_directory()
 {
     printf("FileIO::_cmd_remove_directory()\n");
+    // see: std::filesystem::remove() for both remove_directory and delete_file
+    // https://en.cppreference.com/w/cpp/filesystem/remove
 }
 
 void FileIO::_cmd_delete_file()
 {
     printf("FileIO::_cmd_delete_file()\n");
+    // see: std::filesystem::remove() for both remove_directory and delete_file
+    // https://en.cppreference.com/w/cpp/filesystem/remove
+}
+
+void FileIO::_cmd_rename_directory()
+{
+    printf("FileIO::_cmd_rename_directory()\n");
+    // see: std::filesystem::rename() for both rename_directory and rename_file
+    // https://en.cppreference.com/w/cpp/filesystem/rename
 }
 
 void FileIO::_cmd_rename_file()
 {
     printf("FileIO::_cmd_rename_file()\n");
+    // see: std::filesystem::rename() for both rename_directory and rename_file
+    // https://en.cppreference.com/w/cpp/filesystem/rename
 }
 
 void FileIO::_cmd_copy_file()
 {
     printf("FileIO::_cmd_copy_file()\n");
+    // see: std::filesystem::copy() to copy files, folders, and symlinks
+    // https://en.cppreference.com/w/cpp/filesystem/copy
 }
 
 void FileIO::_cmd_seek_start()
 {
     printf("FileIO::_cmd_seek_start()\n");
+    // https://en.cppreference.com/w/cpp/io/c/fseek
 }
 
 void FileIO::_cmd_seek_end()
 {
     printf("FileIO::_cmd_seek_end()\n");
+    // https://en.cppreference.com/w/cpp/io/c/fseek
 }
 
 void FileIO::_cmd_set_seek_position()
 {
     printf("FileIO::_cmd_set_seek_position()\n");
+    // https://en.cppreference.com/w/cpp/io/c/fsetpos
 }
 
 void FileIO::_cmd_get_seek_position()
 {
     printf("FileIO::_cmd_get_seek_position()\n");
+    // https://en.cppreference.com/w/cpp/io/c/fgetpos
 }
 
 

@@ -93,4 +93,5 @@ class FileIO : public IDevice
         std::string dir_data;       // directory filename list container
 
         Byte  _io_data = 0;     // data to read / write
+        DWord _seek_pos = 0;    // file seek position
 };
