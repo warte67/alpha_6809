@@ -1,4 +1,4 @@
-; test.asm
+; filetest.asm
 
 		; include "../build/kernel_f000.sym"
 		INCLUDE "kernel_header.asm"
