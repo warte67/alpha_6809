@@ -33,11 +33,11 @@ enum MEMMAP
         // User Ram (28K)
     USER_RAM         = 0x4000, 
         
-        // Paged Memory Bank One (8K)
-    PG_BANK_ONE      = 0xB000, 
-        
-        // Paged Memory Bank Two (8K)
-    PG_BANK_TWO      = 0xD000, 
+        // Banked Memory Buffers (16K total):
+    MEMBANK_BEGIN    = 0xB000, //  start of Banked Memory Region
+    MEMBANK_ONE      = 0xB000, //  Start of Page One (8K)
+    MEMBANK_TWO      = 0xD000, //  Start of Page Two (8K)
+    MEMBANK_END      = 0xF000, //  End of Banked Memory Region
         
         // KERNEL ROM (3.5K)
     KERNEL_ROM       = 0xF000, 

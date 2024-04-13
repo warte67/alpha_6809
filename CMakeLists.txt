@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME}
     ./src/Gamepad.cpp
     ./src/FileIO.cpp
     ./src/Math.cpp
+    ./src/MemBank.cpp
 )
 
 # INCLUDE DIRECTORIES

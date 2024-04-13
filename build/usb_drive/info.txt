@@ -1,0 +1,2 @@
+The 'build/usb_drive' folder (this folder) should be used to simulate a USB Storage device
+as used in the bare-metal Pico_6809 device.

@@ -16,6 +16,7 @@
 #include "Gamepad.hpp"
 #include "FileIO.hpp"
 #include "Math.hpp"
+#include "MemBank.hpp"
 
 Bus::Bus()
 {
@@ -118,17 +119,21 @@ Bus::Bus()
     dev = new RAM("USER_RAM");
     addr += Attach(dev, uram_size);    
 
-	// paged RAM
-    dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",addr, "Paged Memory Bank One (8K)");
-    dev = new RAM("PG_BANK_ONE");
-    addr += Attach(dev, 8*1024);   
+	// paged MEMORY
+    s_membank = new MemBank("MEM_BANK");
+    addr += Attach(s_membank);    
+    // dev->DisplayEnum("",0, "");
+    // dev->DisplayEnum("",addr, "Paged Memory Bank One (8K)");
+    // dev = new RAM("MEM_BANK_ONE");
+    // addr += Attach(dev, 8*1024);   
 
 	// paged ROM
-    dev->DisplayEnum("",0, "");
-    dev->DisplayEnum("",addr, "Paged Memory Bank Two (8K)");
-    dev = new RAM("PG_BANK_TWO");
-    addr += Attach(dev, 8*1024);          
+    // dev->DisplayEnum("",0, "");
+    // dev->DisplayEnum("",addr, "Paged Memory Bank Two (8K)");
+    // s_membank_two = new MemBank("MEM_BANK_TWO");
+    // addr += Attach(s_membank_two);    
+    // dev = new RAM("MEM_BANK_TWO");
+    // addr += Attach(dev, 8*1024);          
 
 	// KERNEL ROM
     dev->DisplayEnum("",0, "");

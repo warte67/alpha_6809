@@ -20,22 +20,39 @@ skip_data
 		sta	color_attrib
 		lda	#$F4
 		sta	_ATTRIB
-		; display the test.asm string
-		ldx	#test_str
-0		lda	,x+
-		beq	1f
-		jsr	[VEC_CHROUT]
-		bra	0b		
-1	
-		; write the folder path to the IO Data port
-		clr 	FIO_PATH_POS
-		ldx	#folder_path
-2		lda	,x+
-		sta	FIO_PATH_DATA
-		bne	2b
-		; create the folder
-		lda	#FC_MAKEDIR
-		sta	FIO_COMMAND
+
+
+		lda	#$12
+		sta	MEMBANK_ONE
+
+		lda	#$34
+		sta	MEMBANK_TWO
+
+		ldx	#MEMBANK_ONE		
+0		sta	,x
+		inc	,x+
+		inca
+		cmpx	#MEMBANK_END
+		blt	0b
+
+
+		
+* 		; display the test.asm string
+* 		ldx	#test_str
+* 0		lda	,x+
+* 		beq	1f
+* 		jsr	[VEC_CHROUT]
+* 		bra	0b		
+* 1	
+* 		; write the folder path to the IO Data port
+* 		clr 	FIO_PATH_POS
+* 		ldx	#folder_path
+* 2		lda	,x+
+* 		sta	FIO_PATH_DATA
+* 		bne	2b
+* 		; create the folder
+* 		lda	#FC_MAKEDIR
+* 		sta	FIO_COMMAND
 
 
 

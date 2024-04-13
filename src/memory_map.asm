@@ -29,11 +29,11 @@ VIDEO_END           equ   $3FFF    ; End of Default Video Space
           ; User Ram (28K)
 USER_RAM            equ   $4000  
         
-          ; Paged Memory Bank One (8K)
-PG_BANK_ONE         equ   $B000  
-        
-          ; Paged Memory Bank Two (8K)
-PG_BANK_TWO         equ   $D000  
+          ; Banked Memory Buffers (16K total):
+MEMBANK_BEGIN       equ   $B000    ;  start of Banked Memory Region
+MEMBANK_ONE         equ   $B000    ;  Start of Page One (8K)
+MEMBANK_TWO         equ   $D000    ;  Start of Page Two (8K)
+MEMBANK_END         equ   $F000    ;  End of Banked Memory Region
         
           ; KERNEL ROM (3.5K)
 KERNEL_ROM          equ   $F000  
@@ -337,6 +337,5 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
 
 

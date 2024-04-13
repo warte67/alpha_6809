@@ -54,6 +54,10 @@ constexpr bool ENABLE_SDL_MOUSE_CURSOR = true;  // when the SDL cursor is displa
 // FileIO Device Constants:
 constexpr Word FILEHANDLESMAX = 256;
 
+// Paged memory file:
+const std::string PAGED_MEMORY_FILENAME = "usb_drive/paged.mem";
+constexpr DWord PAGED_MEMORY_BANKSIZE = 8192;
+
 
 
 /***************************

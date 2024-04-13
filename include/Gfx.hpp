@@ -115,51 +115,16 @@ class Gfx : public IDevice
 };
 
 
-/******
-              
-    GFX_MODE         = 0xFE00, // (Byte) Graphics Mode
-        //           - bit 0-4   = Resolution Modes 0-31
-        //           - bit 5-6   = Bits-Per-Pixel (in bitmap mode)
-        //           - bit 7     = 0:text,  1:bitmap
-        
-    GFX_EMU          = 0xFE01, // (Byte) Emulation Flags
-        //           - bits 0-2  = Active Monitor 0-7
-        //           - bits 3-5  = reserved
-        //           - bit  6    = 0:vsync off, 1:vsync on
-        //           - bit  7    = 0:windowed, 1:fullscreen
-        
-    GFX_VID_END      = 0xFE02, //  (Word Read Only) Top of Display Buffer
-        // Note: This will change to reflect the highest address of 
-        //     the currently running video display mode.
-        
-    GFX_HRES         = 0xFE04, //  (Word Read Only) Horizontal Display Resolution
-        // Note: This will reflect the number of character columns for the 
-        //     text modes, but will reflect pixel columns for bitmap modes. 
-        
-    GFX_VRES         = 0xFE06, //  (Word Read Only) Vertical Display Resolution
-        // Note: This will reflect the number of character rows for the 
-        //     text modes, but will reflect pixel rows for bitmap modes. 
-        
-    GFX_PAL_IDX      = 0xFE02, //  (Byte) Color Palette Index
-        // GFX_PAL_IDX: 0-255
-        // Note: Use this register to set the index into theColor Palette. 
-        //   Set this value prior referencing color data (GFX_PAL_CLR).
-        
-    GFX_PAL_CLR      = 0xFE03, //  (Word) Indexed Color Palette Data
-        // GFX_PAL_CLR: Color Data A4R4G4B4 format
-        // Note: This is the color data for an individual palette entry.
-        //     Write to DSP_PAL_IDX with the index within the color palette
-        //     prior to reading or writing the color data in the GFX_PAL_CLR register.
-        
-    GFX_GLYPH_IDX    = 0xFE05, //  (Byte) Text Glyph Index
-        // GFX_GLYPH_IDX: 0-256
-        // Note: Set this register to index a specific text glyph. Set this value
-        //     prior to updating glyph pixel data.
-        
-    GFX_GLYPH_DATA   = 0xFE06, //  (8-Bytes) Text Glyph Pixel Data Array
-        // GFX_GLYPH_DATA: 8 rows of binary encoded glyph pixel data
-        // Note: Each 8x8 text glyph is composed of 8 bytes. The first byte in this 
-        //     array represents the top line of 8 pixels. Each array entry represents
-        //     a row of 8 pixels.                 
 
- ******/
+/**** NOTES ********************************************************************
+
+
+    ToDo:
+        1)  Add Load / Save palette files. 
+        2)  Add Load / Save Glyph data (Character Fonts)
+        3)  Add methods to copy palette data to/from memory address.
+        4)  Add methods to copy font data to/from memory address.
+        
+
+
+ **** NOTES ********************************************************************/
