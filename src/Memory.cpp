@@ -35,11 +35,11 @@ Byte Memory::read(Word offset, bool debug)
         case MEM_DYN_ADDR+1:    data =  (reg_address>>0) & 0xFF;   break; 
 
         case MEM_DYN_AVAIL+0:    
-            reg_avail = _memAvail(); 
+            reg_avail = MemAvailable(); 
             data =  (reg_avail>>8) & 0xFF;   
             break; 
         case MEM_DYN_AVAIL+1:    
-            reg_avail = _memAvail(); 
+            reg_avail = MemAvailable(); 
             data =  (reg_avail>>0) & 0xFF;   
             break; 
     }
@@ -165,7 +165,7 @@ Word Memory::_findFirstBlockOfSize(Word p_size)
     {        
         addr = itr->first;
         size = itr->second;
-        if (addr-size < _memAvail())  return 0;       // out of memory error
+        if (addr-size < MemAvailable())  return 0;       // out of memory error
         gap = s_lastAddr - addr;
         // printf("GAP of %d at $%04X\n", gap, s_lastAddr);
         // if (s_lastAddr <= memory_btm)   break;       // out of memory error
@@ -190,43 +190,55 @@ void Memory::_onSizeLSB()
 
     // case: when $0000 is written to 'reg_size'...  FREE memory block at 'reg_address'
     if (reg_size == 0)
-    {
-        // free the block at 'reg_address'
-        // printf("Free the block at $%04X\n", reg_address);
-        if (dyn_heap[reg_address] != 0)
-        {
-            // return number of bytes freed
-            reg_size = dyn_heap[reg_address];
-            // dyn_heap[reg_address] = 0;
-            dyn_heap.erase(reg_address);
-        }
-    }    
+        reg_size = MemDelete(reg_address);
     else    // case: when non-zero is written to MEM_DYN_SIZE... ALLOCATE a memory block
+        reg_size = MemAlloc(reg_size);
+
+    if (false)  // display the heap table
     {
-        Word new_addr = _findFirstBlockOfSize(reg_size);
-        if (new_addr != 0)
-        {    
-            dyn_heap[new_addr] = reg_size;
-            reg_address = new_addr;
-        }
-        else
+        printf("HEAP TABLE (%d):\n", (int)dyn_heap.size());
+        std::map<Word,Word>::reverse_iterator itr;
+        for (itr = dyn_heap.rbegin(); itr != dyn_heap.rend(); itr++)
         {
-            reg_size = 0;
-            // Bus::Error("Out of Extended Memory");            
+            printf("[$%04X] size: %d\n", itr->first, itr->second);
         }
-        // printf("Allocate $%04X bytes at $%04X\n", reg_size, reg_address);
     }
-    // // display the heap table
-    // printf("HEAP TABLE (%d):\n", (int)dyn_heap.size());
-    // std::map<Word,Word>::reverse_iterator itr;
-    // for (itr = dyn_heap.rbegin(); itr != dyn_heap.rend(); itr++)
-    // {
-    //     printf("[$%04X] size: %d\n", itr->first, itr->second);
-    // }
 }
 
+// returns address of the block in the extended heap
+Word Memory::MemAlloc(Word size)
+{
+
+    Word new_addr = _findFirstBlockOfSize(reg_size);
+    if (new_addr != 0)
+    {    
+        dyn_heap[new_addr] = reg_size;
+        reg_address = new_addr;
+    }
+    else
+    {
+        reg_size = 0;
+        // Bus::Error("Out of Extended Memory");            
+    }
+    return reg_size;
+}
+
+// frees memory and returns number of bytes de-allocated
+Word Memory::MemDelete(Word addr)
+{
+    if (dyn_heap[reg_address] != 0)
+    {
+        // return number of bytes freed
+        reg_size = dyn_heap[reg_address];
+        // dyn_heap[reg_address] = 0;
+        dyn_heap.erase(reg_address);
+    }
+    return reg_size;
+}  
+
+
 // return the number of unallocated bytes on the heap
-Word Memory::_memAvail()
+Word Memory::MemAvailable()
 {
     int mem_size = 0xFFFF - memory_btm;
     for (auto& [addr,size] : dyn_heap)
