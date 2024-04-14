@@ -156,6 +156,7 @@ Word Memory::_findFirstBlockOfSize(Word p_size)
 {
     int addr = 0xFFFF;
     static int s_lastAddr = addr;
+    // s_lastAddr = addr;
     int gap = 0;
     int size = 0;
     
@@ -164,8 +165,10 @@ Word Memory::_findFirstBlockOfSize(Word p_size)
     {        
         addr = itr->first;
         size = itr->second;
+        if (addr-size < _memAvail())  return 0;       // out of memory error
         gap = s_lastAddr - addr;
         // printf("GAP of %d at $%04X\n", gap, s_lastAddr);
+        // if (s_lastAddr <= memory_btm)   break;       // out of memory error
         if (gap >= p_size)
         {
             // printf("GAP of %d at $%04X\n", gap, s_lastAddr);
@@ -175,7 +178,7 @@ Word Memory::_findFirstBlockOfSize(Word p_size)
         // printf("[$%04X].size=%d\n", addr, size);
     }
     addr = s_lastAddr;
-    if ((addr - p_size) < memory_btm)    return 0;      // out of memory error
+    // if ((addr - p_size) < memory_btm)    return 0;      // out of memory error
     // printf("FALL THROUGH: $%04X\n", addr);
     return addr;
 }
@@ -201,8 +204,16 @@ void Memory::_onSizeLSB()
     else    // case: when non-zero is written to MEM_DYN_SIZE... ALLOCATE a memory block
     {
         Word new_addr = _findFirstBlockOfSize(reg_size);
-        dyn_heap[new_addr] = reg_size;
-        reg_address = new_addr;
+        if (new_addr != 0)
+        {    
+            dyn_heap[new_addr] = reg_size;
+            reg_address = new_addr;
+        }
+        else
+        {
+            reg_size = 0;
+            // Bus::Error("Out of Extended Memory");            
+        }
         // printf("Allocate $%04X bytes at $%04X\n", reg_size, reg_address);
     }
     // // display the heap table
@@ -217,5 +228,14 @@ void Memory::_onSizeLSB()
 // return the number of unallocated bytes on the heap
 Word Memory::_memAvail()
 {
-    return 0xCCAA;
+    int mem_size = 0xFFFF - memory_btm;
+    for (auto& [addr,size] : dyn_heap)
+    {
+        if (mem_size - size >= 0)
+            mem_size -= size;
+        else
+            break;
+    }
+
+    return (Word)mem_size;
 }

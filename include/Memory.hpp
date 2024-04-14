@@ -48,7 +48,7 @@ class Memory : public IDevice
         Word reg_address = 0;       // dymamic memory address pointer
         Word reg_avail = 0;         // amount of available dynamic memory
         std::map<Word, Word> dyn_heap;    // first = address, second = size
-        int memory_btm = 0x0000;    // current bottom of the memory heap
+        int memory_btm = 0x1000;    // current bottom of the memory heap
 
         // helpers
         Word _findFirstBlockOfSize(Word size);  // find an available block of SIZE
