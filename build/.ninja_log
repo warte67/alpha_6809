@@ -6,12 +6,9 @@
 5	1562	1713027669625679195	CMakeFiles/main.dir/src/Gamepad.cpp.o	3e5b2ac06c0cd165
 1	1702	1713027669765683297	CMakeFiles/main.dir/src/Gfx.cpp.o	700ac23bb0ed37c9
 2	2007	1713027670069692203	CMakeFiles/main.dir/src/Keyboard.cpp.o	e90126e6268de7f8
-1	2012	1713027670073692320	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
+1	1310	1713029047763522436	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
 1	2009	1713027670069692203	CMakeFiles/main.dir/src/C6809.cpp.o	5710ebea0c95313c
-1137	2143	1713027670205696188	CMakeFiles/main.dir/src/MemBank.cpp.o	1d69b3e98fa5eaa
-2143	2264	1713027670325699704	main	3ed63ef741d4dc97
+1	776	1713029047231508067	CMakeFiles/main.dir/src/MemBank.cpp.o	1d69b3e98fa5eaa
+1310	1435	1713029047891525893	main	3ed63ef741d4dc97
 2	1421	1713027669481674976	CMakeFiles/main.dir/src/Mouse.cpp.o	a06ab6b64a9b8040
 15	1678	1713027669741682593	CMakeFiles/main.dir/src/FileIO.cpp.o	5cf8d0d31e88195a
-1	776	1713029047231508067	CMakeFiles/main.dir/src/MemBank.cpp.o	1d69b3e98fa5eaa
-1	1310	1713029047763522436	CMakeFiles/main.dir/src/Bus.cpp.o	b988a977d17ba6a
-1310	1435	1713029047891525893	main	3ed63ef741d4dc97

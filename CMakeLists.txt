@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME}
     ./src/FileIO.cpp
     ./src/Math.cpp
     ./src/MemBank.cpp
+    ./src/Memory.cpp
 )
 
 # INCLUDE DIRECTORIES

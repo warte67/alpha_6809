@@ -133,6 +133,13 @@ build CMakeFiles/main.dir/src/MemBank.cpp.o: CXX_COMPILER__main_unscanned_Debug 
   OBJECT_DIR = CMakeFiles/main.dir
   OBJECT_FILE_DIR = CMakeFiles/main.dir/src
 
+build CMakeFiles/main.dir/src/Memory.cpp.o: CXX_COMPILER__main_unscanned_Debug /home/jay/dev/alpha_6809/src/Memory.cpp || cmake_object_order_depends_target_main
+  DEP_FILE = CMakeFiles/main.dir/src/Memory.cpp.o.d
+  FLAGS = -g -fexceptions -Wall
+  INCLUDES = -I/home/jay/dev/alpha_6809/./include -isystem /usr/include/SDL2
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir/src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target main
@@ -141,7 +148,7 @@ build CMakeFiles/main.dir/src/MemBank.cpp.o: CXX_COMPILER__main_unscanned_Debug 
 #############################################
 # Link the executable main
 
-build main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/src/main.cpp.o CMakeFiles/main.dir/src/IDevice.cpp.o CMakeFiles/main.dir/src/Bus.cpp.o CMakeFiles/main.dir/src/Gfx.cpp.o CMakeFiles/main.dir/src/Debug.cpp.o CMakeFiles/main.dir/src/C6809.cpp.o CMakeFiles/main.dir/src/Mouse.cpp.o CMakeFiles/main.dir/src/Keyboard.cpp.o CMakeFiles/main.dir/src/Gamepad.cpp.o CMakeFiles/main.dir/src/FileIO.cpp.o CMakeFiles/main.dir/src/Math.cpp.o CMakeFiles/main.dir/src/MemBank.cpp.o | /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a
+build main: CXX_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/src/main.cpp.o CMakeFiles/main.dir/src/IDevice.cpp.o CMakeFiles/main.dir/src/Bus.cpp.o CMakeFiles/main.dir/src/Gfx.cpp.o CMakeFiles/main.dir/src/Debug.cpp.o CMakeFiles/main.dir/src/C6809.cpp.o CMakeFiles/main.dir/src/Mouse.cpp.o CMakeFiles/main.dir/src/Keyboard.cpp.o CMakeFiles/main.dir/src/Gamepad.cpp.o CMakeFiles/main.dir/src/FileIO.cpp.o CMakeFiles/main.dir/src/Math.cpp.o CMakeFiles/main.dir/src/MemBank.cpp.o CMakeFiles/main.dir/src/Memory.cpp.o | /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2main.a
   FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libSDL2.so  /usr/lib/x86_64-linux-gnu/libSDL2main.a
   OBJECT_DIR = CMakeFiles/main.dir

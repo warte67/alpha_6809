@@ -17,14 +17,13 @@ class MemBank : public IDevice
         // structures used
 
         enum BANK_TYPE {
-            NOT_ASSIGNED = 0,   // unused bank type
-            RAM_VOLITILE,       // standard random access memory (RAM)
-            RAM_PERSIST,        // persistant RAM... data is loaded and saved
+            RANDOM_ACCESS=0,    // standard random access memory (RAM)
+            PERSISTANT,         // persistant RAM... data is loaded and saved
             READ_ONLY,          // loaded on boot... read only memory (ROM)
             BANK_TYPE_MAX       // Count of these enumerated types
         };
         struct BANK_NODE {
-            BANK_TYPE type = BANK_TYPE::RAM_VOLITILE;  
+            BANK_TYPE type = BANK_TYPE::PERSISTANT;  
             DWord seek_pos;     // byte position of this bank data within the file
         };
         struct BANK_HEADER {
@@ -54,6 +53,14 @@ class MemBank : public IDevice
         void write(Word offset, Byte data, bool debug = false) override;
 
         // public methods
+        void set_bank_1_page(Byte page);
+        void set_bank_2_page(Byte page);
+        Byte get_bank_1_page()                  { return _bank_header.bank_1_index; }
+        Byte get_bank_2_page()                  { return _bank_header.bank_2_index; }
+        void set_bank_1_type(BANK_TYPE type)    { _bank_header.bank_node[get_bank_1_page()].type = type; }
+        void set_bank_2_type(BANK_TYPE type)    { _bank_header.bank_node[get_bank_2_page()].type = type; }
+        BANK_TYPE get_bank_1_type()             { return _bank_header.bank_node[get_bank_1_page()].type; }
+        BANK_TYPE get_bank_2_type()             { return _bank_header.bank_node[get_bank_2_page()].type; }
 
     private:
 
@@ -63,55 +70,18 @@ class MemBank : public IDevice
         bool _newDefaultFile();         // create a new 'paged.mem' bank file if not exists
         bool _loadHeader();             // load the header info from the 'paged.mem' file
         bool _saveHeader();             // save the header info to the 'paged.mem' file
+        FILE* _fopen(const std::string filename);       // open a file with error handling
 
 };
 
 
-/**** NOTES ********************************************************************
-
-
-    FILE STRUCTURE:
-        HEADER "M_BANK\0" (char [7])    ; null-terminated file identifier string
-        RAW_FLOAT (4 Bytes)             ; RAW float representing the file version
-        BANK_1_INDEX (1 Byte)           ; default index for bank one
-        BANK_2_INDEX (1 Byte)           ; default index for bank two
-        EXEC_VECTOR                     ; cpu address to begin code execution
-                                        ;   if zero, do not autostart 
-        BANK_NODE[256]                  ; an array of BANK_NODE structures defining 
-                                        ;   the stored bank data.
-        BANK_DATA x BANK_COUNT          ; the stored bank data 
-
-    BANK_TYPE
-        NOT_ASSIGNED    ; unused memory bank
-        RAM             ; Standard Random Access Memory (RAM). Zero's out on boot.
-        RAM_PERSIST     ; Persistent RAM. Data is loaded on boot. Saved on quit.
-        ROM             ; Loaded on boot. Read Only Memory (ROM).
-    BANK_NODE
-        BANK_TYPE,
-        SEEK_POSITION   ; (DWord) File Seek position of the start of this bank
-                        ; (all banks are 8K in size)
-
-    While the 6809 is quite capable of delivering completely position independant 
-    code, care should be taken to position program code into the bank space for 
-    which it was originally designed by distributing it within an odd or even bank:
-        Odd indexed banks should use bank ONE address space ($B000-$CFFF).
-        Even indexed banks should use bank TWO address space ($D000-$EFFF).
-
-    As a rule, all code banks should begin execution from the first address of their
-    bank. Use a JMP {addr} at the start of the bank if needed. If the first byte of
-    a loaded memory bank is a NULL (NEG {direct}), it is asumed to be non-executable.
-
-    On baremetal devices, the memory bank file associations are to be stored on
-    the USB storage media. The PI PICOs are each limited to 2MB on-board flash
-    which should be solely used for firmware. The USB drives will be used as the
-    computers "hard drive(s)." Associating a file with RAM allows for persistent 
-    storage.
-
-    Both banks are set as basic RAM (no file) by default.
-
-    When switching between banks, the memory bank should first be written (updated)
-    then the bank being switched in can be read. Will need a public interface
-    method for actual bank switching.
-
-
- **** NOTES ********************************************************************/
+/**** NOTES *******************************************************************************
+ * 
+ *  Interface: 
+ *          set_bank_1_page(page_index)     // set bank ones page (0-255)
+ *          set_bank_2_page(page_index)     // set bank twos page (0-255)
+ *  
+ *          set_bank_1_type(BANK_TYPE)      // set bank ones type to ROM, RAM, or PERSIST
+ *          set_bank_2_type(BANK_TYPE)      // set bank ones type to ROM, RAM, or PERSIST
+ * 
+ **** NOTES *******************************************************************************/

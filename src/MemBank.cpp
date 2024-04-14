@@ -10,28 +10,23 @@
 
 Byte MemBank::read(Word offset, bool debug) 
 {
-    Byte data = IDevice::read(offset);
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
-
-    // BANK ONE = $B000-$CFFF
-    // BANK TWO = $D000-$EFFF    
-
-    // ...
-
-    IDevice::write(offset,data);   // update any internal changes too
-    return data;
+    return IDevice::read(offset);
 }
 void MemBank::write(Word offset, Byte data, bool debug) 
 {
     // printf("%s::write($%04X, $%02X)\n", Name().c_str(), offset, data);    
 
     // BANK ONE = $B000-$CFFF
+    if (offset >= 0xB000 && offset <= 0xCFFF)
+        if (_bank_header.bank_node[_bank_header.bank_1_index].type != BANK_TYPE::READ_ONLY)
+            IDevice::write(offset,data);
+
     // BANK TWO = $D000-$EFFF    
-
-    // DO NOT allow writes when ROM is specified in this bank
-    // ...
-
-    IDevice::write(offset,data);   // update any internal changes too
+    if (offset >= 0xD000 && offset <= 0xEFFF)
+        if (_bank_header.bank_node[_bank_header.bank_2_index].type != BANK_TYPE::READ_ONLY)
+            IDevice::write(offset,data);
+    // IDevice::write(offset,data);   // update any internal changes too
 }
 
 Word MemBank::OnAttach(Word nextAddr) 
@@ -65,11 +60,33 @@ void MemBank::OnInit()
     _loadHeader();
 
     // load the current banked memory pages from the 'paged.mem' file
-    // ...
-
-    for (int t=0; t<256; t++)
+    if ((_bank_header.bank_node[_bank_header.bank_1_index].type != BANK_TYPE::RANDOM_ACCESS) ||
+        (_bank_header.bank_node[_bank_header.bank_2_index].type != BANK_TYPE::RANDOM_ACCESS))
     {
-        printf("$%04X\n", _bank_header.bank_node[t].seek_pos);
+        FILE* fp = _fopen(PAGED_MEMORY_FILENAME);
+        if (fp)
+        {
+            // load bank one        
+            int addr = 0xB000;
+            int seek_pos = 0;
+            if (_bank_header.bank_node[_bank_header.bank_1_index].type != BANK_TYPE::RANDOM_ACCESS)
+            {
+                seek_pos = _bank_header.bank_node[_bank_header.bank_1_index].seek_pos;
+                fseek(fp, seek_pos, SEEK_SET);        
+                for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                    IDevice::write(t, fgetc(fp));        // Bus::Write(t, fgetc(fp));
+            }
+            // load bank two
+            if (_bank_header.bank_node[_bank_header.bank_2_index].type != BANK_TYPE::RANDOM_ACCESS)
+            {
+                addr = 0xD000;
+                seek_pos = _bank_header.bank_node[_bank_header.bank_2_index].seek_pos;
+                fseek(fp, seek_pos, SEEK_SET);
+                for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                    IDevice::write(t, fgetc(fp));        // Bus::Write(t, fgetc(fp));
+            }
+            fclose(fp);
+        }
     }
 }
 void MemBank::OnQuit() 
@@ -80,7 +97,8 @@ void MemBank::OnQuit()
     _saveHeader();
 
     // save the current banked memory pages to the 'paged.mem' file
-    // ...
+    set_bank_1_page(_bank_header.bank_1_index);
+    set_bank_2_page(_bank_header.bank_2_index);
 }
 
 // create a new 'paged.mem' bank file if one does not already exist
@@ -123,48 +141,119 @@ bool MemBank::_fileExists(const std::string& filename)
     return true;
 }
 
-// load the header info from the 'paged.mem' file
+
 bool MemBank::_loadHeader()
 {
-    if (!_fileExists(PAGED_MEMORY_FILENAME)) {
-        std::stringstream ss;
-        ss << "Unable to find the paged memory file: \n" << PAGED_MEMORY_FILENAME << std::endl;
-        Bus::Error(ss.str());
-        return false;
+    FILE *fp = _fopen(PAGED_MEMORY_FILENAME);
+    if (fp)
+    {
+        // load the header info from the 'paged.mem' file
+        fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
+        fread((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+        // close the file
+        fclose(fp);
+        return true;
     }
-    FILE* fp = fopen(PAGED_MEMORY_FILENAME.c_str(), "rb+");
-    if (!fp) {
-        std::stringstream ss;
-        ss << "Unable to open the paged memory file: \n" << PAGED_MEMORY_FILENAME << std::endl;
-        Bus::Error(ss.str());
-        return false;
-    }
-    fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
-    fread((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
-    fclose(fp);
-    return true;
+    return false;
 }
 
-// save the header info to the 'paged.mem' file
 bool MemBank::_saveHeader()
+{
+    FILE *fp = _fopen(PAGED_MEMORY_FILENAME);
+    if (fp)
+    {
+        // save the header info to the 'paged.mem' file
+        fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
+        fwrite((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+        // close the file
+        fclose(fp);
+        return true;
+    }
+    return false;
+}
+
+FILE* MemBank::_fopen(const std::string filename)
 {
     if (!_fileExists(PAGED_MEMORY_FILENAME)) {
         std::stringstream ss;
         ss << "Unable to find the paged memory file: \n" << PAGED_MEMORY_FILENAME << std::endl;
         Bus::Error(ss.str());
-        return false;
+        return nullptr;
     }
     FILE* fp = fopen(PAGED_MEMORY_FILENAME.c_str(), "rb+");
     if (!fp) {
         std::stringstream ss;
         ss << "Unable to open the paged memory file: \n" << PAGED_MEMORY_FILENAME << std::endl;
         Bus::Error(ss.str());
-        return false;
+        return nullptr;
     }
-    fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
-    fwrite((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
-    fclose(fp);
-    return true;
+    return fp;
+}
+
+void MemBank::set_bank_1_page(Byte idx)
+{
+    FILE* fp = _fopen(PAGED_MEMORY_FILENAME);
+    if (fp)
+    {
+        // save the current bank to file
+        int addr = 0xB000;
+        int seek_pos = _bank_header.bank_node[_bank_header.bank_1_index].seek_pos;
+        if (_bank_header.bank_node[_bank_header.bank_1_index].type != BANK_TYPE::RANDOM_ACCESS)
+        {
+            fseek(fp, seek_pos, SEEK_SET);
+            for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                fputc(Bus::Read(t),fp);
+        }
+        
+        // update header with the new index
+        _bank_header.bank_1_index = idx;
+        fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
+        fwrite((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+
+        // load the new bank from file
+        seek_pos = _bank_header.bank_node[_bank_header.bank_1_index].seek_pos;
+        if (_bank_header.bank_node[_bank_header.bank_1_index].type != BANK_TYPE::RANDOM_ACCESS)
+        {
+            fseek(fp, seek_pos, SEEK_SET);
+            for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                IDevice::write(t, fgetc(fp));        // Bus::Write(t, fgetc(fp));
+        }
+        // close the file
+        fclose(fp);
+    }
+}
+
+void MemBank::set_bank_2_page(Byte idx)
+{
+    FILE* fp = _fopen(PAGED_MEMORY_FILENAME);
+    if (fp)
+    {
+        // save the current bank to file
+        int addr = 0xD000;
+        int seek_pos = _bank_header.bank_node[_bank_header.bank_2_index].seek_pos;
+        if (_bank_header.bank_node[_bank_header.bank_2_index].type != BANK_TYPE::RANDOM_ACCESS)
+        {
+            fseek(fp, seek_pos, SEEK_SET);
+            for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                fputc(Bus::Read(t),fp);
+        }
+        
+        // update header with the new index
+        _bank_header.bank_2_index = idx;
+        fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
+        fwrite((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+
+        // load the new bank from file
+        seek_pos = _bank_header.bank_node[_bank_header.bank_2_index].seek_pos;
+        if (_bank_header.bank_node[_bank_header.bank_2_index].type != BANK_TYPE::RANDOM_ACCESS)
+        {
+            fseek(fp, seek_pos, SEEK_SET);
+            for (DWord t=addr; t<addr+PAGED_MEMORY_BANKSIZE; t++)
+                IDevice::write(t, fgetc(fp));        // Bus::Write(t, fgetc(fp));
+        }
+        // close the file
+        fclose(fp);
+    }
 }
 
 

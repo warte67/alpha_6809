@@ -17,6 +17,7 @@
 #include "FileIO.hpp"
 #include "Math.hpp"
 #include "MemBank.hpp"
+#include "Memory.hpp"
 
 Bus::Bus()
 {
@@ -122,18 +123,6 @@ Bus::Bus()
 	// paged MEMORY
     s_membank = new MemBank("MEM_BANK");
     addr += Attach(s_membank);    
-    // dev->DisplayEnum("",0, "");
-    // dev->DisplayEnum("",addr, "Paged Memory Bank One (8K)");
-    // dev = new RAM("MEM_BANK_ONE");
-    // addr += Attach(dev, 8*1024);   
-
-	// paged ROM
-    // dev->DisplayEnum("",0, "");
-    // dev->DisplayEnum("",addr, "Paged Memory Bank Two (8K)");
-    // s_membank_two = new MemBank("MEM_BANK_TWO");
-    // addr += Attach(s_membank_two);    
-    // dev = new RAM("MEM_BANK_TWO");
-    // addr += Attach(dev, 8*1024);          
 
 	// KERNEL ROM
     dev->DisplayEnum("",0, "");
@@ -177,6 +166,13 @@ Bus::Bus()
     s_math = new Math();
     addr += Attach(s_math);
 
+    // NOTE: the MemBank Paged Memory device
+    //      was allocated / attached earlier
+
+    // attach the memory device
+    s_memory = new Memory();
+    addr += Attach(s_memory);
+
 
 
 
@@ -184,7 +180,8 @@ Bus::Bus()
     int reserved = 0xfff0 - addr;
     std::stringstream s;
     addr += reserved;
-    dev = new ROM("RESERVED");
+    dev->DisplayEnum("",0,"Reserved for Future Hardware Devices");
+    dev = new ROM("RSRVD_DEVICE_MEM");
     addr += Attach(dev, reserved);
     s << reserved << " bytes in reserve";
     dev->DisplayEnum("",addr, s.str());

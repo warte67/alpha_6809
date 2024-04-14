@@ -19,6 +19,7 @@ class Gamepad;
 class FileIO;
 class Math;
 class MemBank;
+class Memory;
 
 class Bus : public IDevice
 {
@@ -52,6 +53,7 @@ class Bus : public IDevice
         inline static FileIO* s_fileio = nullptr;
         inline static Math* s_math = nullptr;
         inline static MemBank* s_membank = nullptr;
+        inline static Memory* s_memory = nullptr;
 
     public:
 		~Bus();									// destructor
@@ -108,6 +110,7 @@ class Bus : public IDevice
         inline static FileIO* GetFileIO() { return s_fileio; }
         inline static Math* GetMath() { return s_math; }
         inline static MemBank* GetMemBank() { return s_membank; }
+        inline static Memory* GetMemory() { return s_memory; }
 
         void load_hex(const char* filename);
 

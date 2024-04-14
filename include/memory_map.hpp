@@ -327,8 +327,24 @@ enum MEMMAP
         // End MATH_OPERATION's (MOPS)
     MATH_END         = 0xFF7D, // end of math co-processor registers
         
-    RESERVED         = 0xFF7D, 
-        // 115 bytes in reserve
+        // Memory Device Hardware Registers
+    MEM_BEGIN        = 0xFF7D, //  Start of Memory Device Hardware Registers
+    MEM_BANK1_SELECT = 0xFF7E, // (Byte) select 8k page for bank 1 (0-255)
+    MEM_BANK2_SELECT = 0xFF7F, // (Byte) select 8k page for bank 2 (0-255)
+    MEM_BANK1_TYPE   = 0xFF80, // (Byte) memory bank 1 type
+    MEM_BANK2_TYPE   = 0xFF81, // (Byte) memory bank 2 type
+    MEM_TYPE_RAM     = 0x0000, //      random access memory (RAM)
+    MEM_TYPE_PERSIST = 0x0001, //      persistent memory (saved RAM)
+    MEM_TYPE_ROM     = 0x0002, //      read only memory (ROM)
+    MEM_EXT_ADDR     = 0xFF82, // (Word) Extended Memory Address Port
+    MEM_EXT_PITCH    = 0xFF84, // (Word) number of bytes per line
+    MEM_EXT_WIDTH    = 0xFF86, // (Word) width before skipping to next line
+    MEM_EXT_DATA     = 0xFF88, // (Byte) External Memory Data Port
+    MEM_END          = 0xFF89, //  End of Memory Device Hardware Registers
+        
+        // Reserved for Future Hardware Devices
+    RSRVD_DEVICE_MEM = 0xFF89, 
+        // 103 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 
@@ -344,5 +360,4 @@ enum MEMMAP
 
 
 #endif // __MEMORY_MAP_H__
-
 
