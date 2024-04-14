@@ -107,7 +107,6 @@ Word Mouse::OnAttach(Word nextAddr)
     DisplayEnum("", 0, "");
 
     return nextAddr - old_addr;
-
 }
 
 void Mouse::_show_SDL_cursor(bool b)
@@ -139,6 +138,8 @@ void Mouse::OnInit()
         clr.b = gfx->blu(i);
         _csr_palette.push_back(clr);
     }
+    // // set mouse color zero to 255 alpha
+    // _csr_palette[0].a = 255;
 }
 void Mouse::OnQuit() 
 {

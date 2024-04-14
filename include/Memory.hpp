@@ -5,6 +5,8 @@
 // ***********************************
 #pragma once
 
+#include <array>
+#include <map>
 #include "IDevice.hpp" 
 
 class Memory : public IDevice
@@ -14,39 +16,67 @@ class Memory : public IDevice
         Memory(std::string sName) : IDevice(sName) {}
         ~Memory() {};
 
+        // unused virtuals
+		void OnInit() override {}
+		void OnQuit() override {}
+		void OnActivate() override {}
+		void OnDeactivate() override {}
+		void OnEvent(SDL_Event* evnt) override {}
+		void OnUpdate(float fElapsedTime) override {}
+		void OnRender() override {}
+
         // pure virtuals
 		Word OnAttach(Word nextAddr) override;
-		void OnInit() override;
-		void OnQuit() override;
-		void OnActivate() override;
-		void OnDeactivate() override;
-		void OnEvent(SDL_Event* evnt) override;
-		void OnUpdate(float fElapsedTime) override;
-		void OnRender() override;
 
         // virtuals
         Byte read(Word offset, bool debug = false) override;
         void write(Word offset, Byte data, bool debug = false) override;
+
+        // public methods
+        Word MemAlloc(Word size);   // returns address of the block in the extended heap
+        Word MemDelete(Word addr);  // frees memory and returns number of bytes de-allocated
+        Word MemAvailable();        // returns the number of bytes available in the heap
+
+    private:
+
+        Word reg_addr = 0;          // address register
+        Word reg_pitch = 1;         // pitch register
+        Word reg_width = 1;         // width register
+        std::array<Byte, 65536> ext_memory = {0};
+
+        Word reg_size = 0;          // dynamic memory size register
+        Word reg_address = 0;       // dymamic memory address pointer
+        Word reg_avail = 0;         // amount of available dynamic memory
+        std::map<Word, Word> dyn_heap;    // first = address, second = size
+        int memory_btm = 0x0000;    // current bottom of the memory heap
+
+        // helpers
+        Word _findFirstBlockOfSize(Word size);  // find an available block of SIZE
+        void _onSizeLSB();          // fires when the LSB of MEM_DYN_SIZE is written to
+        Word _memAvail();           // return the number of unallocated bytes on the heap
 };
 
 
 /**** NOTES *******************************************************************************
  * 
- *  MemBank Interface: 
+ *  Dynamic Memory Idea:
+ *      SIZE        (Word) allocate on non-zero (LSB) write... free on zero (LSB) write
+ *      ADDR        (Word) start address of allocated memory... start address to free
+ *      FREE       (Word) returns the number of bytes available in the heap 
  * 
- *      enum BANK_TYPE 
- *      {
- *          INVALID = 0,        // unused bank type
- *          RAM_VOLITILE,       // standard random access memory (RAM)
- *          RAM_PERSIST,        // persistant RAM... data is loaded and saved
- *          READ_ONLY,          // loaded on boot... read only memory (ROM)
- *          BANK_TYPE_MAX       // Count of these enumerated types
- *      };
+ *                      When SIZE reads as $0000 there was an allocation error
+ *                      When writing $00 to the LSB of SIZE, the memory node pointed to 
+ *                          by ADDR will be released. If there was an error freeing the 
+ *                          memory, ADDR will report as $0000.
+ *                      
  * 
- *      set_bank_1_page(page_index)     // set bank ones page (0-255)
- *      set_bank_2_page(page_index)     // set bank twos page (0-255)
- *
- *      set_bank_1_type(BANK_TYPE)      // set bank ones type to ROM, RAM, or PERSIST
- *      set_bank_2_type(BANK_TYPE)      // set bank ones type to ROM, RAM, or PERSIST
+ * 
+ *  Options to include in the Gfx Device ???
+ * 
+ *  Extended Display Bitap Buffer:
+ *      $0000-{required buffer size}    ; buffer size takes from the dynamic memory pool
+ *  
+ *      Extended Display uses the default display resolution as per the Gfx device.
+ *      Number of bitplanes, however, may be increased if they fit.
  * 
  **** NOTES *******************************************************************************/

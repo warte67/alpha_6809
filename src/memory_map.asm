@@ -324,7 +324,7 @@ MOP_LASTOP          equ   $0038    ;        last implemented math operation
 MATH_END            equ   $FF7D    ; end of math co-processor registers
         
           ; Memory Device Hardware Registers
-MEM_BEGIN           equ   $FF7D    ;  Start of Memory Device Hardware Registers
+MEM_BEGIN           equ   $FF7D    ; Start of Memory Device Hardware Registers
 MEM_BANK1_SELECT    equ   $FF7E    ; (Byte) select 8k page for bank 1 (0-255)
 MEM_BANK2_SELECT    equ   $FF7F    ; (Byte) select 8k page for bank 2 (0-255)
 MEM_BANK1_TYPE      equ   $FF80    ; (Byte) memory bank 1 type
@@ -332,15 +332,25 @@ MEM_BANK2_TYPE      equ   $FF81    ; (Byte) memory bank 2 type
 MEM_TYPE_RAM        equ   $0000    ;      random access memory (RAM)
 MEM_TYPE_PERSIST    equ   $0001    ;      persistent memory (saved RAM)
 MEM_TYPE_ROM        equ   $0002    ;      read only memory (ROM)
+
 MEM_EXT_ADDR        equ   $FF82    ; (Word) Extended Memory Address Port
 MEM_EXT_PITCH       equ   $FF84    ; (Word) number of bytes per line
 MEM_EXT_WIDTH       equ   $FF86    ; (Word) width before skipping to next line
 MEM_EXT_DATA        equ   $FF88    ; (Byte) External Memory Data Port
-MEM_END             equ   $FF89    ;  End of Memory Device Hardware Registers
+
+MEM_DYN_SIZE        equ   $FF89    ; (Word) dynamic memory block size 
+          ;      Notes: Memory allocation occurs when the 
+          ;             least-significant byte is written.
+          ;             Reads as total number of bytes allocated
+          ;             or freed. When $0000 is written to this 
+          ;             port, memory node at MEM_DYN_ADDR is freed.
+MEM_DYN_ADDR        equ   $FF8B    ; (Word) address of a dynamic memory node
+MEM_DYN_AVAIL       equ   $FF8D    ; (Word) number of non-allocated bytes
+MEM_END             equ   $FF8F    ; End of Memory Device Hardware Registers
         
           ; Reserved for Future Hardware Devices
-RSRVD_DEVICE_MEM    equ   $FF89  
-          ; 103 bytes in reserve
+RSRVD_DEVICE_MEM    equ   $FF8F  
+          ; 97 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  
@@ -353,3 +363,6 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
+
+
+
