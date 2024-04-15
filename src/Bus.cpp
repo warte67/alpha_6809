@@ -142,7 +142,7 @@ Bus::Bus()
     s_gfx = new Gfx();  // non-enforced singleton
     addr += Attach(s_gfx);
 
-    // attach the debug device
+    // attach the debug device (also SYS devices)
     s_debug = new Debug();
     addr += Attach(s_debug);
 

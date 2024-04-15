@@ -167,7 +167,7 @@ k_init_0	clr	,x+		; clear the next byte
 		lda	#$0C		; set the default CPU clock speed
 		sta	SYS_STATE	;	to 2.0 mhz.
 		; default graphics mode
-		lda	#$00		; default: 0x03 = 40x25 text
+		lda	#$03		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
 		; default text color attribute

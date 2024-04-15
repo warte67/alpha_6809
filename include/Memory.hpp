@@ -11,6 +11,8 @@
 
 class Memory : public IDevice
 {
+    friend class Gfx;   // for private access to 'ext_memory' and 'memory_btm'
+
     public:
         Memory() { _deviceName = "Memory"; }
         Memory(std::string sName) : IDevice(sName) {}
@@ -22,11 +24,11 @@ class Memory : public IDevice
 		void OnActivate() override {}
 		void OnDeactivate() override {}
 		void OnEvent(SDL_Event* evnt) override {}
-		void OnUpdate(float fElapsedTime) override {}
 		void OnRender() override {}
 
         // pure virtuals
 		Word OnAttach(Word nextAddr) override;
+		void OnUpdate(float fElapsedTime) override;
 
         // virtuals
         Byte read(Word offset, bool debug = false) override;
@@ -39,6 +41,7 @@ class Memory : public IDevice
 
     private:
 
+        Byte reg_dsp_flags = 0;     // extended display flags register
         Word reg_addr = 0;          // address register
         Word reg_pitch = 1;         // pitch register
         Word reg_width = 1;         // width register
@@ -48,7 +51,7 @@ class Memory : public IDevice
         Word reg_address = 0;       // dymamic memory address pointer
         Word reg_avail = 0;         // amount of available dynamic memory
         std::map<Word, Word> dyn_heap;    // first = address, second = size
-        int memory_btm = 0x1000;    // current bottom of the memory heap
+        int memory_btm = 0x0000;    // bottom of the memory heap (AKA display buffer size)
 
         // helpers
         Word _findFirstBlockOfSize(Word size);  // find an available block of SIZE
@@ -69,14 +72,10 @@ class Memory : public IDevice
  *                          by ADDR will be released. If there was an error freeing the 
  *                          memory, ADDR will report as $0000.
  *                      
+ *  MEM_DSP_FLAGS
+ *      bit 7:      0:standard graphics, 1:extended graphics
+ *      bits 2-6:   reserved (future tilemap support)
+ *      bits 0-1:   color depth: 0:2-color, 1:4-color, 2:16-color, 3:256-color
  * 
- * 
- *  Options to include in the Gfx Device ???
- * 
- *  Extended Display Bitap Buffer:
- *      $0000-{required buffer size}    ; buffer size takes from the dynamic memory pool
- *  
- *      Extended Display uses the default display resolution as per the Gfx device.
- *      Number of bitplanes, however, may be increased if they fit.
  * 
  **** NOTES *******************************************************************************/

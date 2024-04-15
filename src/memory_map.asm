@@ -332,25 +332,32 @@ MEM_BANK2_TYPE      equ   $FF81    ; (Byte) memory bank 2 type
 MEM_TYPE_RAM        equ   $0000    ;      random access memory (RAM)
 MEM_TYPE_PERSIST    equ   $0001    ;      persistent memory (saved RAM)
 MEM_TYPE_ROM        equ   $0002    ;      read only memory (ROM)
-
-MEM_EXT_ADDR        equ   $FF82    ; (Word) Extended Memory Address Port
-MEM_EXT_PITCH       equ   $FF84    ; (Word) number of bytes per line
-MEM_EXT_WIDTH       equ   $FF86    ; (Word) width before skipping to next line
-MEM_EXT_DATA        equ   $FF88    ; (Byte) External Memory Data Port
-
-MEM_DYN_SIZE        equ   $FF89    ; (Word) dynamic memory block size 
+        
+MEM_DSP_FLAGS       equ   $FF82    ; (Byte) Extended Graphics Display Flags
+          ;      bit 7:    0=standard graphics, 1:extended graphics 
+          ;      bits 2-6: reserved (possibly for tilemap support)
+          ;      bits 0-1: color depth:  
+          ;            0:2-color, 1:4-color, 2:16-color, 3:256-color
+MEM_DSPLY_SIZE    equ   $FF83    ; (Word) Extended Graphics Buffer Size
+        
+MEM_EXT_ADDR        equ   $FF85    ; (Word) Extended Memory Address Port
+MEM_EXT_PITCH       equ   $FF87    ; (Word) number of bytes per line
+MEM_EXT_WIDTH       equ   $FF89    ; (Word) width before skipping to next line
+MEM_EXT_DATA        equ   $FF8B    ; (Byte) External Memory Data Port
+        
+MEM_DYN_SIZE        equ   $FF8C    ; (Word) dynamic memory block size
           ;      Notes: Memory allocation occurs when the 
           ;             least-significant byte is written.
           ;             Reads as total number of bytes allocated
           ;             or freed. When $0000 is written to this 
           ;             port, memory node at MEM_DYN_ADDR is freed.
-MEM_DYN_ADDR        equ   $FF8B    ; (Word) address of a dynamic memory node
-MEM_DYN_AVAIL       equ   $FF8D    ; (Word) number of non-allocated bytes
-MEM_END             equ   $FF8F    ; End of Memory Device Hardware Registers
+MEM_DYN_ADDR        equ   $FF8E    ; (Word) address of a dynamic memory node
+MEM_DYN_AVAIL       equ   $FF90    ; (Word) number of non-allocated bytes
+MEM_END             equ   $FF92    ; End of Memory Device Hardware Registers
         
           ; Reserved for Future Hardware Devices
-RSRVD_DEVICE_MEM    equ   $FF8F  
-          ; 97 bytes in reserve
+RSRVD_DEVICE_MEM    equ   $FF92  
+          ; 94 bytes in reserve
         
           ; Hardware Interrupt Vectors:
 ROM_VECTS           equ   $FFF0  

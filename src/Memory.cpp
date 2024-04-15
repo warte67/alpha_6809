@@ -7,6 +7,7 @@
 #include "Memory.hpp"
 #include "Bus.hpp"
 #include "MemBank.hpp"
+#include "Gfx.hpp"
 
 Byte Memory::read(Word offset, bool debug) 
 {
@@ -19,7 +20,12 @@ Byte Memory::read(Word offset, bool debug)
         case MEM_BANK1_SELECT:  data = mb->get_bank_1_page();   break; 
         case MEM_BANK2_SELECT:  data = mb->get_bank_2_page();   break;  
         case MEM_BANK1_TYPE:    data = mb->get_bank_1_type();   break; 
-        case MEM_BANK2_TYPE:    data = mb->get_bank_2_type();   break; 
+        case MEM_BANK2_TYPE:    data = mb->get_bank_2_type();   break;
+
+        case MEM_DSP_FLAGS:     data = reg_dsp_flags;           break;
+        case MEM_DSPLY_SIZE+0:  data =  (memory_btm>>8) & 0xFF;     break; 
+        case MEM_DSPLY_SIZE+1:  data =  (memory_btm>>0) & 0xFF;     break; 
+
         case MEM_EXT_ADDR+0:    data =  (reg_addr>>8) & 0xFF;   break; 
         case MEM_EXT_ADDR+1:    data =  (reg_addr>>0) & 0xFF;   break; 
         case MEM_EXT_PITCH+0:   data = (reg_pitch>>8) & 0xFF;   break; 
@@ -75,12 +81,37 @@ void Memory::write(Word offset, Byte data, bool debug)
             data = mb->get_bank_2_type();
             break; 
         }
-        case MEM_EXT_ADDR+0:    reg_addr =  (reg_addr  & 0x00FF) | (data << 8); break; 
-        case MEM_EXT_ADDR+1:    reg_addr =  (reg_addr  & 0xFF00) | (data << 0); break; 
-        case MEM_EXT_PITCH+0:   reg_pitch = (reg_pitch & 0x00FF) | (data << 8); break; 
-        case MEM_EXT_PITCH+1:   reg_pitch = (reg_pitch & 0xFF00) | (data << 0); break; 
-        case MEM_EXT_WIDTH+0:   reg_width = (reg_width & 0x00FF) | (data << 8); break; 
-        case MEM_EXT_WIDTH+1:   reg_width = (reg_width & 0xFF00) | (data << 0); break; 
+        case MEM_DSP_FLAGS:         
+        {
+            Gfx* gfx = Bus::GetGfx();
+            if (data & 0x80)
+            {
+                // calc the display buffer size
+                Byte bpp = 1<<(data & 3);
+                int size = ((gfx->res_width * gfx->res_height) / 8) * bpp;
+                memory_btm = size;
+                while (size > 0xffff)
+                {
+                    //Bus::Write(MEM_DSP_FLAGS, ((Bus::Read(MEM_DSP_FLAGS)-1)&3)|0x80);
+                    data = (data-1) & 3;
+                    bpp = 1<<(data&3);
+                    size = ((gfx->res_width * gfx->res_height) / 8) * bpp;
+                    memory_btm = size;
+                }
+                data |= 0x80;
+                // printf("BPP:%d  SIZE:$%04X\n", bpp, size);
+            }            
+            reg_dsp_flags = data & 0x83;   
+            break;
+        }
+        case MEM_DSPLY_SIZE+0:      memory_btm =  (memory_btm  & 0x00FF) | (data << 8); break; 
+        case MEM_DSPLY_SIZE+1:      memory_btm =  (memory_btm  & 0xFF00) | (data << 0); break; 
+        case MEM_EXT_ADDR+0:        reg_addr =  (reg_addr  & 0x00FF) | (data << 8); break; 
+        case MEM_EXT_ADDR+1:        reg_addr =  (reg_addr  & 0xFF00) | (data << 0); break; 
+        case MEM_EXT_PITCH+0:       reg_pitch = (reg_pitch & 0x00FF) | (data << 8); break; 
+        case MEM_EXT_PITCH+1:       reg_pitch = (reg_pitch & 0xFF00) | (data << 0); break; 
+        case MEM_EXT_WIDTH+0:       reg_width = (reg_width & 0x00FF) | (data << 8); break; 
+        case MEM_EXT_WIDTH+1:       reg_width = (reg_width & 0xFF00) | (data << 0); break; 
         case MEM_EXT_DATA:      
         {
             static Word s_width = reg_width+1;
@@ -130,6 +161,13 @@ Word Memory::OnAttach(Word nextAddr)
 	DisplayEnum("MEM_TYPE_RAM",     enumID++,   "     random access memory (RAM)");
 	DisplayEnum("MEM_TYPE_PERSIST", enumID++,   "     persistent memory (saved RAM)");
 	DisplayEnum("MEM_TYPE_ROM",     enumID++,   "     read only memory (ROM)");
+    DisplayEnum("", 0, "");
+    DisplayEnum("MEM_DSP_FLAGS",    nextAddr,   "(Byte) Extended Graphics Display Flags");      nextAddr++;
+	DisplayEnum("",                         0,  "     bit 7:    0=standard graphics, 1:extended graphics ");
+	DisplayEnum("",                         0,  "     bits 2-6: reserved (possibly for tilemap support)");
+	DisplayEnum("",                         0,  "     bits 0-1: color depth:  ");
+    DisplayEnum("",                         0,  "           0:2-color, 1:4-color, 2:16-color, 3:256-color");
+    DisplayEnum("MEM_DISPLAY_SIZE", nextAddr,   "(Word) Extended Graphics Buffer Size");        nextAddr+=2;
     DisplayEnum("", 0, "");
     DisplayEnum("MEM_EXT_ADDR",     nextAddr,   "(Word) Extended Memory Address Port");         nextAddr+=2;
     DisplayEnum("MEM_EXT_PITCH",    nextAddr,   "(Word) number of bytes per line");             nextAddr+=2;
@@ -218,6 +256,7 @@ Word Memory::MemAlloc(Word size)
     else
     {
         reg_size = 0;
+        Bus::Write(SYS_STATE, Bus::Read(SYS_STATE) | 0x40); // set the extended buffer overflow error bit
         // Bus::Error("Out of Extended Memory");            
     }
     return reg_size;
@@ -236,7 +275,6 @@ Word Memory::MemDelete(Word addr)
     return reg_size;
 }  
 
-
 // return the number of unallocated bytes on the heap
 Word Memory::MemAvailable()
 {
@@ -250,4 +288,19 @@ Word Memory::MemAvailable()
     }
 
     return (Word)mem_size;
+}
+
+void Memory::OnUpdate(float fElapsedTime)
+{
+    // TESTING:  For now, just fill the extended video buffer with static every frame
+    if (Bus::Read(MEM_DSP_FLAGS) & 0x80)
+    {
+        Bus::Write_Word(MEM_EXT_ADDR,0);
+        Bus::Write_Word(MEM_EXT_PITCH,1);
+        Bus::Write_Word(MEM_EXT_WIDTH,1);
+        for (int t=0; t<memory_btm; t++)
+            Bus::Write(MEM_EXT_DATA,rand()%256);
+        Bus::Write_Word(MEM_EXT_ADDR,0);
+    }
+    // END TESTING...
 }

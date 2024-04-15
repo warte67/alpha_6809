@@ -336,25 +336,32 @@ enum MEMMAP
     MEM_TYPE_RAM     = 0x0000, //      random access memory (RAM)
     MEM_TYPE_PERSIST = 0x0001, //      persistent memory (saved RAM)
     MEM_TYPE_ROM     = 0x0002, //      read only memory (ROM)
-
-    MEM_EXT_ADDR     = 0xFF82, // (Word) Extended Memory Address Port
-    MEM_EXT_PITCH    = 0xFF84, // (Word) number of bytes per line
-    MEM_EXT_WIDTH    = 0xFF86, // (Word) width before skipping to next line
-    MEM_EXT_DATA     = 0xFF88, // (Byte) External Memory Data Port
-    
-    MEM_DYN_SIZE     = 0xFF89, // (Word) dynamic memory block size 
+        
+    MEM_DSP_FLAGS    = 0xFF82, // (Byte) Extended Graphics Display Flags
+        //      bit 7:    0=standard graphics, 1:extended graphics 
+        //      bits 2-6: reserved (possibly for tilemap support)
+        //      bits 0-1: color depth:  
+        //            0:2-color, 1:4-color, 2:16-color, 3:256-color
+    MEM_DSPLY_SIZE = 0xFF83, // (Word) Extended Graphics Buffer Size
+        
+    MEM_EXT_ADDR     = 0xFF85, // (Word) Extended Memory Address Port
+    MEM_EXT_PITCH    = 0xFF87, // (Word) number of bytes per line
+    MEM_EXT_WIDTH    = 0xFF89, // (Word) width before skipping to next line
+    MEM_EXT_DATA     = 0xFF8B, // (Byte) External Memory Data Port
+        
+    MEM_DYN_SIZE     = 0xFF8C, // (Word) dynamic memory block size
         //      Notes: Memory allocation occurs when the 
         //             least-significant byte is written.
         //             Reads as total number of bytes allocated
         //             or freed. When $0000 is written to this 
         //             port, memory node at MEM_DYN_ADDR is freed.
-    MEM_DYN_ADDR     = 0xFF8B, // (Word) address of a dynamic memory node
-    MEM_DYN_AVAIL    = 0xFF8D, // (Word) number of non-allocated bytes
-    MEM_END          = 0xFF8F, // End of Memory Device Hardware Registers
+    MEM_DYN_ADDR     = 0xFF8E, // (Word) address of a dynamic memory node
+    MEM_DYN_AVAIL    = 0xFF90, // (Word) number of non-allocated bytes
+    MEM_END          = 0xFF92, // End of Memory Device Hardware Registers
         
         // Reserved for Future Hardware Devices
-    RSRVD_DEVICE_MEM = 0xFF8F, 
-        // 97 bytes in reserve
+    RSRVD_DEVICE_MEM = 0xFF92, 
+        // 94 bytes in reserve
         
         // Hardware Interrupt Vectors:
     ROM_VECTS        = 0xFFF0, 

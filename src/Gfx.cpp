@@ -10,6 +10,7 @@
 #include "Bus.hpp"
 #include "C6809.hpp"
 #include "font8x8_system.hpp"
+#include "Memory.hpp"
 
 Byte Gfx::read(Word offset, bool debug)
 {
@@ -488,13 +489,16 @@ void Gfx::OnUpdate(float fElapsedTime)
 {
     // printf("%s::OnUpdate()\n", Name().c_str());
     SDL_SetRenderTarget(sdl_renderer, sdl_target_texture);
-	// SDL_SetRenderDrawColor(sdl_renderer, 8,32,4,255);    //rgba
-    // SDL_RenderClear(sdl_renderer);    
 
-    if (bIsBitmapMode)
-        _updateBitmapScreen();
+    if (Bus::Read(MEM_DSP_FLAGS) & 0x80) 
+        _updateExtendedBitmapScreen();
     else
-        _updateTextScreen();
+    {
+        if (bIsBitmapMode)
+            _updateBitmapScreen();
+        else
+            _updateTextScreen();
+    }
     return;
 }
 
@@ -920,4 +924,99 @@ void Gfx::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_i
             );    
         }
     }
+}
+
+
+void Gfx::_updateExtendedBitmapScreen()
+{
+    Memory* mm = Bus::GetMemory();
+
+    Byte bpp = 1<<(Bus::Read(MEM_DSP_FLAGS) & 3);
+
+    // // calc the display buffer size
+    // Byte bpp = 1<<(Bus::Read(MEM_DSP_FLAGS)&3);
+    // int size = ((res_width * res_height) / 8) * bpp;
+    // mm->memory_btm = size;
+    // while (size > 0xffff)
+    // {
+    //     Bus::Write(MEM_DSP_FLAGS, ((Bus::Read(MEM_DSP_FLAGS)-1)&3)|0x80);
+    //     bpp = 1<<(Bus::Read(MEM_DSP_FLAGS)&3);
+    //     size = ((res_width * res_height) / 8) * bpp;
+    //     mm->memory_btm = size;
+    // }
+    // printf("BPP:%d  SIZE:$%04X\n", bpp, size);
+
+
+    // display the extended bitmap buffer
+    Word pixel_index = 0x0000;
+    void *pixels;
+    int pitch;
+    if (SDL_LockTexture(sdl_target_texture, NULL, &pixels, &pitch) < 0)
+        Bus::Error("Failed to lock texture: ");	
+    else
+    {
+        for (int y = 0; y < res_height; y++)
+        {
+            for (int x = 0; x < res_width; )
+            {
+                // 256 color mode
+                if (bpp == 8)
+                {
+// printf("256-colors\n");
+                    Byte index = mm->ext_memory[pixel_index++];
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 16 color mode
+                else if (bpp == 4)
+                {
+// printf("16-colors\n");
+                    Byte data = mm->ext_memory[pixel_index++];
+                    Byte index = (data >> 4);
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data & 0x0f);
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 4 color mode
+                else if (bpp == 2)
+                {
+// printf("4-colors\n");
+                    Byte data = mm->ext_memory[pixel_index++];
+                    Byte index = (data >> 6) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 4) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 2) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 0) & 0x03;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+                // 2 color mode
+                else if (bpp == 1)
+                {
+// printf("2-colors\n");
+                    Byte data = mm->ext_memory[pixel_index++];
+                    Byte index = (data >> 7) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+                    index = (data >> 6) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 5) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 4) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 3) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 2) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 1) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    index = (data >> 0) & 1;
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                }
+            }
+        }
+        SDL_UnlockTexture(sdl_target_texture); 
+    }
+
+    // SDL_SetRenderTarget(_renderer, _render_target);
+    SDL_RenderCopy(sdl_renderer, sdl_target_texture, NULL, NULL);		
 }

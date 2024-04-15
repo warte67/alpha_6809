@@ -13,6 +13,7 @@ class Gfx : public IDevice
 {
     friend class Debug; 
     friend class Mouse;
+    friend class Memory;
 
     public:
         Gfx() { _deviceName = "Gfx"; }
@@ -112,6 +113,7 @@ class Gfx : public IDevice
 								Byte color_index, bool bIgnoreAlpha = false);        
         void _updateTextScreen();        
         void _updateBitmapScreen();    
+        void _updateExtendedBitmapScreen();
 };
 
 
