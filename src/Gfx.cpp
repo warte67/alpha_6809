@@ -18,7 +18,7 @@ Byte Gfx::read(Word offset, bool debug)
     // printf("%s::read($%04X) = $%02X\n", Name().c_str(), offset,  data);
     switch (offset)
     {
-        case GFX_MODE:          data = s_gfx_mode; break;
+        case GFX_MODE:          data = s_gfx_mode; Bus::Write(MEM_DSP_FLAGS, Bus::Read(MEM_DSP_FLAGS)); break;
         case GFX_EMU:           data = s_gfx_emu; break;
 
 		case GFX_VID_END + 0: 	data = (gfx_vid_end >> 8) & 0xFF; break;
@@ -506,15 +506,12 @@ void Gfx::OnRender()
 {
     // printf("%s::OnRender()\n", Name().c_str());
     SDL_SetRenderTarget(sdl_renderer, NULL);
-    // SDL_RenderCopy(sdl_renderer, sdl_target_texture, NULL, NULL);
 
     // render aspect
     Byte mode = Bus::Read(GFX_MODE) & 0x1f;
     Byte tindex = vec_gmodes[mode].Timing_index;   
 
     float aspect = (float)vec_timings[tindex].Width  / (float)vec_timings[tindex].Height;
-    // float aspect = (float)res_width  / (float)res_height;
-    // float aspect = (float)window_width  / (float)window_height;
     int ww = window_width;
     int wh = window_height;
     float fh = (float)window_height;
@@ -605,8 +602,10 @@ void Gfx::_decode_gmode()
     {   // FULLSCREEN
         bIsFullscreen = true;
         window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-        window_width = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Width;
-        window_height = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Height;
+        // window_width = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Width;
+        // window_height = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Height;
+        window_width = desktop_width;
+        window_height = desktop_height;
     }
 
 	// SDL Renderer Flags
