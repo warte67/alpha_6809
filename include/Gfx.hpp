@@ -75,6 +75,8 @@ class Gfx : public IDevice
 
         Word GetTimingWidth();
         Word GetTimingHeight();
+        bool SaveGimpPalette(const std::string& filename, const std::string& name);  // save the current palette
+        bool LoadGimpPalette(const std::string& filename);  // load from a GIMP (*.gpl) formatted palette file
 
 
     private:

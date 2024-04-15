@@ -311,8 +311,8 @@ void Gfx::OnInit()
             }
         }  
 
-        // Add one 100% transparent black entry to the end              
-        _palette.push_back({0x0000});   // (255 = 100% transparent)
+        // Add one 100% transparent white entry to the end              
+        _palette.push_back({0x0FFF});   // (255 = 100% transparent)
 
         // printf("_palette.size(): %3d\n", (int)_palette.size());
     }
@@ -324,6 +324,9 @@ void Gfx::OnInit()
 
     // set the default monitor
     s_gfx_emu |= (MAIN_MONITOR & 0x07);
+
+    // save the default palette
+    SaveGimpPalette("retro_6809.gpl", "Retro 6809");
 }
 
 void Gfx::OnQuit()
@@ -1019,3 +1022,39 @@ void Gfx::_updateExtendedBitmapScreen()
     // SDL_SetRenderTarget(_renderer, _render_target);
     SDL_RenderCopy(sdl_renderer, sdl_target_texture, NULL, NULL);		
 }
+
+
+// save the current palette to a GIMP (*.gpl) palette
+bool Gfx::SaveGimpPalette(const std::string& file, const std::string& name)
+{
+    FILE* fp = fopen(file.c_str(), "wb");
+    if (fp)
+    {
+        // Save the Header
+        fprintf(fp, "GIMP Palette\n");
+        fprintf(fp, "Name: %s\n", name.c_str());
+        fprintf(fp, "Columns: 0\n");
+        fprintf(fp, "# Palette Data\n");
+
+        // Write the palette data
+        for (int idx=0; idx<256; idx++)
+        {
+            Byte red = (_palette[idx].r << 4) | _palette[idx].r;
+            Byte grn = (_palette[idx].g << 4) | _palette[idx].g;
+            Byte blu = (_palette[idx].b << 4) | _palette[idx].b;
+            fprintf(fp, "%3d  %3d  %3d  Index_%03d\n", red, grn, blu, idx);
+        }
+
+        // close the file
+        fclose(fp);
+        return true;
+    } 
+    return false;
+}
+
+// load from a GIMP (*.gpl) formatted palette file
+bool Gfx::LoadGimpPalette(const std::string& filename)
+{
+    return true;
+}
+

@@ -19,8 +19,6 @@ class Memory : public IDevice
         ~Memory() {};
 
         // unused virtuals
-		void OnInit() override {}
-		void OnQuit() override {}
 		void OnActivate() override {}
 		void OnDeactivate() override {}
 		void OnEvent(SDL_Event* evnt) override {}
@@ -28,6 +26,8 @@ class Memory : public IDevice
 
         // pure virtuals
 		Word OnAttach(Word nextAddr) override;
+		void OnInit() override;
+		void OnQuit() override;
 		void OnUpdate(float fElapsedTime) override;
 
         // virtuals
@@ -38,6 +38,8 @@ class Memory : public IDevice
         Word MemAlloc(Word size);   // returns address of the block in the extended heap
         Word MemDelete(Word addr);  // frees memory and returns number of bytes de-allocated
         Word MemAvailable();        // returns the number of bytes available in the heap
+
+        bool LoadBMP(const std::string& file);
 
     private:
 
