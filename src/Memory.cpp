@@ -4,6 +4,8 @@
 // *
 // ***********************************
 
+#include <sstream>
+
 #include "Memory.hpp"
 #include "Bus.hpp"
 #include "MemBank.hpp"
@@ -232,7 +234,7 @@ void Memory::_onSizeLSB()
     else    // case: when non-zero is written to MEM_DYN_SIZE... ALLOCATE a memory block
         reg_size = MemAlloc(reg_size);
 
-    if (false)  // display the heap table
+    if (true)  // display the heap table
     {
         printf("HEAP TABLE (%d):\n", (int)dyn_heap.size());
         std::map<Word,Word>::reverse_iterator itr;
@@ -246,19 +248,15 @@ void Memory::_onSizeLSB()
 // returns address of the block in the extended heap
 Word Memory::MemAlloc(Word size)
 {
+    reg_address = _findFirstBlockOfSize(reg_size);
+    if (reg_address != 0)                   // if valid memory block was found
+        dyn_heap[reg_address] = reg_size;   // then allocate it
+    else                                    // otherwise, 
+        reg_size = 0;                       // size = 0: (out of memory)
 
-    Word new_addr = _findFirstBlockOfSize(reg_size);
-    if (new_addr != 0)
-    {    
-        dyn_heap[new_addr] = reg_size;
-        reg_address = new_addr;
-    }
-    else
-    {
-        reg_size = 0;
-        Bus::Write(SYS_STATE, Bus::Read(SYS_STATE) | 0x40); // set the extended buffer overflow error bit
-        // Bus::Error("Out of Extended Memory");            
-    }
+    // OUT OF MEMORY ERROR: set the extended buffer overflow error bit
+    if (reg_size==0)
+        Bus::Write(SYS_STATE, Bus::Read(SYS_STATE) | 0x40);         
     return reg_size;
 }
 
@@ -292,7 +290,10 @@ Word Memory::MemAvailable()
 
 void Memory::OnInit() 
 {
-    LoadBMP("scene_c.bmp");
+    // BEGIN: Testing bitmap load into extended memory
+        LoadBMP("scene_c.bmp");
+    // END: Testing bitmap load into extended memory
+
 }
 
 void Memory::OnQuit() 
@@ -327,38 +328,40 @@ bool Memory::LoadBMP(const std::string& file)
 
     /* Let the user know if the file failed to load */
     if (!image) {
-        printf("Failed to load image at %s: %s\n", image_path, SDL_GetError());
+        // printf("Failed to load image at %s: %s\n", image_path, SDL_GetError());
+        std::stringstream ss;
+        ss << "Failed to load image '" << image_path << "'\n";
+        ss << SDL_GetError() << std::endl;
+        Bus::Error(ss.str());
         return false;
     }
 
-    // read the pixel data from the surface
     SDL_LockSurface(image);
-    Bus::Write_Word(MEM_EXT_ADDR,   0x0000);
-    Bus::Write_Word(MEM_EXT_PITCH,  0x0001);
-    Bus::Write_Word(MEM_EXT_WIDTH,  0x0001);
-    Byte* pixels = (Byte*)image->pixels;
-    int bpp = image->format->BytesPerPixel;
-    for(int y = 0; y < image->h; y++)
-        for(int x = 0; x < image->w; x++)
-             Bus::Write(MEM_EXT_DATA, pixels[(image->pitch * y) + (x * bpp)]);
-
-    // read the palette data from the image
-    if(image->format->BitsPerPixel==8)
-    {
-        for (int idx=0; idx<256; idx++)
+        // read the pixel data from the surface
+        Bus::Write_Word(MEM_EXT_ADDR,   0x0000);
+        Bus::Write_Word(MEM_EXT_PITCH,  0x0001);
+        Bus::Write_Word(MEM_EXT_WIDTH,  0x0001);
+        Byte* pixels = (Byte*)image->pixels;
+        int bpp = image->format->BytesPerPixel;
+        for(int y = 0; y < image->h; y++)
+            for(int x = 0; x < image->w; x++)
+                Bus::Write(MEM_EXT_DATA, pixels[(image->pitch * y) + (x * bpp)]);
+        // read the palette data from the image
+        if(image->format->BitsPerPixel==8)
         {
-            SDL_Color *color=&image->format->palette->colors[idx];
-            Word MSB = 0xF000 | ((color->r)>>4)<<8;
-            Word LSB = 0x0000 | (color->g & 0xF0);
-            LSB |= ((color->b)>>4);
-
-            Word data = MSB | LSB;
-            Bus::Write(GFX_PAL_IDX, (Byte)idx);
-            Bus::Write_Word(GFX_PAL_CLR, data);
-            printf("Pixel Color $%04X, Red: %3d, Green: %3d, Blue: %3d, Index: %3d\n",
-                data, color->r, color->g, color->b, idx);
-        }
-    }    
+            for (int idx=0; idx<256; idx++)
+            {
+                SDL_Color *color=&image->format->palette->colors[idx];
+                Word MSB = 0xF000 | ((color->r)>>4)<<8;
+                Word LSB = 0x0000 | (color->g & 0xF0);
+                LSB |= ((color->b)>>4);
+                Word data = MSB | LSB;
+                Bus::Write(GFX_PAL_IDX, (Byte)idx);
+                Bus::Write_Word(GFX_PAL_CLR, data);
+                // printf("Pixel Color $%04X, Red: %3d, Green: %3d, Blue: %3d, Index: %3d\n",
+                //     data, color->r, color->g, color->b, idx);
+            }
+        }    
     SDL_UnlockSurface(image);
 
     /* Make sure to eventually release the surface resource */
