@@ -65,23 +65,53 @@ class Memory : public IDevice
 /**** NOTES *******************************************************************************
  * 
  *  Dynamic Memory Idea:
- *      SIZE        (Word) allocate on non-zero (LSB) write... free on zero (LSB) write
- *      ADDR        (Word) start address of allocated memory... start address to free
- *      FREE       (Word) returns the number of bytes available in the heap 
+ *      SIZE    (Word) allocate on non-zero (LSB) write... free on zero (LSB) write
+ *      ADDR    (Word) start address of allocated memory... start address to free
+ *      FREE    (Word) returns the number of bytes available in the heap 
  * 
- *                      When SIZE reads as $0000 there was an allocation error
- *                      When writing $00 to the LSB of SIZE, the memory node pointed to 
- *                          by ADDR will be released. If there was an error freeing the 
- *                          memory, ADDR will report as $0000.
- *                      
+ *               When SIZE reads as $0000 there was an allocation error
+ *               When writing $00 to the LSB of SIZE, the memory node pointed to 
+ *                   by ADDR will be released. If there was an error freeing the 
+ *                   memory, ADDR will report as $0000.
+ *       
+ *                
  *  MEM_DSP_FLAGS
  *      bit 7:      0:standard graphics, 1:extended graphics
  *      bits 2-6:   reserved (future tilemap support)
  *      bits 0-1:   color depth: 0:2-color, 1:4-color, 2:16-color, 3:256-color
  * 
+ *      Consider moving the MEM_DSP_FLAGS register to the Gfx Device Hardware Registers immediately
+ *          following the GFX_MODE register.  
  * 
- *  GIMP saves all indexed images as 256-color regarless of the palette size. Care should 
- *      be taken to load the proper image format into memory based on color depth.
+ *  Rename: 
+ *      GFX_MODE        to GFX_STD_MODE     ; bit flags remain unchanged
+ *      MEM_DSP_FLAGS   to GFX_EXT_MODE     ; bit flags remain unchanged
+ * 
+ * 
+ *  Extended Video Buffer:
+ *      This buffer should be allocated dynamically using the 'dyn_heap' according to required 
+ *          size when the display mode is started. Remove the 'memory_btm' variable, simply make
+ *          use of the extended heap memory system.
+ * 
+ *  Standard Video Buffer:
+ *      Consider moving the standard text / bitmap buffer to extended memory to free up CPU accessable
+ *          memory. Like the notes for the Extended Video Buffer, the Standard buffer should be 
+ *          dynamically allocated on the heap according to the required size. 
+ *  
+ *  Dynamically Allocate the Display Buffers:
+ *      Whenever the video mode changes, pixel resolution and/or color depth of either Standard or
+ *          Extended Video Modes, both dynamically allocated buffers should be released and re-allocated
+ *          according to their required size. The Standard Video Buffer should begin at $0000 and the
+ *          Extended buffer should begin immediately following.
+ * 
+ * Sprites and Map Tiles Should be Dynamically Allocated:
+ *      Each image data entry should be dynamically allocated and given its own pointer to pass on
+ *          to an indexed image display table.  
+ * 
+ * 
+ *  GIMP saves all indexed BMP images as 256-color regarless of the palette size. Unused palette
+ *      entries are set to WHITE. Care should be taken to load the proper image format into 
+ *      memory based on color depth.
  * 
  * 
  * 

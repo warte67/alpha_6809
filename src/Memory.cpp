@@ -293,7 +293,7 @@ void Memory::OnInit()
 {
     // BEGIN: Testing bitmap load into extended memory
         // LoadBMP("scene_d.bmp", 8, true);
-        LoadBMP("scene_c.bmp");
+        LoadBMP("scene_c.bmp",8);
     // END: Testing bitmap load into extended memory
 
 }
@@ -323,14 +323,19 @@ void Memory::OnUpdate(float fElapsedTime)
     // END TESTING...
 }
 
+
+// Super overarching load bmp routine.  Will need to refine further to implement the loading of 
+//      tiles, sprites, and dynamically sized bitmaps. More hardware registers will be needed.
+//      As of initial writing, this function only loads to extended memory starting at $0000.
+//      This function would be more appropriately at home in the Gfx Device. Consider moving it.
 bool Memory::LoadBMP(const std::string& file, Byte bits_per_pixel, bool updatePalette)
 {
     const char *image_path = file.c_str();
     SDL_Surface *image = SDL_LoadBMP(image_path);
 
-    /* Let the user know if the file failed to load */
-    if (!image) {
-        // printf("Failed to load image at %s: %s\n", image_path, SDL_GetError());
+    // failed to load?
+    if (!image) 
+    {
         std::stringstream ss;
         ss << "Failed to load image '" << image_path << "'\n";
         ss << SDL_GetError() << std::endl;
@@ -344,7 +349,14 @@ bool Memory::LoadBMP(const std::string& file, Byte bits_per_pixel, bool updatePa
     Byte* pixels = (Byte*)image->pixels;
     int bpp = image->format->BytesPerPixel;
 
-    SDL_LockSurface(image);
+    if (SDL_LockSurface(image))
+    {
+        std::stringstream ss; 
+        ss << "Failed to lock surface: " << SDL_GetError(); 
+        Bus::Error(ss.str());
+    }
+    else
+    {
         for(int y = 0; y < image->h; y++)
         {
             for(int x = 0; x < image->w; x++)
@@ -399,11 +411,12 @@ bool Memory::LoadBMP(const std::string& file, Byte bits_per_pixel, bool updatePa
                         Bus::Write(MEM_EXT_DATA, data);
                     }
                 }
-                else // bits_per_pixel ==8 (or default)
+                else // bits_per_pixel ==8 (default)
                     Bus::Write(MEM_EXT_DATA, clr);
             }
         }
-    SDL_UnlockSurface(image);
+        SDL_UnlockSurface(image);
+    } // END if (SDL_LockSurface(image))
 
     // read the palette data from the image                
     if (updatePalette)
@@ -425,7 +438,6 @@ bool Memory::LoadBMP(const std::string& file, Byte bits_per_pixel, bool updatePa
         }    
     }
 
-    /* Make sure to eventually release the surface resource */
     SDL_FreeSurface(image);
     return true;
 }
