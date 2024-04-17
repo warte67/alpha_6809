@@ -245,7 +245,13 @@ void Debug::OnInit()
         c.attr = at;
     }    
 
-
+    // copy the default (Gfx) palette locally
+    for (int t=0; t<16; t++)
+    {
+        PALETTE clr;
+        clr.color = Bus::GetGfx()->_palette[t].color;
+        _debug_palette.push_back(clr);
+    }
 }
 
 void Debug::OnActivate()
@@ -1340,7 +1346,8 @@ void Debug::_setPixel(int x, int y, Byte color_index,
 
 void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
-    Gfx* gfx = Bus::GetGfx();
+    SDL_clamp(color_index, 0, 15);
+    // Gfx* gfx = Bus::GetGfx();
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
     bool ALPHA_BLEND = true;
     if (ALPHA_BLEND)
@@ -1351,10 +1358,10 @@ void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color
 		Byte g1 = (pixel & 0x00f0) >> 4;
 		Byte b1 = (pixel & 0x000f) >> 0;
 		//
-        Byte a2 = gfx->alf(color_index);
-        Byte r2 = gfx->red(color_index);
-        Byte g2 = gfx->grn(color_index);
-        Byte b2 = gfx->blu(color_index);
+        Byte a2 = alf(color_index);
+        Byte r2 = red(color_index);
+        Byte g2 = grn(color_index);
+        Byte b2 = blu(color_index);
         if (bIgnoreAlpha)
             a2 = 15;
 		//
@@ -1362,7 +1369,7 @@ void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color
         Byte g = (((g1 * (16-a2))) + (g2 * (a2+1))) >> 4;
         Byte b = (((b1 * (16-a2))) + (b2 * (a2+1))) >> 4;
 
-        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        if (alf(color_index) != 0 || bIgnoreAlpha)
         {
             *dst = (
                 0xF000 | 
@@ -1375,14 +1382,14 @@ void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color
     else
     {        
         // simple non-zero alpha channel
-        if (gfx->alf(color_index) != 0 || bIgnoreAlpha)
+        if (alf(color_index) != 0 || bIgnoreAlpha)
         {
             *dst = 
             (
                 0xF000 |
-                (gfx->red(color_index)<<8) |
-                (gfx->grn(color_index)<<4) |
-                gfx->blu(color_index)
+                (red(color_index)<<8) |
+                (grn(color_index)<<4) |
+                 blu(color_index)
             );    
         }
     }    

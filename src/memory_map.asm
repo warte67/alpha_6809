@@ -334,11 +334,12 @@ MEM_TYPE_PERSIST    equ   $0001    ;      persistent memory (saved RAM)
 MEM_TYPE_ROM        equ   $0002    ;      read only memory (ROM)
         
 MEM_DSP_FLAGS       equ   $FF82    ; (Byte) Extended Graphics Display Flags
-          ;      bit 7:    0=standard graphics, 1:extended graphics 
-          ;      bits 2-6: reserved (possibly for tilemap support)
-          ;      bits 0-1: color depth:  
-          ;            0:2-color, 1:4-color, 2:16-color, 3:256-color
-MEM_DSPLY_SIZE    equ   $FF83    ; (Word) Extended Graphics Buffer Size
+          ;      bit 7:    1=extended bitmap enabled, 0=disabled 
+          ;      bit 6:    1=standard modes enabled,  0=disabled
+          ;      bits 2-5: reserved (possibly for tilemap/sprites)
+          ;      bits 0-1: extended bitmap color depth:  
+          ;                0:2-color, 1:4-color, 2:16-color, 3:256-color
+MEM_DSPLY_SIZE      equ   $FF83    ; (Word) Extended Graphics Buffer Size
         
 MEM_EXT_ADDR        equ   $FF85    ; (Word) Extended Memory Address Port
 MEM_EXT_PITCH       equ   $FF87    ; (Word) number of bytes per line
@@ -370,6 +371,5 @@ HARD_SWI            equ   $FFFA    ; SWI / SYS Hardware Interrupt Vector
 HARD_NMI            equ   $FFFC    ; NMI Hardware Interrupt Vector
 HARD_RESET          equ   $FFFE    ; RESET Hardware Interrupt Vector
 ; END of definitions
-
 
 

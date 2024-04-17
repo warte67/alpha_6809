@@ -39,7 +39,7 @@ class Memory : public IDevice
         Word MemDelete(Word addr);  // frees memory and returns number of bytes de-allocated
         Word MemAvailable();        // returns the number of bytes available in the heap
 
-        bool LoadBMP(const std::string& file);
+        bool LoadBMP(const std::string& file, bool updatePalette = true);
 
     private:
 

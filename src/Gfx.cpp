@@ -11,6 +11,7 @@
 #include "C6809.hpp"
 #include "font8x8_system.hpp"
 #include "Memory.hpp"
+#include "MemBank.hpp"
 
 Byte Gfx::read(Word offset, bool debug)
 {
@@ -108,14 +109,14 @@ void Gfx::write(Word offset, Byte data, bool debug)
 			Word c = _palette[_gfx_pal_idx].color & 0xff00;
 			_palette[_gfx_pal_idx].color = c | data;
 			data |= _palette[_gfx_pal_idx].color;
-			Bus::IsDirty(true);
+			// Bus::IsDirty(true);
 			break;
 		}
 		case GFX_PAL_CLR+0:	{
 			Word c = _palette[_gfx_pal_idx].color & 0x00ff;
 			_palette[_gfx_pal_idx].color = c | ((Word)data << 8);
 			data = _palette[_gfx_pal_idx].color;
-			Bus::IsDirty(true);
+			// Bus::IsDirty(true);
 			break;
 		}
         // text glyph definition data registers
@@ -234,7 +235,7 @@ void Gfx::OnInit()
 			{ 0xF555 },		// 1: dk gray
 			{ 0xF007 },		// 2: dk blue
 			{ 0xF600 },		// 3: dk red
-			{ 0xF140 },		// 4: dk green
+			{ 0x0140 },		// 4: dk green
 			{ 0xF840 },		// 5: brown
 			{ 0xF406 },		// 6: purple          
 			{ 0xF046 },		// 7: deep sea           	
@@ -493,15 +494,34 @@ void Gfx::OnUpdate(float fElapsedTime)
     // printf("%s::OnUpdate()\n", Name().c_str());
     SDL_SetRenderTarget(sdl_renderer, sdl_target_texture);
 
+    SDL_SetRenderDrawColor(sdl_renderer, 0,0,0,0);
+	SDL_RenderClear(sdl_renderer);	
+
     if (Bus::Read(MEM_DSP_FLAGS) & 0x80) 
         _updateExtendedBitmapScreen();
     else
+    {        
+        SDL_Surface *surface = nullptr;
+        SDL_LockTextureToSurface(sdl_target_texture, NULL, &surface);
+        //               ARGB 
+        Uint32 color = 0xF000;
+        color |= (red(0)<<8);
+        color |= (grn(0)<<4);
+        color |= (blu(0)<<0);
+        SDL_FillRect(surface, NULL, color);
+
+        SDL_UnlockTexture(sdl_target_texture);
+    }
+
+    // is standard display enabled?
+    if (Bus::Read(MEM_DSP_FLAGS) & 0x40)
     {
         if (bIsBitmapMode)
             _updateBitmapScreen();
         else
             _updateTextScreen();
     }
+
     return;
 }
 
@@ -723,6 +743,10 @@ void Gfx::_init_gmodes()
 
 void Gfx::_updateBitmapScreen()
 {
+    bool ignore_alpha = true;
+    if (Bus::Read(MEM_DSP_FLAGS) & 0x80) 
+        ignore_alpha = false;
+
     Word pixel_index = VIDEO_START;
     void *pixels;
     int pitch;
@@ -738,50 +762,50 @@ void Gfx::_updateBitmapScreen()
                 if (bits_per_pixel == 8)
                 {
                     Byte index = Bus::Read(pixel_index++);
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                 }
                 // 16 color mode
                 else if (bits_per_pixel == 4)
                 {
                     Byte data = Bus::Read(pixel_index++);
                     Byte index = (data >> 4);
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data & 0x0f);
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                 }
                 // 4 color mode
                 else if (bits_per_pixel == 2)
                 {
                     Byte data = Bus::Read(pixel_index++);
                     Byte index = (data >> 6) & 0x03;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 4) & 0x03;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 2) & 0x03;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 0) & 0x03;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                 }
                 // 2 color mode
                 else if (bits_per_pixel == 1)
                 {
                     Byte data = Bus::Read(pixel_index++);
                     Byte index = (data >> 7) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true); 
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha); 
                     index = (data >> 6) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 5) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 4) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 3) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 2) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 1) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                     index = (data >> 0) & 1;
-                    _setPixel_unlocked(pixels, pitch, x++, y, index, true);   
+                    _setPixel_unlocked(pixels, pitch, x++, y, index, ignore_alpha);   
                 }
             }
         }
@@ -796,6 +820,10 @@ void Gfx::_updateBitmapScreen()
 
 void Gfx::_updateTextScreen() 
 {
+    bool ignore_alpha = true;
+    if (Bus::Read(MEM_DSP_FLAGS) & 0x80) 
+        ignore_alpha = false;
+
     void *pixels;
     int pitch;
 
@@ -830,7 +858,7 @@ void Gfx::_updateTextScreen()
 					if (gd & (1 << (7 - h)))
 						color = fg;
 					// _setPixel_unlocked(pixels, pitch, x + h, y + v, 15);
-					_setPixel_unlocked(pixels, pitch, x + h, y + v, color);
+					_setPixel_unlocked(pixels, pitch, x + h, y + v, color, ignore_alpha);
 				}
 			}
 		}

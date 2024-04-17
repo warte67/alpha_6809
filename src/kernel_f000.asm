@@ -170,6 +170,10 @@ k_init_0	clr	,x+		; clear the next byte
 		lda	#$03		; default: 0x03 = 40x25 text
 					;          0x0E = 32x15 text (16:9)
 		sta	GFX_MODE	; set the default graphics
+		; enable the standard display
+		lda	#$C0		; enable standard display
+		; ora	#$80		; enable extended display
+		sta	MEM_DSP_FLAGS	; store into the display flags register
 		; default text color attribute
 		lda	#$B4		; lt green on dk green
 		sta	_ATTRIB

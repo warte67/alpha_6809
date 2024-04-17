@@ -338,11 +338,12 @@ enum MEMMAP
     MEM_TYPE_ROM     = 0x0002, //      read only memory (ROM)
         
     MEM_DSP_FLAGS    = 0xFF82, // (Byte) Extended Graphics Display Flags
-        //      bit 7:    0=standard graphics, 1:extended graphics 
-        //      bits 2-6: reserved (possibly for tilemap support)
-        //      bits 0-1: color depth:  
-        //            0:2-color, 1:4-color, 2:16-color, 3:256-color
-    MEM_DSPLY_SIZE = 0xFF83, // (Word) Extended Graphics Buffer Size
+        //      bit 7:    1=extended bitmap enabled, 0=disabled 
+        //      bit 6:    1=standard modes enabled,  0=disabled
+        //      bits 2-5: reserved (possibly for tilemap/sprites)
+        //      bits 0-1: extended bitmap color depth:  
+        //                0:2-color, 1:4-color, 2:16-color, 3:256-color
+    MEM_DSPLY_SIZE   = 0xFF83, // (Word) Extended Graphics Buffer Size
         
     MEM_EXT_ADDR     = 0xFF85, // (Word) Extended Memory Address Port
     MEM_EXT_PITCH    = 0xFF87, // (Word) number of bytes per line

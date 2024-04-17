@@ -40,7 +40,21 @@ class Debug : public IDevice
         bool SingleStep();
         void ContinueSingleStep();
 
-        
+        // palette stuff
+        union PALETTE {
+            Word color;
+            struct {
+                Uint8 b : 4;
+                Uint8 g : 4;
+                Uint8 r : 4;
+                Uint8 a : 4;
+            };
+        };
+        std::vector<PALETTE> _debug_palette;
+	    Uint8 red(Uint8 index) { Uint8 c = _debug_palette[index].r;  return c; }
+        Uint8 grn(Uint8 index) { Uint8 c = _debug_palette[index].g;  return c; }
+        Uint8 blu(Uint8 index) { Uint8 c = _debug_palette[index].b;  return c; }
+        Uint8 alf(Uint8 index) { Uint8 c = _debug_palette[index].a;  return c; }  
 
 
     private:
