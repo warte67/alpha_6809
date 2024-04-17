@@ -1346,7 +1346,8 @@ void Debug::_setPixel(int x, int y, Byte color_index,
 
 void Debug::_setPixel_unlocked(void* pixels, int pitch, int x, int y, Byte color_index, bool bIgnoreAlpha)
 {
-    SDL_clamp(color_index, 0, 15);
+    if (color_index>15) color_index=15;
+
     // Gfx* gfx = Bus::GetGfx();
     Uint16 *dst = (Uint16*)((Uint8*)pixels + (y * pitch) + (x*sizeof(Uint16)));		// because data size is two bytes 
     bool ALPHA_BLEND = true;
