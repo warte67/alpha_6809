@@ -78,7 +78,6 @@ class Gfx : public IDevice
         bool SaveGimpPalette(const std::string& filename, const std::string& name);  // save the current palette
         bool LoadGimpPalette(const std::string& filename);  // load from a GIMP (*.gpl) formatted palette file
 
-
     private:
 
         // internal registers (do these really need to be statics?)

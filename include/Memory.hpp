@@ -39,7 +39,7 @@ class Memory : public IDevice
         Word MemDelete(Word addr);  // frees memory and returns number of bytes de-allocated
         Word MemAvailable();        // returns the number of bytes available in the heap
 
-        bool LoadBMP(const std::string& file, bool updatePalette = true);
+        bool LoadBMP(const std::string& file, Byte bits_per_pixel=8, bool updatePalette = true);
 
     private:
 
@@ -78,6 +78,11 @@ class Memory : public IDevice
  *      bit 7:      0:standard graphics, 1:extended graphics
  *      bits 2-6:   reserved (future tilemap support)
  *      bits 0-1:   color depth: 0:2-color, 1:4-color, 2:16-color, 3:256-color
+ * 
+ * 
+ *  GIMP saves all indexed images as 256-color regarless of the palette size. Care should 
+ *      be taken to load the proper image format into memory based on color depth.
+ * 
  * 
  * 
  **** NOTES *******************************************************************************/
