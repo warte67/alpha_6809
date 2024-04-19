@@ -64,7 +64,7 @@ class Memory : public IDevice
 
 /**** NOTES *******************************************************************************
  * 
- *  Dynamic Memory Idea:
+ *  Dynamic Memory:
  *      SIZE    (Word) allocate on non-zero (LSB) write... free on zero (LSB) write
  *      ADDR    (Word) start address of allocated memory... start address to free
  *      FREE    (Word) returns the number of bytes available in the heap 
@@ -83,9 +83,9 @@ class Memory : public IDevice
  *      Consider moving the MEM_DSP_FLAGS register to the Gfx Device Hardware Registers immediately
  *          following the GFX_MODE register.  
  * 
- *  Rename: 
- *      GFX_MODE        to GFX_STD_MODE     ; bit flags remain unchanged
- *      MEM_DSP_FLAGS   to GFX_EXT_MODE     ; bit flags remain unchanged
+ *      Rename: 
+ *          GFX_MODE        to GFX_STD_MODE     ; bit flags remain unchanged
+ *          MEM_DSP_FLAGS   to GFX_EXT_MODE     ; bit flags remain unchanged
  * 
  * 
  *  Extended Video Buffer:
@@ -102,7 +102,14 @@ class Memory : public IDevice
  *      Whenever the video mode changes, pixel resolution and/or color depth of either Standard or
  *          Extended Video Modes, both dynamically allocated buffers should be released and re-allocated
  *          according to their required size. The Standard Video Buffer should begin at $0000 and the
- *          Extended buffer should begin immediately following.
+ *          Extended buffer should begin immediately following. (Only Extended buffer in Ext RAM).
+ * 
+ *      Personally, I like the standard buffer being in the CPU addressable space as it allows student
+ *          programer to be exposed to both video memory systems. The Register Port style video memory
+ *          addressing scheme is a system that is used in "modern" retro machines such as the Commander 64.
+ *          The CPU addressable video memory is more akin to how the video hardware worked on the 8-bit 
+ *          machines. Moving forwared, I believe the standard buffer will continue to be CPU addressable.
+ *          The extended buffer will be located at address $0000 in the extended memory buffer.
  * 
  * Sprites and Map Tiles Should be Dynamically Allocated:
  *      Each image data entry should be dynamically allocated and given its own pointer to pass on
