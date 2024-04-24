@@ -63,6 +63,35 @@ class Memory : public IDevice
 
 
 /**** NOTES *******************************************************************************
+ *  Rename this class to ExtMemory to avoid abiguity between CPU addressable Standard
+ *      memory and the Extended Video Buffer memory. While blocks of memory can be
+ *      dynamically allocated for other purposes, this feature should be reserved for
+ *      video related assets.
+ *      
+ *      1)  Rename the hardware registers to use the prefix EXT_ rather than MEM_. 
+ *      2)  Add suport for loading sprite/tile assets dynamically.
+ *          A)  Support a custom sequential image load file format.
+ *          B)  Support for loading a grid of tiles from a SpriteSheet.
+ *      3)  Add support for enabling sprites and/or tilesets:
+ *          A) Support for Tilemaps and Spritelists
+ *      4)  Image definition structure to include specific image information:
+ *          A)  Image sizes should includine 8, 16, 24, 32, 40, and 48 pixels:
+ *                  I)    Height
+ *                  II)   Width
+ *                  III)  Bits Per Pixel (color depth 2, 4, 16, or 256)
+ *          B)  Position should be in signed screen space
+ *                  I)    Horizontal Position (Sint16)
+ *                  II)   Vertical Position (Sint16)
+ *          C)  Types should include Sprite Image Data, Collision Masks, and Tile Image Data
+ *          D)  Flags:
+ *                  I)    Sprite Display Enable (bit)
+ *                  II)   Sprite Collision Enable (bit)
+ *                  III)  Sprite Collision Flags? (need some way of tracking collided sprites)
+ *                  IV)   Memory Bank (Image is stored in STD or EXT memory)
+ *          E)  Image Data Pointer
+ *          F)  User Data Structure and/or pointer
+ * 
+ * 
  * 
  *  Dynamic Memory:
  *      SIZE    (Word) allocate on non-zero (LSB) write... free on zero (LSB) write
