@@ -6,6 +6,9 @@ build/cmake_install.cmake
 build/Makefile
 build/*.lst
 build/*.sym
+build/.ninja_deps
+build/.ninga_log
+build/build.ninja
 compile_commands.json
 CMakeCache.txt
 main
