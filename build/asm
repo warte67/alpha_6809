@@ -5,9 +5,11 @@ cd ../src
 echo 'asm6809 -H -9 "$1.asm" -o "../build/$1.hex" -l "../build/$1.lst" -s "../build/$1.sym" '
 asm6809 -H -9 "$1.asm" -o "../build/$1.hex" -l "../build/$1.lst" -s "../build/$1.sym"    
 if [ $? -eq 0 ]; then
-    echo "\e[93msuccessfully built $1.hex\e[0m"
+    echo -e "\033[93msuccessfully built $1.hex\e[0m"
+    echo -e "\033[00m";
 else
-    echo "\e[31masm6809 FAILED!\e[0m"
+    echo -e "\033[31masm6809 FAILED!\e[0m";
+    echo -e "\033[00m";
 fi
 cd ../build
 
