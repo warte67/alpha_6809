@@ -45,10 +45,10 @@ if [ "$1" = "build" -o "$1" = "make" -o "$1" = "run" ]; then
                 ./main
             fi
         else
-            echo "\e[31mmake FAILED to build!\e[0m"
+            echo -e "\033[31mmake FAILED to build!\e[0m"
         fi
     else
-        echo CMake FAILED!
-        echo "\e[31mCMake FAILED!\e[0m"
+        #echo CMake FAILED!
+        echo -e "\033[31mCMake FAILED!\e[0m"
     fi
 fi

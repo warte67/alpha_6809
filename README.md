@@ -5,6 +5,24 @@ Emulation prototype work has been completed (see: retro_6809). Alpha_6809 will b
 More notes and WIKI documention to follow.
 
 
+FEDORA STUFF:
+
+install ASM6809:
+/home/jay/Documents/GitHub/alpha_6809/reference/asm/ASM6809/asm6809-2.13-12.fc40.x86_64.rpm
+
+install SDL2:
+sudo dnf install SDL2_gfx-devel.x86_64 SDL2_image-devel.x86_64 SDL2_mixer-devel.x86_64 SDL2_ttf-devel.x86_64 SDL2-devel.x86_64 SDL2_net-devel.x86_64 SDL2_sound-devel.x86_64 
+
+
+UBUNTU / DEBIAN:
+
+install ASM6809:
+/home/jay/Documents/GitHub/alpha_6809/reference/asm/asm6809_2.13+14SNAPSHOT20230630200048-0ubuntu1~jammy_amd64.deb
+
+install SDL2
+...
+
+
 
 
 
