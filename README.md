@@ -54,6 +54,7 @@ VS Code Extensions:
     6x09 Assembly
     
 I like to turn off the Code Lens from the 6809 listings:
+
     Click the Gear Icon for the 6x09 Assemly in the Extensions Marketplace
     Click Extension Settings
     Under '6x09 Assembly: Enable Code Lens'
