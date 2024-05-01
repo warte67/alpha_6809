@@ -46,6 +46,20 @@ to build and run, either:
 
     ./run
 
+VS Code Extensions:
+
+    C/C++
+    C/C++ Extension Pack
+    C/C++ Themes
+    6x09 Assembly
+    
+I like to turn off the Code Lens from the 6809 listings:
+    Click the Gear Icon for the 6x09 Assemly in the Extensions Marketplace
+    Click Extension Settings
+    Under '6x09 Assembly: Enable Code Lens'
+    Uncleck the 'Enable CodeLens for assembly source files' box
+
+
 
 
 
