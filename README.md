@@ -7,43 +7,43 @@ More notes and WIKI documention to follow.
 
 FEDORA STUFF:
 
-    install ASM6809:
-        /home/jay/Documents/GitHub/alpha_6809/reference/asm/ASM6809/asm6809-2.13-12.fc40.x86_64.rpm
+install ASM6809:
+    /home/jay/Documents/GitHub/alpha_6809/reference/asm/ASM6809/asm6809-2.13-12.fc40.x86_64.rpm
 
-    install SDL2:
-        sudo dnf install SDL2_gfx-devel.x86_64 SDL2_image-devel.x86_64 SDL2_mixer-devel.x86_64 SDL2_ttf-devel.x86_64 SDL2-devel.x86_64 SDL2_net-devel.x86_64 SDL2_sound-devel.x86_64 
+install SDL2:
+    sudo dnf install SDL2_gfx-devel.x86_64 SDL2_image-devel.x86_64 SDL2_mixer-devel.x86_64 SDL2_ttf-devel.x86_64 SDL2-devel.x86_64 SDL2_net-devel.x86_64 SDL2_sound-devel.x86_64 
 
 
 UBUNTU 24.04:
 
-    update/upgrade:
-        sudo apt update && sudo apt upgrade -y
+update/upgrade:
+    sudo apt update && sudo apt upgrade -y
 
-    install flatpaks:
-        sudo apt install flatpak
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        sudo apt install gnome-software-plugin-flatpak gnome-software
+install flatpaks:
+    sudo apt install flatpak
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    sudo apt install gnome-software-plugin-flatpak gnome-software
 
-    install development tools:
-        sudo apt install build-essential make cmake git
+install development tools:
+    sudo apt install build-essential make cmake git
 
-    install SDL2 libraries:
-        sudo apt install libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
+install SDL2 libraries:
+    sudo apt install libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev
 
-    from software center:
-        install vscode (flatpak) and github-desktop (flatpak)
+from software center:
+    install vscode (flatpak) and github-desktop (flatpak)
 
-    after cloning the repository (from the cloned asm_6809 directory):
-        cd reference
-        cd asm
-        sudo dpkg -i asm6809_2*
-        cd ../../build
+after cloning the repository (from the cloned asm_6809 directory):
+    cd reference
+    cd asm
+    sudo dpkg -i asm6809_2*
+    cd ../../build
 
-    to build and run, either:
-        ./clean build
-        ./main
-      or simply:
-        ./run
+to build and run, either:
+    ./clean build
+    ./main
+  or simply:
+    ./run
 
 
 
