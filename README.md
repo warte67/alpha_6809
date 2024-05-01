@@ -58,7 +58,7 @@ to build and run, either:
 
 
 
-GNU LICENSE:
+GNU V3 LICENSE:
 
                            GNU LESSER GENERAL PUBLIC LICENSE
                                Version 3, 29 June 2007
