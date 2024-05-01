@@ -6,6 +6,7 @@ More notes and WIKI documention to follow.
 
 
 FEDORA STUFF:
+
     install ASM6809:
         /home/jay/Documents/GitHub/alpha_6809/reference/asm/ASM6809/asm6809-2.13-12.fc40.x86_64.rpm
 
@@ -14,6 +15,7 @@ FEDORA STUFF:
 
 
 UBUNTU 24.04:
+
     update/upgrade:
         sudo apt update && sudo apt upgrade -y
 
