@@ -19,3 +19,6 @@ main
 .cmake
 
 *.ninja
+build/.ninja_deps
+build/.ninja_log
+*.ninja
