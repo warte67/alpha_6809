@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# ./clean               cleans up build files
+# ./clean build         cleans and builds the program file
+# ./clean make          cleans and builds the program file (same as 'build')
+# ./clean run           cleans, builds, and runs the program
+
+# Cleanup any prior build files
+FILE=CMakeFiles
+if test -e "$FILE"; then
+    echo "Removing $FILE ..."
+    rm -rf "$FILE"
+fi
+FILE=cmake_install.cmake
+if test -e "$FILE"; then
+    echo "Removing $FILE ..."
+    rm -rf "$FILE"
+fi
+FILE=CMakeCache.txt
+if test -e "$FILE"; then
+    echo "Removing $FILE ..."
+    rm -rf "$FILE"
+fi
+FILE=Makefile
+if test -e "$FILE"; then
+    echo "Removing $FILE ..."
+    rm -rf "$FILE"
+fi
+FILE=main
+if test -e "$FILE"; then
+    echo "Removing $FILE ..."
+    rm -rf "$FILE"
+fi
+
+# attempt to build the kernel rom
+./asm kernel_f000
+
+# Attempt to build, run if successful
+if [ "$1" = "build" -o "$1" = "make" -o "$1" = "run" ]; then
+    cmake ..
+    if [ $? -eq 0 ]; then
+        make    
+        if [ $? -eq 0 ]; then
+            if [ "$1" = "run" ]; then
+                ./main
+            fi
+        else
+            echo "\e[31mmake FAILED to build!\e[0m"
+        fi
+    else
+        echo CMake FAILED!
+        echo "\e[31mCMake FAILED!\e[0m"
+    fi
+fi
