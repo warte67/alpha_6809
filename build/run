@@ -20,7 +20,7 @@ if [ $? -eq 0 ]; then
 
     # attempt to make and run 
     if [ $? -eq 0 ]; then
-        make -j
+        make -j # $(nproc) 
         if [ $? -eq 0 ]; then
             ./main
         else

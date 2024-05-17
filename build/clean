@@ -39,7 +39,7 @@ fi
 if [ "$1" = "build" -o "$1" = "make" -o "$1" = "run" ]; then
     cmake ..
     if [ $? -eq 0 ]; then
-        make -j   
+        make -j # $(nproc)   
         if [ $? -eq 0 ]; then
             if [ "$1" = "run" ]; then
                 ./main
