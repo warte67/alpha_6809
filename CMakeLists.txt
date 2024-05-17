@@ -39,6 +39,7 @@ target_link_libraries(
 
 # COMPILER FLAGS
 target_compile_options(${PROJECT_NAME} PRIVATE 
+    -O2
     -fexceptions
     -Wall
     #-DDEBUG

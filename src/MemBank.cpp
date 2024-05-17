@@ -149,7 +149,13 @@ bool MemBank::_loadHeader()
     {
         // load the header info from the 'paged.mem' file
         fseek(fp, 0, SEEK_SET);     // seek the beginning of the file
-        fread((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+        size_t size_read = fread((void *)&_bank_header, sizeof(Byte), sizeof(BANK_HEADER), fp);
+        if (size_read != sizeof(BANK_HEADER))
+        {
+            Bus::Error("MemBank::Error() -- Load Error");
+            fclose(fp);
+            return false;
+        }
         // close the file
         fclose(fp);
         return true;
