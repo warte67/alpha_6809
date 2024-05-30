@@ -22,3 +22,4 @@ main
 build/.ninja_deps
 build/.ninja_log
 *.ninja
+build/build.ninja
