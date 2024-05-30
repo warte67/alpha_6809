@@ -975,6 +975,7 @@ void Gfx::_updateExtendedBitmapScreen()
     //     mm->memory_btm = size;
     // }
     // printf("BPP:%d  SIZE:$%04X\n", bpp, size);
+	//
 
 
     // display the extended bitmap buffer
