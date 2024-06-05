@@ -348,16 +348,16 @@ void Debug::OnEvent(SDL_Event* evnt)
                     bMouseWheelActive = false;
                 }
             }
-            // [F10] or [SPACE] == Step Over
-            if (evnt->key.keysym.sym == SDLK_F10)// || evnt->key.keysym.sym == SDLK_SPACE)
-            {
-                cbStepOver();
-            }    
-            // [F11] == Step Into
-            if (evnt->key.keysym.sym == SDLK_F11)
-            {
-                cbStepIn();
-            }                
+            // // [F10] or [SPACE] == Step Over
+            // if (evnt->key.keysym.sym == SDLK_F10 || evnt->key.keysym.sym == SDLK_SPACE)
+            // {
+            //     cbStepOver();
+            // }    
+            // // [F11] == Step Into
+            // if (evnt->key.keysym.sym == SDLK_F11)
+            // {
+            //     cbStepIn();
+            // }                
             break;           
         }
     }
@@ -366,9 +366,8 @@ void Debug::OnEvent(SDL_Event* evnt)
     if (!(SDL_GetWindowFlags(Debug::GetSDLWindow()) & SDL_WINDOW_INPUT_FOCUS)) 
         return;
 
-    switch (evnt->type) {
-        // handle default events SDL_QUIT and ALT-X quits
-
+    switch (evnt->type) 
+    {   // handle default events SDL_QUIT and ALT-X quits
         case SDL_WINDOWEVENT:
         {
             switch (evnt->window.event)
@@ -452,6 +451,18 @@ void Debug::OnEvent(SDL_Event* evnt)
                         bIsCursorVisible = false;
                 }          
             }
+
+            // [F10] or [SPACE] == Step Over
+            if (evnt->key.keysym.sym == SDLK_F10 || evnt->key.keysym.sym == SDLK_SPACE)
+            {
+                cbStepOver();
+            }    
+            // [F11] == Step Into
+            if (evnt->key.keysym.sym == SDLK_F11)
+            {
+                cbStepIn();
+            }    
+
             break;
         } // SDL_KEYDOWN
 
