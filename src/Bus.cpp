@@ -232,6 +232,7 @@ Bus::Bus()
 	// Install the CPU and start its thread
 	s_c6809 = new C6809(this);
 
+	// start the CPU thread
 	try 
 	{
 		s_cpuThread = std::thread(&C6809::ThreadProc);
