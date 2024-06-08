@@ -243,9 +243,8 @@ Bus::Bus()
 			s_cpuThread.join();		
 		Bus::Error("Unable to start the CPU thread");
 		Bus::IsRunning(false);
+		std::cout << e.what() << std::endl;
 	}
-
-
 	// C6809::IsCpuEnabled(true);       
 }
 
