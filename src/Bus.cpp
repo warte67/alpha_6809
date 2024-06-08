@@ -231,7 +231,20 @@ Bus::Bus()
 
 	// Install the CPU and start its thread
 	s_c6809 = new C6809(this);
-	s_cpuThread = std::thread(&C6809::ThreadProc);
+
+	try 
+	{
+		s_cpuThread = std::thread(&C6809::ThreadProc);
+	} 
+	catch (const std::exception& e)
+	{
+		if (s_cpuThread.joinable())
+			s_cpuThread.join();		
+		Bus::Error("Unable to start the CPU thread");
+		Bus::IsRunning(false);
+	}
+
+
 	// C6809::IsCpuEnabled(true);       
 }
 
@@ -240,7 +253,8 @@ Bus::~Bus()
     // std::cout << "~" << Name() << "::Bus()\n";
 
     // shutdown the CPU thread
-    s_cpuThread.join();
+	if (s_cpuThread.joinable())
+    	s_cpuThread.join();
 
     // Remove the CPU device
     if (s_c6809)
