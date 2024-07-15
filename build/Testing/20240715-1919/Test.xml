@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="(empty)"
+	BuildStamp="20240715-1919-Experimental"
+	Name="(empty)"
+	Generator="ctest-3.29.6"
+	CompilerName=""
+	CompilerVersion=""
+	OSName="Linux"
+	Hostname="CoffeeTable"
+	OSRelease="6.8.0-38-generic"
+	OSVersion="#38-Ubuntu SMP PREEMPT_DYNAMIC Fri Jun  7 15:25:01 UTC 2024"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="AuthenticAMD"
+	VendorID="Advanced Micro Devices"
+	FamilyID="21"
+	ModelID="2"
+	ProcessorCacheSize="2048"
+	NumberOfLogicalCPU="6"
+	NumberOfPhysicalCPU="3"
+	TotalVirtualMemory="33279"
+	TotalPhysicalMemory="32079"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="3013.77"
+	>
+	<Testing>
+		<StartDateTime>Jul 15 12:19 PDT</StartDateTime>
+		<StartTestTime>1721071152</StartTestTime>
+		<TestList/>
+		<EndDateTime>Jul 15 12:19 PDT</EndDateTime>
+		<EndTestTime>1721071152</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>
