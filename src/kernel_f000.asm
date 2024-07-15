@@ -28,7 +28,7 @@ SVCT_RESET	fdb	KRNL_START	; VECT_RESET
 ;	fcs	character string with its terminators high bit set
 ;	fcn	character string with null termination
 
-KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.3\n"
+KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.4\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
 KRNL_PROMPT2	fcn	"Under General Public Liscense (GPL V3)\n"
 KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
@@ -45,6 +45,8 @@ KRNL_CMD_TABLE	fcn	"cls"		; #0
 		fcn	"exit"		; #8
 		fcn	"quit"		; #9
 		fcn	"mode"		; #10
+		fcn	"debug"		; #11
+		fcn	"help"		; #12
 		fcb	$FF		; $FF = end of list
 		; ...
 
@@ -59,8 +61,18 @@ KRNL_CMD_VECTS  fdb	do_cls		; #0
 		fdb	do_exit		; #8
 		fdb	do_quit		; #9
 		fdb	do_mode		; #10
+		fdb	do_debug	; #11
+		fdb	do_help		; #12
 		; ...
 KRNL_ERR_NFND 	fcn	"ERROR: Command Not Found\n"
+krnl_help_str	fcc	" valid commands are:\n"
+		fcc	"  cls,   color, load,\n"
+		fcc	"  exec,  reset, dir, cd,\n"
+		fcc	"  chdir, exit,  quit,\n"
+		fcc	"  mode,  debug, exit,\n"
+		fcc	"  quit,  mode,  debug,\n"
+		fcn	"  and help\n"
+
 
 ; *****************************************************************************
 ; * KERNAL ROUTINE SOFTWARE VECTORS                                           *
@@ -256,6 +268,7 @@ k_main_error	ldx	#KRNL_ERR_NFND	; ERROR: Command Not Found
 ;	do_exit		; #8		; Exit the Emulator
 ;	do_quit		; #9		; Also Exits the Emulator
 ;	do_mode		; #10		; Display Mode (0-31) or ($00-$1F)
+;	do_debug	; #11		; Enter or Exit the Debugger
 
 ; *****************************************************************************
 ; * Command: CLS "Clear Screen"			      ARG1 = Color Attribute  *
@@ -378,6 +391,41 @@ do_mode		tst	,x		; test for an argument
 		lda	#' '		; load a SPACE character
 		jsr	KRNL_CLS	; clear the screen
 do_mode_0	rts			; return from subroutine
+
+; *****************************************************************************
+; * Command: DEBUG "Enter / Exit Debugger"                       ARG1 = none  *
+; *****************************************************************************
+do_debug_str		fcn	" ";
+do_debug_ena		fcn	"enabled\n";
+do_debug_dis		fcn	"disabled\n";
+do_debug	lda	DBG_FLAGS	; load the debug hardware flags
+		anda	#$80		; test the enable bit
+		beq	do_debug_0	; Go ENABLE the debugger
+		; DISABLE the debugger
+		lda	DBG_FLAGS	; load the debug hardware flags
+		anda	#$7f		; mask out the debugger bit
+		sta	DBG_FLAGS	; store the updated debug flags
+		ldx	#do_debug_str	; load the debugger response string
+		jsr	KRNL_LINEOUT	; send the string to the console
+		ldx	#do_debug_dis	; load the "disabled" string address
+		jsr	KRNL_LINEOUT	; send it to the console
+		rts			; return from this subroutine
+do_debug_0	; ENABLE the debugger
+		lda	DBG_FLAGS	; load the debug hardware flags
+		ora	#$80		; set the debug enable flag
+		sta	DBG_FLAGS	; store the updated debug flags
+		ldx	#do_debug_str	; load the debugger response string
+		jsr	KRNL_LINEOUT	; send it to the console
+		ldx	#do_debug_ena	; load the "enabled" string start
+		jsr	KRNL_LINEOUT	; send it to the console
+		rts			; return from this subroutine
+
+; *****************************************************************************
+; * Command: HELP basic help text message                        ARG1 = none  *
+; *****************************************************************************
+do_help		ldx	#krnl_help_str	; load the help message string addresses
+		jsr	KRNL_LINEOUT	; send it to the console
+		rts			; return from subroutine
 
 ; *****************************************************************************
 ; * KERNEL SUBROUTINES (Prototypes)                                           *
