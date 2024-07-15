@@ -1,27 +1,18 @@
 *.o
 *.o.d
 *.cmake
+*.ninja
 build/CMakeFiles/
 build/cmake_install.cmake
 build/Makefile
 build/*.lst
 build/*.sym
-build/.ninja_deps
-build/.ninja_log
-build/build.ninja
-.ninja_deps
-.ninja_log
-build.ninja
+
 compile_commands.json
 CMakeCache.txt
 main
 .vscode
 .cmake
 
-*.ninja
-build/.ninja_deps
-build/.ninja_log
-*.ninja
-build/build.ninja
 
-*.ninja
+
