@@ -376,6 +376,9 @@ void Gfx::OnActivate()
             Bus::Error("Error Creating _render_target");    
     }
     // C6809::IsCpuEnabled(true); 
+
+    // finally raise the main window
+    SDL_RaiseWindow(Gfx::GetSDLWindow());
 }
 
 void Gfx::OnDeactivate()

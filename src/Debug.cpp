@@ -342,7 +342,10 @@ void Debug::OnEvent(SDL_Event* evnt)
                         SDL_RaiseWindow(Debug::GetSDLWindow());
                     }
                     else
+                    {
                         SDL_HideWindow(Debug::GetSDLWindow());
+                        SDL_RaiseWindow(Gfx::GetSDLWindow());
+                    }
                     
                     // if (s_bIsDebugActive) // enable the cursor during debug
                     // {
@@ -388,12 +391,14 @@ void Debug::OnEvent(SDL_Event* evnt)
                     s_bIsDebugActive = false;
                     SDL_HideWindow(sdl_debug_window);
                     // SDL_MinimizeWindow(sdl_debug_window);   // just minimize instead of close
+                    SDL_RaiseWindow(Gfx::GetSDLWindow());
                     break;
                 }                
                 case SDL_WINDOWEVENT_MINIMIZED:
                 {
                     //printf("%s::OnEvent(): SDL_WINDOWEVENT_MINIMIZED\n", Name().c_str());
                     s_bIsDebugActive = false;
+                    SDL_RaiseWindow(Gfx::GetSDLWindow());
                     break;
                 }
                 case SDL_WINDOWEVENT_RESTORED:
