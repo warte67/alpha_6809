@@ -194,6 +194,12 @@ void Debug::OnInit()
         s_bSingleStep = true;     
         reg_flags |= 0x40; 
     }
+    /***********************************************************************
+     * Attempting to stop the screen flicker when creating the SDL window  *
+     ***********************************************************************/
+    #ifdef __linux__
+        debug_window_flags |= SDL_WINDOW_UTILITY;
+    #endif        
 
     // set the default monitor
     Gfx::s_gfx_emu |= (DEBUG_MONITOR & 0x07)<<3;
@@ -331,7 +337,10 @@ void Debug::OnEvent(SDL_Event* evnt)
                     bMouseWheelActive = false;
 
                     if (s_bIsDebugActive)
+                    {
                         SDL_ShowWindow(Debug::GetSDLWindow());
+                        SDL_RaiseWindow(Debug::GetSDLWindow());
+                    }
                     else
                         SDL_HideWindow(Debug::GetSDLWindow());
                     
@@ -368,6 +377,7 @@ void Debug::OnEvent(SDL_Event* evnt)
 
     switch (evnt->type) 
     {   // handle default events SDL_QUIT and ALT-X quits
+
         case SDL_WINDOWEVENT:
         {
             switch (evnt->window.event)
@@ -376,8 +386,8 @@ void Debug::OnEvent(SDL_Event* evnt)
                 {
                     //printf("%s::OnEvent(): SDL_WINDOWEVENT_CLOSE\n", Name().c_str());
                     s_bIsDebugActive = false;
-                    // SDL_HideWindow(sdl_debug_window);
-                    SDL_MinimizeWindow(sdl_debug_window);   // just minimize instead of close
+                    SDL_HideWindow(sdl_debug_window);
+                    // SDL_MinimizeWindow(sdl_debug_window);   // just minimize instead of close
                     break;
                 }                
                 case SDL_WINDOWEVENT_MINIMIZED:

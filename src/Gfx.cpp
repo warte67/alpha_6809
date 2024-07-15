@@ -631,6 +631,13 @@ void Gfx::_decode_gmode()
         window_height = desktop_height;
     }
 
+    /***********************************************************************
+     * Attempting to stop the screen flicker when creating the SDL window  *
+     ***********************************************************************/
+    #ifdef __linux__
+        window_flags |= SDL_WINDOW_UTILITY;
+    #endif    
+
 	// SDL Renderer Flags
 	sdl_renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
 	if (gmode & 0x40)
