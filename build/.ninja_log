@@ -1,17 +1,17 @@
 # ninja log v5
-9	6752	1721071134722005059	CMakeFiles/main.dir/src/Mouse.cpp.o	4613599c2827a261
-7	18462	1721071146422030819	CMakeFiles/main.dir/src/C6809.cpp.o	ee3f92e7e54d1bf
-4459	14681	1721071142641022659	CMakeFiles/main.dir/src/FileIO.cpp.o	f48f48cb9adcb7da
-3	47	1721072668098308594	build.ninja	ca15f1120a17632e
+9	7167	1721071135137006000	CMakeFiles/main.dir/src/Keyboard.cpp.o	ddb6c90aaf5182e8
+4	8809	1721071136777009697	CMakeFiles/main.dir/src/Gfx.cpp.o	96c1fbb2b7cf541a
+4191	10591	1721071138561013681	CMakeFiles/main.dir/src/Gamepad.cpp.o	5a6252842d9955a7
+2133	2392	1721072316519822494	main	2e195ab0b2b27470
+1	4	0	clean	a31eedcededa8236
+3	9412	1721071137379011045	CMakeFiles/main.dir/src/Bus.cpp.o	9e8445a152b7fb1a
+3	47	1721072757860974084	build.ninja	ca15f1120a17632e
 7170	11998	1721071139970016804	CMakeFiles/main.dir/src/MemBank.cpp.o	2005692d85362798
+7	18462	1721071146422030819	CMakeFiles/main.dir/src/C6809.cpp.o	ee3f92e7e54d1bf
+9	6752	1721071134722005059	CMakeFiles/main.dir/src/Mouse.cpp.o	4613599c2827a261
+4459	14681	1721071142641022659	CMakeFiles/main.dir/src/FileIO.cpp.o	f48f48cb9adcb7da
 8813	13942	1721071141913021072	CMakeFiles/main.dir/src/Memory.cpp.o	4befcbbe18a0dc2d
 3	4191	1721071132162999212	CMakeFiles/main.dir/src/IDevice.cpp.o	d4bfdfa0d75a6f2a
 6757	13298	1721071141267019657	CMakeFiles/main.dir/src/Math.cpp.o	ca12da3ae9f8afb9
 4	2132	1721072316262814548	CMakeFiles/main.dir/src/main.cpp.o	edbc078711520090
 4	11784	1721071139749016315	CMakeFiles/main.dir/src/Debug.cpp.o	fd54c3f87e31456d
-4191	10591	1721071138561013681	CMakeFiles/main.dir/src/Gamepad.cpp.o	5a6252842d9955a7
-4	8809	1721071136777009697	CMakeFiles/main.dir/src/Gfx.cpp.o	96c1fbb2b7cf541a
-9	7167	1721071135137006000	CMakeFiles/main.dir/src/Keyboard.cpp.o	ddb6c90aaf5182e8
-3	9412	1721071137379011045	CMakeFiles/main.dir/src/Bus.cpp.o	9e8445a152b7fb1a
-1	4	0	clean	a31eedcededa8236
-2133	2392	1721072316519822494	main	2e195ab0b2b27470
