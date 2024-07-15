@@ -20,7 +20,7 @@ install flatpak support:
 
 install development tools:
 
-    sudo apt install build-essential make cmake git
+    sudo apt install build-essential make cmake git ninja-build
 
 install SDL2 libraries:
 
