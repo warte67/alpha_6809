@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         std::cout << "DEBUG flag was set at compile time.\n";
     #endif
 
-    std::cout << "\n\n\nProgram Terminated\n\n\n";
+    // std::cout << "\n\n\nProgram Terminated\n\n\n";
 
     return (int)0;
 }
