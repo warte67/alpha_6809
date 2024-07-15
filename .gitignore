@@ -3,9 +3,9 @@
 *.cmake
 *.ninja
 
-build/.ninja_deps
-build/.ninja_log
-build/build.ninja
+./build/.ninja_deps
+./build/.ninja_log
+./build/build.ninja
 
 build/CMakeFiles/
 build/cmake_install.cmake
