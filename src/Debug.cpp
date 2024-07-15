@@ -19,7 +19,8 @@ Byte Debug::read(Word offset, bool debug)
     switch (offset)
     {
         // system registers
-		case SYS_STATE: {
+		case SYS_STATE: 
+        {
 			Byte err = C6809::s_sys_state & 0xF0;
 			C6809::s_sys_state &= 0x0F;
 			data = C6809::s_sys_state | err; 
@@ -34,7 +35,8 @@ Byte Debug::read(Word offset, bool debug)
         // debug registers
         case DBG_BRK_ADDR + 0: data = reg_brk_addr >> 8;   break;
         case DBG_BRK_ADDR + 1: data = reg_brk_addr & 0xFF; break;
-        case DBG_FLAGS: {
+        case DBG_FLAGS: 
+        {
             (s_bIsDebugActive) ? reg_flags |= 0x80 : reg_flags &= ~0x80; // Enable
             (s_bSingleStep)     ? reg_flags |= 0x40 : reg_flags &= ~0x40; // Single-Step
             reg_flags &= ~0x20;     // zero for Clear all Breakpoints
@@ -87,9 +89,15 @@ void Debug::write(Word offset, Byte data, bool debug)
             if (reg_flags & 0x01)   cbReset();
             // activate or deactivate the debugger
             if (s_bIsDebugActive)   // activate
+            {
                 SDL_ShowWindow(sdl_debug_window);
-            else                    // deactivate            
+                SDL_RaiseWindow(Debug::GetSDLWindow());
+            }
+            else                    // deactivate      
+            {      
                 SDL_HideWindow(sdl_debug_window);
+                SDL_RaiseWindow(Gfx::GetSDLWindow());
+            }
 
             break;        
         }
@@ -337,15 +345,9 @@ void Debug::OnEvent(SDL_Event* evnt)
                     bMouseWheelActive = false;
 
                     if (s_bIsDebugActive)
-                    {
                         SDL_ShowWindow(Debug::GetSDLWindow());
-                        SDL_RaiseWindow(Debug::GetSDLWindow());
-                    }
                     else
-                    {
                         SDL_HideWindow(Debug::GetSDLWindow());
-                        SDL_RaiseWindow(Gfx::GetSDLWindow());
-                    }
                     
                     // if (s_bIsDebugActive) // enable the cursor during debug
                     // {
@@ -387,44 +389,40 @@ void Debug::OnEvent(SDL_Event* evnt)
             {
                 case SDL_WINDOWEVENT_CLOSE:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_CLOSE\n", Name().c_str());
                     s_bIsDebugActive = false;
                     SDL_HideWindow(sdl_debug_window);
-                    // SDL_MinimizeWindow(sdl_debug_window);   // just minimize instead of close
                     SDL_RaiseWindow(Gfx::GetSDLWindow());
                     break;
                 }                
                 case SDL_WINDOWEVENT_MINIMIZED:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_MINIMIZED\n", Name().c_str());
                     s_bIsDebugActive = false;
-                    SDL_RaiseWindow(Gfx::GetSDLWindow());
                     break;
                 }
                 case SDL_WINDOWEVENT_RESTORED:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_RESTORED\n", Name().c_str());
                     s_bIsDebugActive = true;
                     break;
                 }
                 case SDL_WINDOWEVENT_ENTER:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_ENTER\n", Name().c_str());
                     bIsMouseOver = true;
                     break;
                 }
                 case SDL_WINDOWEVENT_LEAVE:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_LEAVE\n", Name().c_str());
                     bIsMouseOver = false;
                     break;
                 }
                 case SDL_WINDOWEVENT_FOCUS_LOST:
                 {
-                    //printf("%s::OnEvent(): SDL_WINDOWEVENT_FOCUS_LOST\n", Name().c_str());
                     bIsCursorVisible = false;
                     break;
-                }                
+                }   
+                // case SDL_WINDOWEVENT_FOCUS_GAINED:
+                // {
+                //     break;
+                // }             
             }
             break;
         }
