@@ -1,3 +1,4 @@
+//////////////////////////////////////////////////////////////////////////
 //
 // Using CMAKE to build the Makefile:
 //      to build the Makefile, run CMAKE from the build folder:
@@ -13,6 +14,7 @@
 //            F5 to build Makefiles
 //            CTRL-F5 to make and run (debug)
 //
+//////////
 
 #include <SDL2/SDL.h>
 #include <iostream>
