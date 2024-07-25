@@ -11,7 +11,7 @@ start		jmp	skip_data
 
 color_attrib	fcb	0
 test_str	fcn	"test.asm\n"
-folder_path	fcn	"/home/jay/dev/alpha_6809/build/test"
+folder_path	fcn	"/home/jay/GitHub/alpha_6809/build/test"
 ; data here ...
 
 

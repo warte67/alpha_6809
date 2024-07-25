@@ -13,7 +13,7 @@ start		jmp	skip_data
 color_attrib	fcb	0
 file_handle	fcb	0
 txt1		fcn	"\n\nHello World!\n"
-test_file	fcn	"/home/jay/dev/alpha_6809/build/test.txt"
+test_file	fcn	"/home/jay/GitHub/alpha_6809/build/test.txt"
 file_error	fcn	"ERROR: File does not exist!\n"
 file_EOF	fcn	"ERROR: Input past end of file!\n"
 
