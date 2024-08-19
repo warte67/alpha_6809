@@ -292,7 +292,7 @@ void Bus::Run()
                 OnDeactivate();
                 // create a new environment
                 OnActivate();
-                // wait 25 milliseconds to re-enable the CPU
+                // wait 25 milliseconds to re-enable the CPU 
                 SDL_Delay(25);
                 C6809::IsCpuEnabled(true);
                 // no longer dirty
@@ -320,8 +320,7 @@ Word Bus::OnAttach(Word nextAddr)
     return 0;
 
     // std::cout << Name() << "::OnAttach()\n";
-
-    return 0;
+    // return 0;
 }
 
 void Bus::OnInit()
@@ -472,11 +471,8 @@ void Bus::OnUpdate(float fNullTime)
     tp1 = tp2;
     // Our time per frame coefficient
     float fElapsedTime = elapsedTime.count();
-    // static float fLastElapsed = fElapsedTime;
-    // static float fFrameTimer = fElapsedTime;
 
     // count frames per second
-    // static int fps = 0;
     static int frame_count = 0;
     static float frame_acc = fElapsedTime;
     frame_count++;
@@ -490,15 +486,13 @@ void Bus::OnUpdate(float fNullTime)
 
 		// clean this up (get rid of the requirement for th GFX friend class Bus bullshit)
 		std::string sTitle = "Retro 6809";
-		sTitle += "  FPS: ";
-		sTitle += std::to_string(_fps);
-
-        _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
-
-        sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
-		// if (m_gfx)
+		sTitle += "  FPS: ";		// if (m_gfx)
 		// 	if (m_gfx->_window)
 		// 		 SDL_SetWindowTitle(m_gfx->_window, sTitle.c_str());
+
+		sTitle += std::to_string(_fps);
+        _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
+        sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
     }    
 
 	// update the devices
