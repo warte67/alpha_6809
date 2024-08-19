@@ -277,47 +277,42 @@ Bus::~Bus()
 
 void Bus::Run()
 {    
-    // std::cout << Name() << "::Run()\n";
-
-    // Bus::Error("Does the error thing work?");
-
+    // Application Main Loop:
     if (s_bIsRunning)
     {
+        // terminate the app when the 'isRunning' flag is no longer true
         while (s_bIsRunning)
         {
+            // something changed (is dirty). rebuild the environment
             if (s_bIsDirty)
             {
+                // stop the CPU from running while updating system
                 C6809::IsCpuEnabled(false);
                 // shutdown the old environment
                 OnDeactivate();
                 // create a new environment
                 OnActivate();
-
-                // wait a bit to re-enable the CPU
+                // wait 25 milliseconds to re-enable the CPU
                 SDL_Delay(25);
                 C6809::IsCpuEnabled(true);
-
-
-
                 // no longer dirty
                 s_bIsDirty = false;            
             }
+            // update all of the attached devices
             OnUpdate(0.0f);
+            // dispatch SDL events to the devices
             OnEvent(nullptr);
+            // render all of the devices to the screen buffers
             OnRender();      
             // only a present for GfxCore            
             Gfx::Present();
         }
         // shutdown the environment
         OnDeactivate();    
-
         // close down all of the attached devices
         OnQuit();   // One time destructor
     }
 }
-
-
-
 
 Word Bus::OnAttach(Word nextAddr)
 {
