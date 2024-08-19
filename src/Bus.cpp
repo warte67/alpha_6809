@@ -483,18 +483,12 @@ void Bus::OnUpdate(float fNullTime)
         frame_acc -= 0.25f;
 		_fps = frame_count * 4;
 		frame_count = 0;
-
-		// clean this up (get rid of the requirement for th GFX friend class Bus bullshit)
 		std::string sTitle = "Retro 6809";
-		sTitle += "  FPS: ";		// if (m_gfx)
-		// 	if (m_gfx->_window)
-		// 		 SDL_SetWindowTitle(m_gfx->_window, sTitle.c_str());
-
+		sTitle += "  FPS: ";		
 		sTitle += std::to_string(_fps);
         _sys_cpu_speed = (int)(1.0f / (s_avg_cpu_cycle_time / 1000000.0f));
         sTitle += "   CPU_SPEED: " + std::to_string(_sys_cpu_speed) + " khz.";
     }    
-
 	// update the devices
 	for (auto &d : Bus::_memoryNodes)
 		d->OnUpdate(fElapsedTime);	    
@@ -502,14 +496,12 @@ void Bus::OnUpdate(float fNullTime)
 
 void Bus::OnRender()
 {
-    // std::cout << Name() << "::OnRender()\n";
 	for (auto &d : Bus::_memoryNodes)
 		d->OnRender();    
 }
 
 Word Bus::Attach(IDevice* dev, Word size) 
 {    
-    // std::cout << Name() << "::Attach()\n";
     if (dev != nullptr)
     {
         if (size == 0)
@@ -537,8 +529,6 @@ void Bus::Error(const std::string& sErr)
     s_bIsRunning = false;
 }
 
-
-
 Byte Bus::read(Word offset, bool debug) 
 {
 	return Bus::Read(offset, debug);
@@ -558,9 +548,6 @@ void Bus::write_word(Word offset, Word data, bool debug)
 {
 	Bus::Write_Word(offset, data, debug);
 }
-
-
-
 
 Byte Bus::Read(Word offset, bool debug)
 {
@@ -622,9 +609,6 @@ void Bus::Write_DWord(Word offset, DWord data, bool debug)
     Bus::Write(offset+3, (data>> 0) & 0xFF);
 }
 
-
-
-
 // load_hex helpers
 Byte Bus::_fread_hex_byte(std::ifstream& ifs)
 {
@@ -658,8 +642,6 @@ void Bus::load_hex(const char* filename)
 	std::ifstream ifs(filename);
 	if (!ifs.is_open())
 	{
-		//printf("UNABLE TO OPEN FILE '%s'\n", filename);	
-
         std::stringstream ss;
         ss << "Unable to open file: " << filename;
         Bus::Error(ss.str());        	
