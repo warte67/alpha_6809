@@ -30,7 +30,7 @@ SVCT_RESET	fdb	KRNL_START	; VECT_RESET
 
 KRNL_PROMPT0	fcn	"Retro 6809 Kernel ROM V0.4\n"
 KRNL_PROMPT1	fcn	"Emulator compiled "
-KRNL_PROMPT2	fcn	"Under General Public Liscense (GPL V3)\n"
+KRNL_PROMPT2	fcn	"GNU General Public Liscense (GPL V3)\n"
 KRNL_PROMPT3	fcn	"Copyright (C) 2024-2025 By Jay Faries\n\n"  
 READY_PROMPT	fcn	"Ready\n"
 
