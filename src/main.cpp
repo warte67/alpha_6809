@@ -9,12 +9,9 @@
 //          ./main
 //
 // VSCode with the CMAKE plugins -- 
-//      CMAKE Icon: 
-//            Configure->Debug or Release
-//            F5 to build Makefiles
-//            CTRL-F5 to make and run (debug)
+//      CMAKE Icon:
 //
-//////////
+///////////
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "Bus.hpp"
