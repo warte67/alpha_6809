@@ -19,3 +19,5 @@ main
 .vscode
 .cmake
 
+.kdev4/alpha_6809.kdev4
+alpha_6809.kdev4
