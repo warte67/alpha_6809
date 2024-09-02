@@ -343,7 +343,6 @@ void Debug::OnEvent(SDL_Event* evnt)
                     Bus::Write(DBG_FLAGS, data);
                     bIsCursorVisible = false;
                     bMouseWheelActive = false;
-
                     if (s_bIsDebugActive)
                         SDL_ShowWindow(Debug::GetSDLWindow());
                     else
