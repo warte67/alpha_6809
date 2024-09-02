@@ -378,6 +378,7 @@ void Gfx::OnActivate()
     // C6809::IsCpuEnabled(true); 
 
     // finally raise the main window
+    SDL_Delay(25);
     SDL_RaiseWindow(Gfx::GetSDLWindow());
 }
 
