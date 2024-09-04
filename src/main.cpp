@@ -11,6 +11,8 @@
 // VSCode with the CMAKE plugins -- 
 //      CMAKE Icon:
 //
+// Notes:  Add notes here.
+//
 ///////////
 #include <SDL2/SDL.h>
 #include <iostream>
