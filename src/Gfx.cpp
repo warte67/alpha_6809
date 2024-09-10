@@ -344,6 +344,11 @@ void Gfx::OnActivate()
     int MainMonitor = s_gfx_emu & 0x07;
     // printf("MainMonitor: %d\n", MainMonitor);
 
+    // TESTING,,,
+    //            window_flags &= ~SDL_WINDOW_FULLSCREEN_DESKTOP;
+    //            window_flags |= SDL_WINDOW_FULLSCREEN;                
+    // ... END TESTING
+
     // create the main window
     sdl_window = SDL_CreateWindow("alpha_6809",
         SDL_WINDOWPOS_CENTERED_DISPLAY(MainMonitor),  
@@ -629,9 +634,9 @@ void Gfx::_decode_gmode()
     if (gemu & 0x80)
     {   // FULLSCREEN
         bIsFullscreen = true;
-        window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-        // window_width = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Width;
-        // window_height = vec_timings[vec_gmodes[gmode & 0x1f].Timing_index].Height;
+        // window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+        window_flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS;
+
         window_width = desktop_width;
         window_height = desktop_height;
     }
