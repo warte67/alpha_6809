@@ -1,10 +1,12 @@
 # alpha_6809
 
-###########################################################################################
-
-PLEASE NOTE: This project has moved into beta development stages. While this alpha version is more-or-less complete (with the exception of GPIO and audio support), the beta version will be in privite untill more complete. 
-
-################################################################################################################
+######################################################
+# PLEASE NOTE: This project has moved into beta      #
+# development stages. While this alpha version is    #
+# more-or-less complete (with the exception of GPIO  #
+# and audio support), the beta version will be in    #
+# privite until more complete.                       #
+######################################################
 
 
 
