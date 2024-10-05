@@ -24,7 +24,7 @@
  peripheral support. Serial Communication for real-time
  debugging with a development PC will also be supported.
 
-# ---
+# -------------------------------------------------------
 
 
 
