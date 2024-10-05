@@ -17,12 +17,16 @@
  boards and supporting circuitry. 
 
  The goal of the target hardware is to realize an
- Mid-1980's era personal computer based on the Motorola
- 6809 processor, 12-bit 640x480 graphics, stereo FM 
- synthesis (emulated C64 SID) with WAV support, 
+ Mid-1980's era PC built on a single board computer 
+ design. It will be based on the Motorola 6809 processor, 
+ 12-bit 640x480 graphics, stereo FM synthesis with emulated
+ C64 SID and multiple channel digital WAV playback, 
  external storage via USB thumbdrive, and USB 
- peripheral support. Serial Communication for real-time
- debugging with a development PC will also be supported.
+ peripheral support for modern keyboards, joysticks,
+ and gamepads. There will also be a 32-bit GPIO port
+ for future external custom devices. Serial Communication 
+ for real-time debugging with a development PC will also be 
+ supported. 
 
 # -------------------------------------------------------
 
