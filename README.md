@@ -1,28 +1,31 @@
 # alpha_6809
 
-#
-# PLEASE NOTE: This project has moved into BETA
-# development stages. While this alpha version is
-# more-or-less complete (with the exception of GPIO
-# and audio support), the beta version will be 
-# developed in privite until more feature complete.
-#
-# The ALPHA_6809 Project was implemented as a proof
-# of concept and a viability experiment. I am 
-# convinced that it is worthy of the time and effort
-# to fully realize the project. The BETA project will
-# completely refactor the ALPHA code while considering
-# the target hardware consisting of a custom single
-# board computer utilizing a pair of Raspberry PI PICO
-# boards and supporting circuitry. 
-#
-# The goal of the target hardware is to realize an
-# Mid-1980's era personal computer based on the Motorola
-# 6809 processor, 12-bit 640x480 graphics, stereo FM 
-# synthesis (emulated C64 SID) with WAV support, 
-# external storage via USB thumbdrive, and USB 
-# peripheral support. Serial Communication for real-time
-# debugging with a development PC will also be supported.
+
+ PLEASE NOTE: This project has moved into BETA
+ development stages. While this alpha version is
+ more-or-less complete (with the exception of GPIO
+ and audio support), the beta version will be 
+ developed in privite until more feature complete.
+
+ The ALPHA_6809 Project was implemented as a proof
+ of concept and a viability experiment. I am 
+ convinced that it is worthy of the time and effort
+ to fully realize the project. The BETA project will
+ completely refactor the ALPHA code while considering
+ the target hardware consisting of a custom single
+ board computer utilizing a pair of Raspberry PI PICO
+ boards and supporting circuitry. 
+
+ The goal of the target hardware is to realize an
+ Mid-1980's era personal computer based on the Motorola
+ 6809 processor, 12-bit 640x480 graphics, stereo FM 
+ synthesis (emulated C64 SID) with WAV support, 
+ external storage via USB thumbdrive, and USB 
+ peripheral support. Serial Communication for real-time
+ debugging with a development PC will also be supported.
+
+
+
 
 Emulation prototype work has been completed (see: retro_6809). Alpha_6809 will be the alpha version of the Retro 6809 two-raspbery pi Pico machine. 
 
