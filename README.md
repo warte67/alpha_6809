@@ -5,7 +5,7 @@
  development stages. While this alpha version is
  more-or-less complete (with the exception of GPIO
  and audio support), the beta version will be 
- developed in privite until more feature complete.
+ developed in private until more feature complete.
 
  The ALPHA_6809 Project was implemented as a proof
  of concept and a viability experiment. I am 
@@ -20,7 +20,7 @@
  Mid-1980's era PC built on a single board computer 
  design. It will be based on the Motorola 6809 processor, 
  12-bit 640x480 graphics, stereo FM synthesis with emulated
- C64 SID and multiple channel digital WAV playback, 
+ C64 SID and multiple channels of digital WAV playback, 
  external storage via USB thumbdrive, and USB 
  peripheral support for modern keyboards, joysticks,
  and gamepads. There will also be a 32-bit GPIO port
