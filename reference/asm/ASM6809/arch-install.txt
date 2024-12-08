@@ -8,7 +8,7 @@ or (if present)
 cd asm6809
 
 ./autogen.sh
-./config
+./configure
 make
 
 make install # if this doesnt work, the file asm6809 should be in the src folder now.
