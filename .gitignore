@@ -16,7 +16,6 @@ build/*.sym
 compile_commands.json
 CMakeCache.txt
 main
-.vscode
 .cmake
 
 .kdev4/alpha_6809.kdev4

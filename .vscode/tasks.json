@@ -1,0 +1,46 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "assemble-kernel",
+            "type": "shell",
+            "command": "${HOME}/.local/bin/asm6809",
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+            "args": [
+                "-H", "-9",
+                "kernel_f000.asm",
+                "-o", "${workspaceFolder}/kernel_f000.hex",
+                "-l", "${workspaceFolder}/build/kernel_f000.lst",
+                "-s", "${workspaceFolder}/build/kernel_f000.sym"
+            ]
+        },
+        {
+            "label": "cmake-build",
+            "type": "shell",
+            "command": "cmake --build ${workspaceFolder}/build -j8",
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "label": "build",
+            "dependsOrder": "sequence",
+            "dependsOn": ["assemble-kernel", "cmake-build"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
