@@ -55,10 +55,11 @@ constexpr bool ENABLE_SDL_MOUSE_CURSOR = true;  // when the SDL cursor is displa
 constexpr Word FILEHANDLESMAX = 256;
 
 // Paged memory file:
-const std::string PAGED_MEMORY_FILENAME = "usb_drive/paged.mem";
+const std::string PAGED_MEMORY_FILENAME = "/home/jay/Documents/GitHub/alpha_6809/build/usb_drive/paged.mem";
 constexpr DWord PAGED_MEMORY_BANKSIZE = 8192;
 
-
+// Testing
+const std::string TESTING_BITMAP = "/home/jay/Documents/GitHub/alpha_6809/build/scene_c.bmp";
 
 /***************************
   

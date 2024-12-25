@@ -292,8 +292,7 @@ Word Memory::MemAvailable()
 void Memory::OnInit() 
 {
     // BEGIN: Testing bitmap load into extended memory
-        // LoadBMP("scene_d.bmp", 8, true);
-        LoadBMP("scene_c.bmp",8);
+        LoadBMP(TESTING_BITMAP,8);
     // END: Testing bitmap load into extended memory
 
 }
